@@ -1,6 +1,8 @@
-WePill - site pronto para publicar
+WePill - site
 
-- index.html fica na raiz; todos os caminhos são relativos (funciona no GitHub Pages, Netlify ou domínio próprio).
-- Para lançar uma atualização: troque os arquivos e aumente o número em sw.js (const C='wepill-vNN').
-  Quem já instalou recebe a versão nova sozinho ao abrir o app (ele recarrega uma vez).
+- index.html (raiz) = página de vendas em wepill.com.br
+  Links de pagamento da Cakto: no fim do index.html, em "const CHECKOUT".
+- app/ = o aplicativo em wepill.com.br/app
+  Para lançar uma atualização do app: troque os arquivos de app/ e aumente o número em app/sw.js (const C='wepill-app-vNN').
+- sw.js na raiz só limpa o app antigo de quem instalou antes da mudança. Não apagar.
 - O arquivo .nojekyll precisa ficar junto (GitHub Pages).
