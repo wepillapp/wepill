@@ -6,8 +6,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="WePill">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32.png">
-<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
+<link rel="apple-touch-icon" href="icon-180.png">
 </head><body>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Manrope:wght@400;500;600;700&display=swap">
@@ -1778,7 +1778,7 @@ function gotPhoto(url){
 
 
 /* v66: leitura real da foto (câmera ou galeria): 1) código de barras, 2) texto (OCR) cruzado com a lista Anvisa */
-const TSS={local:{js:'tess/tesseract.min.js',worker:'tess/worker.min.js',core:'tess/',lang:'tess/'},cdn:{js:'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js',worker:'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/worker.min.js',core:'https://cdn.jsdelivr.net/npm/tesseract.js-core@5.1.1/',lang:'https://cdn.jsdelivr.net/npm/@tesseract.js-data/por@1.0.0/4.0.0_best_int/'}};
+const TSS={local:{js:'tesseract.min.js',worker:'worker.min.js',core:'./',lang:'./'},cdn:{js:'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js',worker:'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/worker.min.js',core:'https://cdn.jsdelivr.net/npm/tesseract.js-core@5.1.1/',lang:'https://cdn.jsdelivr.net/npm/@tesseract.js-data/por@1.0.0/4.0.0_best_int/'}};
 let TSRC=null,TSP=null,TWK=null;
 function loadScript(src){return new Promise((ok,no)=>{const sc=document.createElement('script');sc.src=src;sc.onload=ok;sc.onerror=()=>{sc.remove();no()};document.head.appendChild(sc)})}
 function loadTess(){if(TSP)return TSP;TSP=loadScript(TSS.local.js).then(()=>TSRC=TSS.local,()=>loadScript(TSS.cdn.js).then(()=>TSRC=TSS.cdn)).catch(e=>{TSP=null;throw e});return TSP}
