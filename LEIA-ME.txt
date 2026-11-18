@@ -1,0 +1,6 @@
+WePill - site pronto para publicar
+
+- index.html fica na raiz; todos os caminhos são relativos (funciona no GitHub Pages, Netlify ou domínio próprio).
+- Para lançar uma atualização: troque os arquivos e aumente o número em sw.js (const C='wepill-vNN').
+  Quem já instalou recebe a versão nova sozinho ao abrir o app (ele recarrega uma vez).
+- O arquivo .nojekyll precisa ficar junto (GitHub Pages).
