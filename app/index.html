@@ -2085,6 +2085,7 @@ function sbLoad(){if(SB)return Promise.resolve(SB);if(SBP)return SBP;
   SBP=loadScript('supabase.js').catch(()=>loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.1/dist/umd/supabase.js')).then(()=>{
     SB=supabase.createClient(SBURL,SBKEY,{auth:{persistSession:true,autoRefreshToken:true,storageKey:'wepill-auth',detectSessionInUrl:false}});
     SB.auth.onAuthStateChange((ev,s)=>{FAM.user=s&&s.user||null;if(ev==='SIGNED_OUT'){FAM.fid=null;FAM.membros=[];famUnsub()}});return SB}).catch(e=>{SBP=null;throw e});return SBP}
+async function R(pr){const r=await Promise.race([pr,new Promise((_,no)=>setTimeout(()=>no(new Error('O servidor não respondeu. Confira a internet e tente de novo.')),15000))]);if(r&&r.error)throw r.error;return r}
 function famErr(e){const m=(e&&(e.message||e.error_description))||String(e||'');
   if(/Failed to fetch|NetworkError|network/i.test(m))return 'Sem conexão agora. Tente de novo.';
   if(/rate|security purposes|too many/i.test(m))return 'Muitas tentativas. Espere alguns minutos e tente de novo.';
@@ -2092,19 +2093,19 @@ function famErr(e){const m=(e&&(e.message||e.error_description))||String(e||'');
   if(/already registered|already been registered/i.test(m))return 'Esse e-mail já tem conta. Toque em "Já tenho conta" e entre.';
   if(/Email not confirmed/i.test(m))return 'Falta confirmar o e-mail desta conta.';
   if(/Password should be/i.test(m))return 'A senha precisa ter pelo menos 6 caracteres.';
-  return m.replace(/^.*?:\s*/,'')||'Algo deu errado. Tente de novo.'}
+  const c=e&&e.code?` (código ${e.code})`:'';return (m.replace(/^.*?:\s*/,'')||'Algo deu errado. Tente de novo.')+c}
 async function famBoot(){try{const sb=await sbLoad();const {data}=await sb.auth.getSession();FAM.user=data.session&&data.session.user||null;if(FAM.user)await famLoad()}catch(e){}}
 async function famLoad(){if(!FAM.user)return;const sb=SB;
-  await sb.from('perfis').upsert({id:FAM.user.id,nome:(S.profile&&S.profile.nome)||FAM.user.email.split('@')[0]}).then(()=>{},()=>{});
-  const {data:f}=await sb.rpc('minha_familia');FAM.fid=f||null;FAM.loaded=true;
+  await R(sb.from('perfis').upsert({id:FAM.user.id,nome:(S.profile&&S.profile.nome)||FAM.user.email.split('@')[0]}));
+  const {data:f}=await R(sb.rpc('minha_familia'));FAM.fid=f||null;FAM.loaded=true;
   if(!FAM.fid){FAM.membros=[];famUnsub();return}
-  const {data:ms}=await sb.from('membros').select('user_id,papel,apelido').eq('familia_id',FAM.fid);FAM.membros=ms||[];
+  const {data:ms}=await R(sb.from('membros').select('user_id,papel,apelido').eq('familia_id',FAM.fid));FAM.membros=ms||[];
   const me=FAM.membros.find(m=>m.user_id===FAM.user.id);FAM.papel=me?me.papel:null;
   const ids=FAM.membros.map(m=>m.user_id);
-  const {data:ps}=await sb.from('perfis').select('id,nome').in('id',ids);const nm={};(ps||[]).forEach(p=>nm[p.id]=p.nome);FAM.membros.forEach(m=>m.nome=m.apelido||nm[m.user_id]||'Sem nome');
+  const {data:ps}=await R(sb.from('perfis').select('id,nome').in('id',ids));const nm={};(ps||[]).forEach(p=>nm[p.id]=p.nome);FAM.membros.forEach(m=>m.nome=m.apelido||nm[m.user_id]||'Sem nome');
   const d0=new Date();d0.setHours(0,0,0,0);const d1=new Date(d0.getTime()+864e5);
-  const {data:it}=await sb.from('itens').select('user_id,item_id,dados').in('user_id',ids).eq('ativo',true);FAM.itens={};(it||[]).forEach(r=>(FAM.itens[r.user_id]=FAM.itens[r.user_id]||[]).push(r));
-  const {data:ds}=await sb.from('doses').select('user_id,item_id,previsto_para,status,tomado_em').in('user_id',ids).gte('previsto_para',d0.toISOString()).lt('previsto_para',d1.toISOString()).order('previsto_para');FAM.doses={};(ds||[]).forEach(r=>(FAM.doses[r.user_id]=FAM.doses[r.user_id]||[]).push(r));
+  const {data:it}=await R(sb.from('itens').select('user_id,item_id,dados').in('user_id',ids).eq('ativo',true));FAM.itens={};(it||[]).forEach(r=>(FAM.itens[r.user_id]=FAM.itens[r.user_id]||[]).push(r));
+  const {data:ds}=await R(sb.from('doses').select('user_id,item_id,previsto_para,status,tomado_em').in('user_id',ids).gte('previsto_para',d0.toISOString()).lt('previsto_para',d1.toISOString()).order('previsto_para'));FAM.doses={};(ds||[]).forEach(r=>(FAM.doses[r.user_id]=FAM.doses[r.user_id]||[]).push(r));
   FAM.membros.forEach(m=>famExpand(m.user_id));famSub()}
 /* doses esperadas pelos horários da lista, mesmo se a pessoa ainda não abriu o app hoje */
 function famExpand(uid){const L=FAM.doses[uid]=FAM.doses[uid]||[],day=new Date();day.setHours(0,0,0,0);
@@ -2153,24 +2154,24 @@ function famSheetBody(){const E=FAM.err?`<p class="famerr">${esc(FAM.err)}</p>`:
   return `<div id="famsheet"><h1>Família conectada <span class="sim">beta</span></h1>${h}<p class="disclaimer">Cada pessoa vê só a lista e as doses da própria família. Seus dados ficam guardados com segurança no servidor do WePill.</p></div>`}
 function avatarTxt(n){const p=(n||'?').trim().split(/\s+/),t=((p[0]||'?')[0]+(p.length>1?p[p.length-1][0]:'')).toUpperCase();return `<span class="famav">${esc(t)}</span>`}
 async function openFam(){FAM.err='';openSheet(famSheetBody());try{await sbLoad();if(FAM.user&&!FAM.loaded)await famLoad()}catch(e){FAM.err=famErr(e)}famRefresh()}
-async function famDo(fn){if(FAM.busy)return;FAM.busy=true;FAM.err='';famRefresh();try{await fn()}catch(e){FAM.err=famErr(e)}FAM.busy=false;famRefresh()}
+async function famDo(fn,btn){if(FAM.busy)return;FAM.busy=true;FAM.err='';if(btn){btn.disabled=true;btn.textContent='Aguarde…'}try{await fn()}catch(e){FAM.err=famErr(e)}FAM.busy=false;famRefresh();if(FAM.err){const x=$('.famerr');if(x)x.scrollIntoView({block:'center'})}}
 document.addEventListener('click',e=>{const t=e.target.closest('[data-fam],[data-famlogin],[data-famtoggle],[data-famcreate],[data-famjoin],[data-faminvite],[data-famleave],[data-famout],[data-famreload]');if(!t)return;const ds=t.dataset;
   if(ds.fam!==undefined)return openFam();
   if(ds.famtoggle!==undefined){FAM.step=FAM.step==='nova'?'email':'nova';FAM.err='';FAM.email=(($('#famemail')||{}).value||FAM.email).trim();return famRefresh()}
   if(ds.famlogin!==undefined){FAM.email=((($('#famemail')||{}).value)||'').trim().toLowerCase();const pw=($('#fampass')||{}).value||'';
     if(!/^\S+@\S+\.\S+$/.test(FAM.email)){FAM.err='Digite um e-mail válido.';return famRefresh()}if(pw.length<6){FAM.err='A senha precisa ter pelo menos 6 caracteres.';return famRefresh()}
     const nova=FAM.step==='nova';
-    return famDo(async()=>{const sb=await sbLoad();const r=nova?await sb.auth.signUp({email:FAM.email,password:pw}):await sb.auth.signInWithPassword({email:FAM.email,password:pw});
+    return famDo(async()=>{const sb=await sbLoad();const r=nova?await sb.auth.signUp({email:FAM.email,password:pw}):await sb.auth.signInWithPassword({email:FAM.email,password:pw},t);
       if(r.error)throw r.error;if(!r.data.session)throw new Error('Conta criada, mas falta confirmar o e-mail. Avise o suporte do WePill.');
       FAM.user=r.data.user;FAM.step='email';await famLoad();famSync();toast(nova?'Conta criada.':'Pronto, você entrou.')})}
-  if(ds.famcreate!==undefined)return famDo(async()=>{const {error}=await SB.rpc('criar_familia',{p_nome:'Família de '+((S.profile&&S.profile.nome)||'').split(' ')[0]});if(error)throw error;await famSync();await famLoad();toast('Família criada. Agora convide quem você cuida.')});
+  if(ds.famcreate!==undefined)return famDo(async()=>{await R(SB.rpc('criar_familia',{p_nome:'Família de '+((S.profile&&S.profile.nome)||'').split(' ')[0]}));await famSync();await famLoad();toast('Família criada. Agora convide quem você cuida.')},t);
   if(ds.famjoin!==undefined){const c=(($('#faminv')||{}).value||'').trim().toUpperCase();if(!c){FAM.err='Digite o código do convite.';return famRefresh()}
-    return famDo(async()=>{const {error}=await SB.rpc('aceitar_convite',{p_codigo:c});if(error)throw error;S.pendingInvite='';await famSync();await famLoad();toast('Você entrou na família.')})}
-  if(ds.faminvite!==undefined)return famDo(async()=>{const {data,error}=await SB.rpc('gerar_convite');if(error)throw error;FAM.code=data});
-  if(ds.famreload!==undefined)return famDo(async()=>{await famSync();famUnsub();await famLoad()});
+    return famDo(async()=>{await R(SB.rpc('aceitar_convite',{p_codigo:c}));S.pendingInvite='';await famSync();await famLoad();toast('Você entrou na família.')},t)}
+  if(ds.faminvite!==undefined)return famDo(async()=>{const {data}=await R(SB.rpc('gerar_convite'));FAM.code=data},t);
+  if(ds.famreload!==undefined)return famDo(async()=>{await famSync();famUnsub();await famLoad()},t);
   if(ds.famleave!==undefined){if(!t.dataset.sure){t.dataset.sure='1';t.textContent='Toque de novo para confirmar';return}
-    return famDo(async()=>{const {error}=await SB.rpc('sair_da_familia');if(error)throw error;FAM.code='';famUnsub();await famLoad()})}
-  if(ds.famout!==undefined)return famDo(async()=>{famUnsub();await SB.auth.signOut();FAM.user=null;FAM.fid=null;FAM.loaded=false;FAM.membros=[]})
+    return famDo(async()=>{await R(SB.rpc('sair_da_familia'));FAM.code='';famUnsub();await famLoad()},t)}
+  if(ds.famout!==undefined)return famDo(async()=>{famUnsub();await SB.auth.signOut();FAM.user=null;FAM.fid=null;FAM.loaded=false;FAM.membros=[]},t)
 },true);
 /* liga a sincronização ao save() e o aviso de atraso ao Início */
 {const _save=save;save=function(){_save.apply(this,arguments);famSyncSoon()}}
