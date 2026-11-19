@@ -890,6 +890,7 @@ a.btn{text-decoration:none}
 .fmd span.late{background:color-mix(in srgb,#E2557B 14%,transparent);color:#C23B62;border-color:transparent;font-weight:700}.fmd span.late::before{content:"! "}
 .faminv{margin:12px 0;padding:14px;border-radius:18px;border:1.5px dashed var(--accent);text-align:center}.faminv small{display:block;font-size:12px;color:var(--ink-2)}.faminv b{display:block;font-family:var(--font-display);font-size:28px;letter-spacing:.12em;margin:4px 0 10px}
 .famerr{color:#C23B62;font-size:13.5px;font-weight:600;margin:6px 0 10px}
+.chk.warn:not(.cam .chk){display:flex;gap:10px;align-items:flex-start;font-size:13.5px;line-height:1.45;padding:10px 12px;border-radius:14px;background:color-mix(in srgb,var(--peach-ink) 8%,transparent);border:1px solid color-mix(in srgb,var(--peach-ink) 40%,transparent);margin:10px 0}.chk.warn:not(.cam .chk) svg{color:var(--peach-ink);flex:none;width:20px;height:20px}em.regi{font-style:normal;color:var(--peach-ink);font-weight:700}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="var(--accent)"/><stop offset="1" stop-color="var(--accent-2)"/></linearGradient></defs></svg>
@@ -1065,7 +1066,8 @@ let S={tab:'hoje',list:['losartana','levotiroxina','metformina','omega3','calcio
 try{const sv=JSON.parse(localStorage.getItem('medlist-v2')||'null');if(sv&&Array.isArray(sv.list))S={...S,...sv,tab:'hoje',fresh:null}}catch(e){}
 if(!S.trialStart)S.trialStart=Date.now();if(!PLANS.find(x=>x.id===S.plan))S.plan='gratis';if(!S.planTab)S.planTab='pac';if(!S.bill)S.bill='ano';
 /* itens vindos da lista completa da Anvisa (CMED), guardados no aparelho */
-if(!S.custom)S.custom={};const CUST={};
+if(!S.custom)S.custom={};if(!S.myEan)S.myEan={};const CUST={};let CAMCODE=null;
+function learnedEan(code){const x=S.myEan[code];if(!x)return null;if(!DB[x.id]&&x.d){CUST[x.id]=x.d;regCustom(x.id,x.d)}return DB[x.id]?x.id:null}
 function regCustom(id,d){DB[id]=d.db;BOX[id]=d.box;if(d.unit)UNIT[id]=d.unit;COMP[id]=d.comp}
 Object.entries(S.custom).forEach(([id,d])=>regCustom(id,d));
 if(!S.horasOv)S.horasOv={};Object.entries(S.horasOv).forEach(([id,h])=>{if(DB[id])DB[id].horas=[...h]});
@@ -1091,7 +1093,7 @@ function allergyTerms(){return (S.profile.alergias+','+(S.profile.obs||'')).toLo
 function allergyFor(id){const hay=(DB[id].nome+' '+(COMP[id]||'')).toLowerCase();const syn={'frutos do mar':['peixe'],'lactose':['lactose','leite'],'dipirona':['dipirona','metamizol']};
   for(const t of allergyTerms()){const keys=[t,...(syn[t]||[])];const k=keys.find(k=>hay.includes(k));if(k)return t}return null}
 function allergyHits(list=S.list){return list.map(id=>({id,t:allergyFor(id)})).filter(x=>x.t)}
-function save(){try{localStorage.setItem('medlist-v2',JSON.stringify({list:S.list,taken:S.taken,takenDay:S.takenDay,seedV:S.seedV,pros:S.pros,alarms:S.alarms,theme:S.theme,plan:S.plan,trialStart:S.trialStart,locOk:S.locOk,praio:S.praio,planTab:S.planTab,bill:S.bill,profile:S.profile,stock:S.stock,refillOff:S.refillOff,big:S.big,onboarded:S.onboarded,lockOn:S.lockOn,threads:S.threads,extraPros:S.extraPros,hiddenPros:S.hiddenPros,changes:S.changes,custom:S.custom,horasOv:S.horasOv,registered:S.registered}))}catch(e){}}
+function save(){try{localStorage.setItem('medlist-v2',JSON.stringify({list:S.list,taken:S.taken,takenDay:S.takenDay,seedV:S.seedV,pros:S.pros,alarms:S.alarms,theme:S.theme,plan:S.plan,trialStart:S.trialStart,locOk:S.locOk,praio:S.praio,planTab:S.planTab,bill:S.bill,profile:S.profile,stock:S.stock,refillOff:S.refillOff,big:S.big,onboarded:S.onboarded,lockOn:S.lockOn,threads:S.threads,extraPros:S.extraPros,hiddenPros:S.hiddenPros,changes:S.changes,custom:S.custom,myEan:S.myEan,horasOv:S.horasOv,registered:S.registered}))}catch(e){}}
 
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -1532,7 +1534,7 @@ function unitOf(ap){const A=nrm(ap);if(/\bCAP|CAPS/.test(A))return 'cápsulas';i
 function catOf(H){if(/VITAMINA|COLECALCIFEROL|CIANOCOBALAMINA|ASCORBICO|RETINOL|TIAMINA|PIRIDOXINA|FOLICO/.test(H))return 'vitamina';if(/EXTRATO|GINKGO|HYPERICUM|PASSIFLORA|VALERIANA|HEDERA|MIKANIA|AESCULUS|CIMICIFUGA/.test(H))return 'fito';return 'remedio'}
 function cmedItem(i,j){const p=CMED.p[i],a=p[2][j],id='x'+(a[1]||(i+'_'+j));if(DB[id])return id;
   const sub=p[1]==='NC/NI'?'':p[1],H=nrm(sub||a[0]),base=[...new Set(BASEMAP.filter(([re])=>re.test(H)).map(x=>x[1]))],B=base.length===1?DB[base[0]]:null;
-  const db={nome:tc(p[0]),dose:doseOf(a[0]),cat:B?B.cat:catOf(H),qtd:B&&unitOf(a[0])!=='doses'?B.qtd:'Conforme a receita',para:B?B.para:'Confira na bula ou com quem receitou.',como:B?B.como:'Siga a receita e a bula oficial.',evitar:B?B.evitar:'Veja a bula oficial no Bulário da Anvisa.',horas:B?[...B.horas]:['08:00'],por:'',src:'cmed',sub:sub.toLowerCase(),ap:a[0],ean:a[1],base:base.length?base:null};
+  const db={nome:tc(p[0]),dose:doseOf(a[0]),cat:B?B.cat:catOf(H),qtd:B&&unitOf(a[0])!=='doses'?B.qtd:'Conforme a receita',para:B?B.para:'Confira na bula ou com quem receitou.',como:B?B.como:'Siga a receita e a bula oficial.',evitar:B?B.evitar:'Veja a bula oficial no Bulário da Anvisa.',horas:B?[...B.horas]:['08:00'],por:'',src:'cmed',reg:p[3]||'',sub:sub.toLowerCase(),ap:a[0],ean:a[1],base:base.length?base:null};
   const d={db,box:qtyOf(a[0])||30,unit:unitOf(a[0]),comp:(sub||a[0]).toLowerCase()};CUST[id]=d;regCustom(id,d);return id}
 /* v57: busca por palavras + dose, sinônimos, "você quis dizer", suplementos fora da CMED e item manual */
 const STOPW=new Set(['DE','DA','DO','DAS','DOS','E','COM','EM','PARA','PRA','O','A','OS','AS']),UNITW=new Set(['MG','MCG','ML','G','UI','GR','GOTAS','COMP','COMPRIMIDO','COMPRIMIDOS','CAPSULA','CAPSULAS','CAPS']);
@@ -1575,11 +1577,11 @@ function cmedHtml(q){if(nrm(q.trim()).length<2)return '';
   let r=cmedSearch(q);const su=suplSearch(q);if((r.numMiss||r.partial)&&su.length)r=[];let h='';
   if(su.length)h+=`<h2 class="cmh">Suplementos e outros produtos</h2>`+su.map(i=>{const x=SUPL[i];return `<button class="result cm tap" data-supl="${i}"><div class="pillic c-${x.cat}">${IC[CAT[x.cat].icon]}</div><div class="info"><b>${esc(x.nome)}</b><br><span>${esc(x.sub)} · ${CAT[x.cat].label.toLowerCase()}</span></div><span class="chev">${IC.plus}</span></button>`}).join('');
   if(r.length)h+=(r.partial?`<p class="sub" style="font-size:13px;margin:10px 2px 0">Não achei tudo o que você digitou junto. Veja os mais parecidos:</p>`:'')+`<h2 class="cmh">Lista Anvisa (CMED) · ${r.length===40?'mais de 40':r.length} resultado${r.length===1?'':'s'}</h2>`+r.map(i=>{const p=CMED.p[i],n=p[2].length;
-    return `<button class="result cm tap" data-cmp="${i}"><div class="pillic c-${catOf(p.s)}">${IC[CAT[catOf(p.s)].icon]}</div><div class="info"><b>${esc(tc(p[0]))}</b><br><span>${esc(p[1]==='NC/NI'?'substância não informada':p[1].toLowerCase())} · ${n} apresentaç${n===1?'ão':'ões'}</span></div><span class="chev">${sv('<path d="M9 6l6 6-6 6"/>',2)}</span></button>`}).join('');
-  if(!r.length&&!su.length){const dm=didYouMean(q);h+=dm.length?`<div class="dym"><span>Você quis dizer:</span>${dm.map(x=>`<button class="qchip tap" data-qset="${esc(tc(x))}">${esc(tc(x))}</button>`).join('')}</div>`:'<p class="sub">Não encontrei esse nome na lista da Anvisa.</p>'}
+    return `<button class="result cm tap" data-cmp="${i}"><div class="pillic c-${catOf(p.s)}">${IC[CAT[catOf(p.s)].icon]}</div><div class="info"><b>${esc(tc(p[0]))}</b><br><span>${esc(p[1]==='NC/NI'?'substância não informada':p[1].toLowerCase())} · ${p[3]==='i'?'<em class="regi">registro cancelado na Anvisa</em>':p[3]?'registro Anvisa':n+' apresentaç'+(n===1?'ão':'ões')}</span></div><span class="chev">${sv('<path d="M9 6l6 6-6 6"/>',2)}</span></button>`}).join('');
+  if(!r.length&&!su.length){const dm=didYouMean(q);h+=dm.length?`<div class="dym"><span>Você quis dizer:</span>${dm.map(x=>`<button class="qchip tap" data-qset="${esc(tc(x))}">${esc(tc(x))}</button>`).join('')}</div>`:'<div class="chk warn">'+IC.shield+'<span>Não encontrei esse nome na lista oficial da Anvisa. Pode ser um remédio que saiu do mercado, um nome comercial novo, um suplemento ou um produto importado. Confira a grafia na caixa ou adicione do seu jeito logo abaixo.</span></div>'}
   const t=q.trim();if(t.length>=3)h+=`<div class="manual"><b>Não achou? Adicione do seu jeito</b><span class="sub">“${esc(t)}” entra na sua lista como</span><div class="mcats">${Object.keys(CAT).map(c=>`<button class="qchip tap" data-manual="${c}">${CAT[c].label}</button>`).join('')}</div></div>`;
   return h}
-function cmedPres(i){const p=CMED.p[i],re=LASTN.map(numRe),ok=a=>re.length&&re.every(x=>x.test(' '+nrm(a[0])+' ')),ord=p[2].map((a,j)=>j).sort((x,y)=>ok(p[2][y])-ok(p[2][x]));
+function cmedPres(i){const p=CMED.p[i];if(p[3]){const old=p[3]==='i';return `<button class="btn ghost sm tap" data-cmback>${sv('<path d="M15 6l-6 6 6 6"/>',2)} Voltar</button><p style="font-weight:800;font-size:19px;margin:14px 2px 2px;color:var(--ink)">${esc(tc(p[0]))}</p><p class="sub" style="font-size:13px;margin:0 2px 8px">${esc(p[1]==='NC/NI'?'Substância não informada':p[1].toLowerCase())}</p><div class="chk warn">${IC.shield}<span>${old?'O registro deste remédio está <b>cancelado ou vencido na Anvisa</b>. Ele pode ter saído do mercado. Se você ainda tem a caixa em casa, confira a validade e fale com seu médico ou farmacêutico antes de usar.':'Este remédio tem registro na Anvisa, mas não está na lista de preços. Por isso não tenho a dose e a apresentação: confira na caixa.'}</span></div><button class="btn primary block tap" data-cma="${i}:0" style="margin-top:10px">${IC.plus} Adicionar mesmo assim</button>`}const _p=0,re=LASTN.map(numRe),ok=a=>re.length&&re.every(x=>x.test(' '+nrm(a[0])+' ')),ord=p[2].map((a,j)=>j).sort((x,y)=>ok(p[2][y])-ok(p[2][x]));
   return `<button class="btn ghost sm tap" data-cmback>${sv('<path d="M15 6l-6 6 6 6"/>',2)} Voltar</button>
   <h2 class="cmh">${esc(tc(p[0]))} · escolha a apresentação</h2><p class="sub" style="font-size:13px;margin:-4px 0 4px">${esc(p[1]==='NC/NI'?'Substância não informada':p[1].toLowerCase())}</p>`+
   ord.map(j=>{const a=p[2][j];return `<button class="result tap${ok(a)?' hit':''}" data-cma="${i}:${j}"><div class="info"><b>${esc(a[0].toLowerCase())}</b><br><span>${a[1]?'Código '+a[1]:'Sem código de barras'}</span></div><span class="chev">${IC.plus}</span></button>`}).join('')}
@@ -1719,7 +1721,7 @@ function sheetSched(id){const D=DB[id],n=D.horas.length;SCH={id,n:FREQ.some(f=>f
   <button class="btn primary block tap" data-sok="1" style="margin-top:18px">${IC.check} Adicionar e programar</button>
   <button class="btn ghost block tap" data-sback="1" style="margin-top:8px">Voltar à busca</button>`}
 function addItem(id){if(S.list.includes(id))return finishAdd(id);openSheet(sheetSched(id))}
-function finishAdd(id){if(CUST[id]&&!S.custom[id])S.custom[id]=CUST[id];const before=alerts().length;if(!S.list.includes(id))S.list.push(id);S.fresh=id;save();closeSheet();const n=alerts().length-before;
+function finishAdd(id){if(CUST[id]&&!S.custom[id])S.custom[id]=CUST[id];if(CAMCODE&&Date.now()-CAMCODE.t<15*60e3){S.myEan[CAMCODE.c]={id,d:CUST[id]||S.custom[id]||null};toast('Pronto! Da próxima vez eu reconheço este código de barras.')}CAMCODE=null;const before=alerts().length;if(!S.list.includes(id))S.list.push(id);S.fresh=id;save();closeSheet();const n=alerts().length-before;
   if(allergyFor(id)){go('hoje');toast(`Atenção: você informou alergia a ${allergyFor(id)}. Veja o destaque no painel.`)}else if(n>0){toast(`${DB[id].nome} adicionado. Encontrei ${n===1?'1 combinação':n+' combinações'} que merece${n===1?'':'m'} cuidado.`);go('alertas')}else{toast(`${DB[id].nome} adicionado. Nenhuma combinação de risco encontrada na nossa base, o que não garante que a combinação seja segura.`);go('lista')}
   setTimeout(()=>{S.fresh=null},1200)}
 
@@ -1758,14 +1760,14 @@ function camFail(msg){const h=$('#camhint');if(h)h.innerHTML=`<span style="displ
 function camFreeze(){const v=$('#camv');if(!v||!v.videoWidth)return null;const cv=document.createElement('canvas');cv.width=v.videoWidth;cv.height=v.videoHeight;cv.getContext('2d').drawImage(v,0,0);const u=cv.toDataURL('image/jpeg',.82);v.insertAdjacentHTML('afterend',`<img class="frozen" src="${u}" alt="">`);return u}
 function camSteps(lines,n){return `<div class="steps">${lines.map((l,i)=>`<span class="${i<n?'done':''}">${i<n?IC.check:'<i class="dot"></i>'}${l}</span>`).join('')}</div>`}
 function gotCode(code){camDone=true;const photo=camFreeze();stopCam();$('#cam').classList.add('hit');try{navigator.vibrate&&navigator.vibrate(60)}catch(e){}beep([1175]);
-  const id=EAN[code];const L=[`Código ${code} lido`,'Consultando base Anvisa/CMED','Cruzando com sua lista e alergias'];
+  const id=EAN[code]||learnedEan(code);const L=[`Código ${code} lido`,'Consultando base Anvisa/CMED','Cruzando com sua lista e alergias'];
   $('#camhint').innerHTML='';const P=$('#campanel');P.innerHTML=camSteps(L,1);
   setTimeout(()=>{P.innerHTML=camSteps(L,2)},450);
   setTimeout(()=>{if(id){P.innerHTML=camSteps(L,3);return setTimeout(()=>camResult(id,`Base de demonstração · código ${code}`,photo),300)}
     loadCmed().then(d=>{const h=d.ean[code];if(!h)return camNotFound(code);const cid=cmedItem(h[0],h[1]);P.innerHTML=camSteps(L,3);setTimeout(()=>camResult(cid,`Lista Anvisa (CMED) · código ${code}`,photo),300)},()=>camNotFound(code,true))},950)}
-function camNotFound(code,off){const br=/^789|^790/.test(code);
+function camNotFound(code,off){const br=/^789|^790/.test(code);if(!off)CAMCODE={c:code,t:Date.now()};
   $('#campanel').innerHTML=`<div class="who"><div class="pillic" style="--c:var(--lav);--ci:var(--lav-ink)">${IC.barcode}</div><div><b>Código lido</b><span class="src">${esc(code)}${br?' · produto brasileiro':''}</span></div></div>
-  <div class="chk warn">${IC.shield}<span>${off?'Sem conexão com a lista da Anvisa agora. Tente de novo em instantes.':'Este código não está na lista da Anvisa (CMED). Pode ser um suplemento, um produto importado ou de uso hospitalar. Busque pelo nome.'}</span></div>
+  <div class="chk warn">${IC.shield}<span>${off?'Sem conexão com a lista da Anvisa agora. Tente de novo em instantes.':'Este código de barras não está na lista oficial da Anvisa. Isso acontece quando a caixa é nova (o laboratório mudou o código), o remédio saiu do mercado, ou é suplemento ou importado. Busque pelo nome: depois que você escolher, eu guardo este código e reconheço na próxima vez.'}</span></div>
   <div class="row"><button class="btn ghost tap" data-camagain="1">Ler outro</button><button class="btn primary tap" data-camtype="1">Buscar pelo nome</button></div>`}
 function camResult(id,src,photo){const D=DB[id],has=S.list.includes(id),al=allergyFor(id);
   const hits=interWith(id);
@@ -1829,7 +1831,7 @@ async function readPhotoNew(url){const sc=$('#scan');if(!sc)return;const alive=(
   let c;try{c=await imgCanvas(url,1600)}catch(e){end();return set('Não consegui abrir a foto','Tente outra imagem ou digite o nome abaixo')}
   loadCmed().catch(()=>{});
   const code=await photoBarcode(c);
-  if(code){let id=EAN[code];if(!id){try{const d=await loadCmed();const h=d.ean[code];if(h)id=cmedItem(h[0],h[1])}catch(e){}}
+  if(code){let id=EAN[code]||learnedEan(code);if(!id){CAMCODE={c:code,t:Date.now()};try{const d=await loadCmed();const h=d.ean[code];if(h)id=cmedItem(h[0],h[1])}catch(e){}}
     if(id&&alive()){photos[id]=url;end();set('Encontrei: '+DB[id].nome+(DB[id].dose?' '+DB[id].dose:''),'Pelo código de barras '+code);
       if(ACTS)ACTS.innerHTML=`<button class="btn primary sm tap" data-confirm="${id}">Adicionar</button>`;return}}
   set('Lendo o texto da foto…','Primeira vez pode levar alguns segundos');
