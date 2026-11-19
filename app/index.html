@@ -2083,7 +2083,7 @@ const SBURL='https://gqlmevpmyckwmcxfmmoe.supabase.co',SBKEY='sb_publishable_3bW
 let SB=null,SBP=null;const FAM={user:null,fid:null,papel:null,membros:[],itens:{},doses:{},step:'email',email:'',busy:false,err:'',code:'',loaded:false,ch:null};
 function sbLoad(){if(SB)return Promise.resolve(SB);if(SBP)return SBP;
   SBP=loadScript('supabase.js').catch(()=>loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.1/dist/umd/supabase.js')).then(()=>{
-    SB=supabase.createClient(SBURL,SBKEY,{auth:{persistSession:true,autoRefreshToken:true,storageKey:'wepill-auth',detectSessionInUrl:false}});
+    SB=supabase.createClient(SBURL,SBKEY,{auth:{persistSession:true,autoRefreshToken:true,storageKey:'wepill-auth',detectSessionInUrl:false,lock:async(n,t,fn)=>await fn()}});
     SB.auth.onAuthStateChange((ev,s)=>{FAM.user=s&&s.user||null;if(ev==='SIGNED_OUT'){FAM.fid=null;FAM.membros=[];famUnsub()}});return SB}).catch(e=>{SBP=null;throw e});return SBP}
 async function R(pr){const r=await Promise.race([pr,new Promise((_,no)=>setTimeout(()=>no(new Error('O servidor não respondeu. Confira a internet e tente de novo.')),15000))]);if(r&&r.error)throw r.error;return r}
 function famErr(e){const m=(e&&(e.message||e.error_description))||String(e||'');
@@ -2094,9 +2094,9 @@ function famErr(e){const m=(e&&(e.message||e.error_description))||String(e||'');
   if(/Email not confirmed/i.test(m))return 'Falta confirmar o e-mail desta conta.';
   if(/Password should be/i.test(m))return 'A senha precisa ter pelo menos 6 caracteres.';
   const c=e&&e.code?` (código ${e.code})`:'';return (m.replace(/^.*?:\s*/,'')||'Algo deu errado. Tente de novo.')+c}
-async function famBoot(){try{const sb=await sbLoad();const {data}=await sb.auth.getSession();FAM.user=data.session&&data.session.user||null;if(FAM.user)await famLoad()}catch(e){}}
+async function famBoot(){try{const sb=await sbLoad();const {data}=await R(sb.auth.getSession());FAM.user=data.session&&data.session.user||null;if(FAM.user)await famLoad()}catch(e){}}
 async function famLoad(){if(!FAM.user)return;const sb=SB;
-  await R(sb.from('perfis').upsert({id:FAM.user.id,nome:(S.profile&&S.profile.nome)||FAM.user.email.split('@')[0]}));
+  try{await R(sb.from('perfis').upsert({id:FAM.user.id,nome:(S.profile&&S.profile.nome)||FAM.user.email.split('@')[0]}))}catch(e){console.warn('perfil',e)}
   const {data:f}=await R(sb.rpc('minha_familia'));FAM.fid=f||null;FAM.loaded=true;
   if(!FAM.fid){FAM.membros=[];famUnsub();return}
   const {data:ms}=await R(sb.from('membros').select('user_id,papel,apelido').eq('familia_id',FAM.fid));FAM.membros=ms||[];
@@ -2139,7 +2139,7 @@ function famSheetBody(){const E=FAM.err?`<p class="famerr">${esc(FAM.err)}</p>`:
   if(!FAM.user){const nova=FAM.step==='nova';h=`<p class="sub">${nova?'Crie sua conta com e-mail e uma senha (mínimo 6 caracteres).':'Entre com seu e-mail e senha para conectar sua família.'}</p>${famInput('famemail','Seu e-mail','email',FAM.email)}${famInput('fampass','Senha','password','')}${E}
       <button class="btn primary block tap" data-famlogin${B}>${FAM.busy?'Aguarde…':nova?'Criar conta':'Entrar'}</button>
       <button class="btn ghost block tap" data-famtoggle style="margin-top:8px">${nova?'Já tenho conta':'Primeira vez? Criar conta'}</button>`}
-  else if(!FAM.loaded)h=`<div class="spin"></div>`;
+  else if(!FAM.loaded)h=FAM.err?`${E}<button class="btn primary block tap" data-famreload>Tentar de novo</button><button class="btn ghost sm tap" data-famout style="margin-top:12px">Sair da conta</button>`:`<div class="spin"></div><p class="sub" style="text-align:center">Carregando sua família…</p>`;
   else if(!FAM.fid){h=`<p class="sub">Conectado como <b>${esc(FAM.user.email)}</b>.</p>
       <div class="fact"><b>Vou cuidar da família</b><p class="sub" style="margin:4px 0 10px">Você vira o responsável e convida até 3 pessoas.</p><button class="btn primary block tap" data-famcreate${B}>Criar minha família</button></div>
       <div class="fact" style="margin-top:10px"><b>Recebi um convite</b>${famInput('faminv','Código do convite','text',S.pendingInvite||'').replace('inputmode="numeric" ','').replace('maxlength="6"','maxlength="8" style="text-transform:uppercase"')}<button class="btn ghost block tap" data-famjoin${B}>Entrar na família</button></div>${E}
@@ -2168,10 +2168,10 @@ document.addEventListener('click',e=>{const t=e.target.closest('[data-fam],[data
   if(ds.famjoin!==undefined){const c=(($('#faminv')||{}).value||'').trim().toUpperCase();if(!c){FAM.err='Digite o código do convite.';return famRefresh()}
     return famDo(async()=>{await R(SB.rpc('aceitar_convite',{p_codigo:c}));S.pendingInvite='';await famSync();await famLoad();toast('Você entrou na família.')},t)}
   if(ds.faminvite!==undefined)return famDo(async()=>{const {data}=await R(SB.rpc('gerar_convite'));FAM.code=data},t);
-  if(ds.famreload!==undefined)return famDo(async()=>{await famSync();famUnsub();await famLoad()},t);
+  if(ds.famreload!==undefined)return famDo(async()=>{if(FAM.loaded)await famSync();famUnsub();await famLoad()},t);
   if(ds.famleave!==undefined){if(!t.dataset.sure){t.dataset.sure='1';t.textContent='Toque de novo para confirmar';return}
     return famDo(async()=>{await R(SB.rpc('sair_da_familia'));FAM.code='';famUnsub();await famLoad()},t)}
-  if(ds.famout!==undefined)return famDo(async()=>{famUnsub();await SB.auth.signOut();FAM.user=null;FAM.fid=null;FAM.loaded=false;FAM.membros=[]},t)
+  if(ds.famout!==undefined)return famDo(async()=>{famUnsub();try{await R(SB.auth.signOut({scope:'local'}))}catch(e){}try{localStorage.removeItem('wepill-auth')}catch(e){}FAM.user=null;FAM.fid=null;FAM.loaded=false;FAM.membros=[]},t)
 },true);
 /* liga a sincronização ao save() e o aviso de atraso ao Início */
 {const _save=save;save=function(){_save.apply(this,arguments);famSyncSoon()}}
