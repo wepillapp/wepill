@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>WePill</title>
 <meta name="theme-color" content="#D0E9DD">
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
@@ -15,7 +15,7 @@
 /* Layout: celular com aurora pastel ao fundo, cartões de vidro, anel de progresso, faixa da semana, barra de navegação flutuante e folhas que sobem de baixo */
 :root{
   --bg:#D0E9DD; --glass:rgba(255,255,255,.74); --glass-2:rgba(255,255,255,.82); --stroke:rgba(255,255,255,.9); --hair:rgba(40,48,80,.08);
-  --ink:#1E2335; --ink-2:#646B85; --ink-3:#9AA0B8;
+  --ink:#1E2335; --ink-2:#565C75; --ink-3:#9AA0B8;
   --a1:#4CC29E; --a2:#8FE3CF; --a3:#FFC3A8; --a4:#A9D4FF;
   --mint:#D6F5EC; --mint-ink:#1F8A6E; --lav:#E6E0FF; --lav-ink:#5B48C9; --peach:#FFE5D9; --peach-ink:#C0582F;
   --sky:#DCEBFF; --sky-ink:#2F6DB5; --butter:#FFF3C9; --butter-ink:#97781A; --rose:#FFDDE4; --rose-ink:#C23A58;
@@ -542,7 +542,7 @@ main{padding-bottom:calc(108px + env(safe-area-inset-bottom,0px))!important}
 .onb.on{opacity:1;pointer-events:auto}
 .onbtop{display:flex;justify-content:space-between;align-items:center;align-self:stretch}
 .brand{display:flex;align-items:center;gap:10px}.brand .bt{width:40px;height:40px;border-radius:12px;background:#22A07F;display:flex;align-items:center;justify-content:center}
-.brand .bw{display:flex;flex-direction:column;line-height:1.05}.brand b{font-family:'Sora',sans-serif;font-size:21px;font-weight:700;letter-spacing:-.035em;color:var(--ink)}.brand b i{font-style:normal;color:#22A07F}.brand small{font-size:11px;color:var(--ink-2);margin-top:3px}
+.brand .bw{display:flex;flex-direction:column;line-height:1.05}.brand b{font-family:'Sora',sans-serif;font-size:21px;font-weight:700;letter-spacing:-.035em;color:var(--ink)}.brand b i{font-style:normal;color:#17805F}.brand small{font-size:11px;color:var(--ink-2);margin-top:3px}
 .onb .skip{align-self:flex-end;font-weight:700;color:var(--ink-2);padding:6px 10px}
 .slides{flex:1;position:relative;overflow:hidden}
 .slide{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;transition:transform .55s var(--ease),opacity .45s var(--ease)}
@@ -972,8 +972,8 @@ const PLANS=[
   {id:'destaque',nome:'Destaque',grupo:'par',preco:79,feat:true,inclui:'Topo da categoria, foto, selo Parceiro e uma oferta para quem usa o WePill'},
 ];
 const FREE_FEATS=['Até 5 itens na lista','Alarme simples, 1 horário por item','Alertas de alergia e de combinações','Ficha de emergência'];
-const PREM_FEATS=['Itens ilimitados e vários horários por item','Controle da caixa: reposição e aviso de "em falta"','Relatório em PDF para a consulta','Alarme que insiste até você confirmar','Backup entre celulares'];
-const FAM_FEATS=['Tudo do Premium para você e mais 3 pessoas','Cada perfil com a sua lista, horários e ficha','O responsável também recebe o aviso quando uma dose não é confirmada','Troque de perfil com um toque'];
+const PREM_FEATS=['Itens ilimitados e vários horários por item','Controle da caixa: reposição e aviso de "em falta"','Relatório em PDF para a consulta','Alarme que insiste até você confirmar','Cópia de segurança da lista na sua conta'];
+const FAM_FEATS=['Tudo do Premium para você e mais 3 pessoas','Cada perfil com a sua lista, horários e ficha','O responsável vê quando uma dose fica atrasada','Troque de perfil com um toque'];
 const PRO_FEATS=['Painel com todos os seus pacientes','Alertas de combinações e de doses perdidas','Notas entre profissionais do mesmo paciente','Paciente convidado por você ganha 30 dias de Premium'];
 const brl=v=>'R$ '+v.toFixed(2).replace('.',',');
 const CAT={remedio:{label:'Remédio',icon:'tablet'},suplemento:{label:'Suplemento',icon:'capsule'},vitamina:{label:'Vitamina',icon:'drop'},fito:{label:'Fitoterápico',icon:'leaf'}};
@@ -1044,7 +1044,7 @@ const PROS=[
   {id:'ana',nome:'Ana Ribeiro',area:'Nutricionista',ini:'AR',c:'mint',on:true,tel:'(44) 99812-3344',end:'Av. Cerro Azul, 845 · Zona 2, Maringá - PR'},
   {id:'rafa',nome:'Rafael Costa',area:'Farmacêutico',ini:'RC',c:'peach',on:false,tel:'(44) 3226-9080',end:'Farmácia Vida, Av. Brasil, 4100 · Centro, Maringá - PR'},
 ];
-const OWNER={losartana:'paulo',levotiroxina:'lucia',metformina:'lucia',omega3:'ana',calcio:'ana',b12:'ana'};
+const OWNER={};
 const T4={id:'t4',ctx:'item',ref:'levotiroxina',topic:'Levotiroxina',pro:'ana',unread:true,msgs:[
     {de:'ana',quando:'Hoje, 09:10',tipo:'Mudança de horário',txt:'Marta, para dar 1 hora inteira antes do café, sugiro tomar a levotiroxina às 06:00. Enviei para a Dra. Lúcia aprovar, porque foi ela quem receitou.',sug:{key:'levotiroxina#0',time:'06:00',status:'aguardando',owner:'lucia'}}]};
 const THREADS0=[T4,
@@ -1062,24 +1062,31 @@ const REPLIES={'Dúvida':'Boa pergunta. Vou olhar sua lista e te respondo com ca
 
 const SOUNDS={suave:[523,659,784],sino:[784,988,1175],cristal:[1047,1319,1568]};
 
-let S={tab:'hoje',list:['losartana','levotiroxina','metformina','omega3','calcio','b12'],taken:{},filter:'todos',pros:Object.fromEntries(PROS.map(p=>[p.id,p.on])),alarms:{},theme:null,fresh:null,plan:'gratis',profile:null,stock:{},refillOff:{},day:null,afilter:'todos',big:false,onboarded:false,lockOn:true,threads:null,extraPros:[],changes:[]};
+let S={tab:'hoje',list:[],taken:{},filter:'todos',pros:Object.fromEntries(PROS.map(p=>[p.id,p.on])),alarms:{},theme:null,fresh:null,plan:'gratis',profile:null,stock:{},refillOff:{},day:null,afilter:'todos',big:false,onboarded:false,lockOn:false,threads:null,extraPros:[],changes:[]};
 try{const sv=JSON.parse(localStorage.getItem('medlist-v2')||'null');if(sv&&Array.isArray(sv.list))S={...S,...sv,tab:'hoje',fresh:null}}catch(e){}
-if(!S.trialStart)S.trialStart=Date.now();if(!PLANS.find(x=>x.id===S.plan))S.plan='gratis';if(!S.planTab)S.planTab='pac';if(!S.bill)S.bill='ano';
+if(!S.trialStart)S.trialStart=Date.now();S.plan='gratis'; /* v76: assinatura simulada removida */if(!S.planTab)S.planTab='pac';if(!S.bill)S.bill='ano';
 /* itens vindos da lista completa da Anvisa (CMED), guardados no aparelho */
 if(!S.custom)S.custom={};const CUST={};
-function regCustom(id,d){DB[id]=d.db;BOX[id]=d.box;if(d.unit)UNIT[id]=d.unit;COMP[id]=d.comp}
+const clean=v=>String(v==null?'':v).replace(/[<>"'`]/g,'').slice(0,120);
+function regCustom(id,d){if(d&&d.db){d.db.nome=clean(d.db.nome);d.db.dose=clean(d.db.dose)}if(d)d.comp=clean(d.comp);DB[id]=d.db;BOX[id]=d.box;if(d.unit)UNIT[id]=d.unit;COMP[id]=d.comp}
 Object.entries(S.custom).forEach(([id,d])=>regCustom(id,d));
 if(!S.horasOv)S.horasOv={};Object.entries(S.horasOv).forEach(([id,h])=>{if(DB[id])DB[id].horas=[...h]});
 S.list=S.list.filter(id=>DB[id]);
-const TODAY=new Date().toDateString();if(S.takenDay!==TODAY||S.seedV!==19){S.taken={};S.takenDay=TODAY;S.seedV=19;const _m=h=>{const[a,b]=h.split(':');return +a*60+ +b},_d=doses();_d.filter(x=>_m(x.h)<720).slice(0,2).forEach(x=>S.taken[x.key]=true);_d.filter(x=>_m(x.h)>=720&&_m(x.h)<1080).slice(0,1).forEach(x=>S.taken[x.key]=true)}
+const dkey=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+if(!S.hist)S.hist={};if(!S.takenAt)S.takenAt={};
+const TODAY=new Date().toDateString();
+/* v76: versões antigas marcavam doses de exemplo como tomadas sozinhas; zera uma vez, sem inventar nada */
+if(S.seedV!==20){S.seedV=20;S.taken={};S.takenAt={};S.hist={};S.takenDay=TODAY}
+if(S.takenDay!==TODAY){if(S.takenDay){const od=new Date(S.takenDay);if(!isNaN(od))S.hist[dkey(od)]={doses:doses().map(x=>({id:x.id,key:x.key,h:x.h,nome:DB[x.id].nome,dose:DB[x.id].dose||''})),taken:{...S.taken}};
+  const lim=new Date();lim.setDate(lim.getDate()-60);Object.keys(S.hist).forEach(k=>{if(k<dkey(lim))delete S.hist[k]})}
+  S.taken={};S.takenAt={};S.takenDay=TODAY}
 const photos={};
 const PROFILE_DEF={nome:'Marta Souza',nasc:'1964-03-14',sexo:'Feminino',cpf:'123.456.789-00',tel:'(44) 99876-5432',email:'marta.souza@exemplo.com',end:'Rua das Palmeiras, 210',cidade:'Maringá - PR',cep:'87020-000',peso:'68',altura:'1,62',sangue:'O+',alergias:'Dipirona',obs:'Intolerância a lactose',condicoes:'Hipertensão, hipotireoidismo, diabetes tipo 2',plano:'Unimed Maringá',carteira:'0 123 456789 00-1',emerg:'Carlos Souza (filho)',emergtel:'(44) 99123-4567',cuidador:'Carlos Souza'};
-if(!S.profile)S.profile={...PROFILE_DEF};
-if(!S.threads)S.threads=JSON.parse(JSON.stringify(THREADS0));
-if(!S.threads.find(t=>t.id==='t4'))S.threads.unshift(JSON.parse(JSON.stringify(T4)));
+if(!S.profile)S.profile=Object.fromEntries(Object.keys(PROFILE_DEF).map(k=>[k,'']));
+/* v76: sem conversas de demonstração */S.threads=(S.threads||[]).filter(t=>!['t1','t2','t3','t4'].includes(t.id));
 if(!S.changes)S.changes=[];
 (S.extraPros||[]).forEach(p=>{if(!PROS.find(x=>x.id===p.id))PROS.push(p)});
-if(S.profile.obs===undefined)S.profile.obs=PROFILE_DEF.obs;
+if(S.profile.obs===undefined)S.profile.obs='';
 const START={losartana:18,levotiroxina:5,metformina:40,omega3:52,calcio:9,b12:45};
 const stock=id=>S.stock[id]??(START[id]??BOX[id]);
 const used=id=>Math.min(1,Math.max(0,1-stock(id)/BOX[id]));
@@ -1091,8 +1098,10 @@ function daysLeft(id){const per=DB[id].horas.length||1;return Math.floor(stock(i
 function allergyTerms(){return (S.profile.alergias+','+(S.profile.obs||'')).toLowerCase().replace(/intoler[aâ]ncia( leve)? a|alergia a/g,',').split(/[,;]| e /).map(x=>x.trim()).filter(x=>x.length>2)}
 function allergyFor(id){const hay=(DB[id].nome+' '+(COMP[id]||'')).toLowerCase();const syn={'frutos do mar':['peixe'],'lactose':['lactose','leite'],'dipirona':['dipirona','metamizol']};
   for(const t of allergyTerms()){const keys=[t,...(syn[t]||[])];const k=keys.find(k=>hay.includes(k));if(k)return t}return null}
+function isAl(t){return (S.profile.alergias||'').toLowerCase().replace(/alergia a/g,',').split(/[,;]| e /).map(x=>x.trim()).includes(t)}
+const alW=t=>isAl(t)?'alergia':'intolerância';
 function allergyHits(list=S.list){return list.map(id=>({id,t:allergyFor(id)})).filter(x=>x.t)}
-function save(){try{localStorage.setItem('medlist-v2',JSON.stringify({list:S.list,taken:S.taken,takenDay:S.takenDay,seedV:S.seedV,pros:S.pros,alarms:S.alarms,theme:S.theme,plan:S.plan,trialStart:S.trialStart,locOk:S.locOk,praio:S.praio,planTab:S.planTab,bill:S.bill,profile:S.profile,stock:S.stock,refillOff:S.refillOff,big:S.big,onboarded:S.onboarded,lockOn:S.lockOn,threads:S.threads,extraPros:S.extraPros,hiddenPros:S.hiddenPros,changes:S.changes,custom:S.custom,horasOv:S.horasOv,registered:S.registered}))}catch(e){}}
+function save(){try{localStorage.setItem('medlist-v2',JSON.stringify({list:S.list,taken:S.taken,takenDay:S.takenDay,seedV:S.seedV,pros:S.pros,alarms:S.alarms,theme:S.theme,plan:S.plan,trialStart:S.trialStart,locOk:S.locOk,praio:S.praio,planTab:S.planTab,bill:S.bill,profile:S.profile,stock:S.stock,refillOff:S.refillOff,big:S.big,onboarded:S.onboarded,hist:S.hist,takenAt:S.takenAt,rung:S.rung,notifAsk:S.notifAsk,consent:S.consent,lockOn:S.lockOn,threads:S.threads,extraPros:S.extraPros,hiddenPros:S.hiddenPros,changes:S.changes,custom:S.custom,horasOv:S.horasOv,registered:S.registered}))}catch(e){}}
 
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -1103,7 +1112,7 @@ function alerts(list=S.list){const out=[],seen=new Set();
       if(o){const k=o.a+'|'+o.b+'|'+o.t;if(!seen.has(k)){seen.add(k);out.push(o)}}})))}
   return out.sort((x,y)=>SEVORD[x.sev]-SEVORD[y.sev])}
 function interWith(id){return alerts([...S.list.filter(x=>x!==id),id]).filter(a=>a.a===id||a.b===id)}
-const unkOf=id=>DB[id]&&DB[id].src==='cmed'&&!DB[id].base;
+const unkOf=id=>DB[id]&&(DB[id].src==='manual'||DB[id].src==='backup'||(DB[id].src==='cmed'&&!DB[id].base));
 function flagFor(id){if(allergyFor(id))return 'alergia';const a=alerts().filter(i=>i.a===id||i.b===id);return a.length?a[0].sev:null}
 function alarm(key){const [id,i]=key.split('#');if(!S.alarms[key])S.alarms[key]={on:true,time:DB[id].horas[+i],days:[1,1,1,1,1,1,1],sound:'suave',snooze:10,insist:true};return S.alarms[key]}
 function doses(){const d=[];S.list.forEach(id=>DB[id].horas.forEach((h,i)=>{const key=id+'#'+i;d.push({id,key,h:alarm(key).time})}));return d.sort((a,b)=>a.h.localeCompare(b.h))}
@@ -1117,7 +1126,7 @@ function curDark(){const t=document.documentElement.getAttribute('data-theme');i
 function applyTheme(){if(S.theme)document.documentElement.setAttribute('data-theme',S.theme);$('#theme').innerHTML=curDark()?IC.sun:IC.moon;$('#theme').setAttribute('aria-label',curDark()?'Mudar para o modo normal':'Mudar para o modo noturno')}
 
 function renderWeek(){const today=new Date(),dow=today.getDay(),L=['D','S','T','Q','Q','S','S'],sel=S.day??dow;
-  $('#week').innerHTML=`<div class="week glass">${L.map((l,i)=>{const dt=new Date(today);dt.setDate(today.getDate()-dow+i);const st=i<dow?(i===dow-2?'':'full'):i===dow?'':'none';
+  $('#week').innerHTML=`<div class="week glass">${L.map((l,i)=>{const dt=new Date(today);dt.setDate(today.getDate()-dow+i);const hd=i<dow?S.hist[dkey(dt)]:null,hn=hd?hd.doses.length:0,ht=hd?hd.doses.filter(x=>hd.taken[x.key]).length:0;const st=i<dow?(!hd||!hn?'none':ht===hn?'full':''):i===dow?'':'none';
     return `<button class="day ${S.tab==='hoje'&&i===sel?'on':''} ${i===dow?'today':''}" data-wday="${i}" aria-label="${i===dow?'Hoje':'Ver '+dt.toLocaleDateString('pt-BR',{weekday:'long'})}">
     <small>${l}</small><b>${dt.getDate()}</b><i class="${st}"></i></button>`}).join('')}</div>`;
   $('#week').style.display=S.tab==='equipe'?'none':''; /* v52: sem semana na Equipe */
@@ -1143,30 +1152,35 @@ function render(quiet){
 
 function vHoje(){
   const dow=new Date().getDay(),sel=S.day??dow,isToday=sel===dow,past=sel<dow;
-  const tk=k=>isToday?!!S.taken[k]:past?!(sel===dow-2&&k.startsWith('metformina#1')):false;
-  const d=doses(),done=d.filter(x=>tk(x.key)).length,pct=d.length?done/d.length:0,C=2*Math.PI*50;
-  const nm=nowMin();const next=isToday?(d.find(x=>!tk(x.key)&&mins(x.h)>=nm)||d.find(x=>!tk(x.key))):null;
-  const diff=next?((mins(next.h)-nm+1440)%1440):0;
-  const cd=next?(diff<60?`em ${diff} min`:`em ${Math.floor(diff/60)}h ${String(diff%60).padStart(2,'0')}min`):'';
-  const atn=alerts().filter(a=>a.sev!=='leve').length,low=S.list.filter(needsAlert).sort((a,b)=>outOf(b)-outOf(a)).length;
   const dt=new Date();dt.setDate(dt.getDate()-dow+sel);const dname=dt.toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'short'});
-  return `${isToday?'':`<div class="dayview">${past?'Histórico de':'Planejado para'} ${dname}<button data-wday="${dow}">Voltar para hoje</button></div>`}
+  const hd=past?S.hist[dkey(dt)]:null;
+  const tk=k=>isToday?!!S.taken[k]:past?!!(hd&&hd.taken[k]):false;
+  const d=past?(hd?hd.doses:[]):doses(),done=d.filter(x=>tk(x.key)).length,pct=d.length?done/d.length:0,C=2*Math.PI*50;
+  const nm=nowMin();const late=isToday?d.find(x=>!tk(x.key)&&mins(x.h)<=nm-15):null;const next=isToday?(late||d.find(x=>!tk(x.key)&&mins(x.h)>=nm)||d.find(x=>!tk(x.key))):null;
+  const diff=next?((mins(next.h)-nm+1440)%1440):0,ago=late?nm-mins(late.h):0;
+  const cd=late?`atrasada há ${ago<60?ago+' min':Math.floor(ago/60)+'h '+String(ago%60).padStart(2,'0')+'min'}`:next?(diff<60?`em ${diff} min`:`em ${Math.floor(diff/60)}h ${String(diff%60).padStart(2,'0')}min`):'';
+  const atn=alerts().filter(a=>a.sev!=='leve').length,low=S.list.filter(needsAlert).sort((a,b)=>outOf(b)-outOf(a)).length;
+  const askN=isToday&&S.list.length&&('Notification' in window)&&Notification.permission==='default';
+  return `${askN?`<button class="famalert tap" data-notif>${IC.bell}<span><b>Ativar os avisos de remédio</b><small>Para o WePill avisar na hora, mesmo em segundo plano</small></span></button>`:''}${isToday?'':`<div class="dayview">${past?'Histórico de':'Planejado para'} ${dname}<button data-wday="${dow}">Voltar para hoje</button></div>`}
   ${idCard()}
   <div class="hero glass">
     <div class="ringwrap"><div class="ring"><svg viewBox="0 0 120 120"><circle class="track" cx="60" cy="60" r="50" fill="none" stroke-width="10"/><circle class="bar" id="ringbar" cx="60" cy="60" r="50" fill="none" stroke-width="10" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-pct)}"/></svg>
       <div class="mid"><b class="num" id="ringnum">${done}/${d.length}</b></div></div><small class="ringlbl">${isToday?'doses hoje':past?'doses tomadas':'doses previstas'}</small></div>
-    <div class="next">${next?`<span class="eyebrow">Próxima dose</span><span class="nm">${DB[next.id].nome} <span style="font-weight:400;color:var(--ink-2)">${DB[next.id].dose}</span></span>
-      <span class="countdown">${next.h} · ${cd}</span><div class="nextacts"><button class="btn primary sm tap" data-takenext="${next.key}">${IC.check} Tomar agora</button><button class="iconbtn tap" data-ring="${next.key}" aria-label="Testar o alarme desta dose">${IC.bell}</button></div>`
+    <div class="next">${next?`<span class="eyebrow"${late?' style="color:var(--rose-ink)"':''}>${late?'Dose atrasada':'Próxima dose'}</span><span class="nm">${DB[next.id].nome} <span style="font-weight:400;color:var(--ink-2)">${DB[next.id].dose}</span></span>
+      <span class="countdown"${late?' style="color:var(--rose-ink)"':''}>${next.h} · ${cd}</span><div class="nextacts"><button class="btn primary sm tap" data-takenext="${next.key}">${IC.check} Tomar agora</button><button class="iconbtn tap" data-ring="${next.key}" aria-label="Testar o alarme desta dose">${IC.bell}</button></div>`
+      :isToday&&!S.list.length?`<span class="eyebrow">Comece por aqui</span><span class="nm">Adicione seu primeiro remédio</span><div class="nextacts"><button class="btn primary sm tap" onclick="document.getElementById('fab').click()">${IC.plus} Adicionar</button></div>`
       :isToday?`<span class="eyebrow">Tudo certo</span><span class="nm">Você tomou todas as doses de hoje</span>`
-      :past?`<span class="eyebrow">Resumo do dia</span><span class="nm">${done===d.length?'Todas as doses tomadas':(d.length-done)+' dose esquecida'}</span>${done===d.length?'':'<span class="sub" style="font-size:13px">Metformina do jantar não foi marcada</span>'}`
-      :`<span class="eyebrow">Dia planejado</span><span class="nm">${d.length} doses programadas</span><span class="sub" style="font-size:13px">Os alarmes já estão ligados</span>`}</div>
+      :past?(!hd?`<span class="eyebrow">Resumo do dia</span><span class="nm">Sem registro neste dia</span><span class="sub" style="font-size:13px">O WePill guarda o histórico a partir do dia em que você começou a usar.</span>`
+        :!d.length?`<span class="eyebrow">Resumo do dia</span><span class="nm">Nenhuma dose neste dia</span>`
+        :`<span class="eyebrow">Resumo do dia</span><span class="nm">${done===d.length?'Todas as doses tomadas':(d.length-done)+(d.length-done>1?' doses sem marcar':' dose sem marcar')}</span>${done===d.length?'':`<span class="sub" style="font-size:13px">${esc(d.filter(x=>!tk(x.key)).map(x=>x.nome+' '+x.h).join(', '))}</span>`}`)
+      :`<span class="eyebrow">Dia planejado</span><span class="nm">${d.length} doses programadas</span><span class="sub" style="font-size:13px">Com os mesmos horários de hoje</span>`}</div>
   </div>
   <h2>Seus turnos</h2>
   <div class="periods stagger">${PERIODS.map(P=>{const ds=d.filter(x=>mins(x.h)>=P.de&&mins(x.h)<P.ate),dn=ds.filter(x=>tk(x.key)).length,nx=ds.find(x=>!tk(x.key));const isNow=isToday&&nm>=P.de&&nm<P.ate;
     return `<button class="period p-${P.id} tap ${isNow?'now':''}" data-period="${P.id}">${P.svg}<b>${P.nome}</b><span class="cnt">${ds.length?dn+' de '+ds.length:'Livre'}</span><div class="bar"><i style="width:${ds.length?dn/ds.length*100:0}%"></i></div><small>${!ds.length?'Nenhuma dose':nx?(isToday?'Próxima ':'')+nx.h:'Tudo tomado'}</small></button>`}).join('')}</div>
 `;
 }
-function doseRow(x){const dow=new Date().getDay(),sel=S.day??dow,ro=sel!==dow;const A=alarm(x.key),D=DB[x.id];const t=ro?(sel<dow&&!(sel===dow-2&&x.key.startsWith('metformina#1'))):S.taken[x.key];
+function doseRow(x){const dow=new Date().getDay(),sel=S.day??dow,ro=sel!==dow;const A=alarm(x.key),D=DB[x.id];const t=ro?false:S.taken[x.key];
   return `<div class="dose glass ${t?'done':''}" data-row="${x.key}">${pillic(x.id)}
     <div class="info"><b>${t?'<s>':''}${D.nome} ${D.dose}${t?'</s>':''}</b>
       <div class="meta"><button class="bell tap ${A.on?'':'off'}" data-alarm="${x.key}" aria-label="Configurar alarme">${A.on?IC.bell:IC.belloff}${A.time}</button><span>${D.qtd} · ${esc(D.como)}</span></div></div>
@@ -1176,7 +1190,7 @@ function idCard(){const p=S.profile,cap=x=>x.charAt(0).toUpperCase()+x.slice(1),
   const al=splitTags(p.alergias||'').map(cap),ob=[...splitTags(p.obs||''),...splitTags(p.condicoes||'')].map(cap);
   return `<div class="idcard"><button class="blood tap" data-sos aria-label="Tipo sanguíneo ${esc(p.sangue)}">${IC.drop2}<b>${esc(p.sangue)}</b><small>Sangue</small></button>
   <div class="idcol"><button class="allergy glass tap" data-${hits.length?'item="'+hits[0].id+'"':'tab="perfil"'}><small>Alergias</small><div class="tags">${al.length?al.map(t=>`<span class="atag">${IC.shield}${esc(t)}</span>`).join(''):'<span class="sub">Nenhuma informada</span>'}</div>
-  ${hits.length?`<span class="warn">${IC.shield}<span>${hits.map(h=>DB[h.id].nome).join(', ')} na sua lista contém alergênico</span></span>`:''}</button>
+  ${hits.length?`<span class="warn">${IC.shield}<span>${hits.map(h=>DB[h.id].nome).join(', ')} na sua lista ${hits.some(h=>isAl(h.t))?'contém algo a que você tem alergia':'contém algo que você não tolera'}</span></span>`:''}</button>
   <button class="obscard glass tap" data-tab="perfil"><small>Observações</small><div class="tags">${ob.length?ob.map(t=>`<span class="otag">${esc(t)}</span>`).join(''):'<span class="sub">Nenhuma informada</span>'}</div></button></div></div>`}
 const FCATS=['todos','remedio','suplemento','vitamina','fito'];let SWIPE='';
 function centerChip(){const f=$('#filters'),c=$('#filters .filter.on');if(!f||!c)return;const left=f.scrollLeft+(c.getBoundingClientRect().left-f.getBoundingClientRect().left)-(f.clientWidth-c.offsetWidth)/2;f.scrollTo({left:Math.max(0,left),behavior:'smooth'})}
@@ -1211,8 +1225,8 @@ function alertCard(a,isNew){return `<div class="alert glass sev-${a.sev} ${isNew
   <div class="todo">${IC.ok}<span>${a.o}</span></div>${FIXED}${srcLine()}</div>`}
 const BASEDATE='01/11/2026';
 const FIXED=`<p class="fixed">Não pare nem mude nenhum remédio por conta própria. Converse com quem receitou.</p>`;
-function srcLine(){return `<div class="srcrow"><span class="src">Fonte: base de combinações (demonstração) · atualizada em ${BASEDATE}</span><button class="report tap" data-report>Este alerta parece errado?</button></div>`}
-function allergyCard(h){return `<div class="alert glass allergic sev-alergia"><span class="sevpill">Alergia</span><h3>${DB[h.id].nome} e sua alergia a ${esc(h.t)}</h3><p>Você informou alergia a <b style="color:var(--ink)">${esc(h.t)}</b>. Este item contém: ${esc(COMP[h.id]||DB[h.id].nome)}.</p><div class="todo">${IC.ok}<span>Converse com seu médico ou farmacêutico antes de usar. Confira também a bula.</span></div><span class="src">Comparado com a alergia e as observações do seu perfil</span></div>`}
+function srcLine(){return `<div class="srcrow"><span class="src">Fonte: base inicial do WePill com as combinações mais comuns · atualizada em ${BASEDATE}. Não substitui a orientação do médico ou do farmacêutico.</span></div>`}
+function allergyCard(h){return `<div class="alert glass allergic sev-alergia"><span class="sevpill">${isAl(h.t)?'Alergia':'Intolerância'}</span><h3>${DB[h.id].nome} e sua ${alW(h.t)} a ${esc(h.t)}</h3><p>Você informou ${alW(h.t)} a <b style="color:var(--ink)">${esc(h.t)}</b>. Este item contém: ${esc(COMP[h.id]||DB[h.id].nome)}.</p><div class="todo">${IC.ok}<span>Converse com seu médico ou farmacêutico antes de usar. Confira também a bula.</span></div><span class="src">Comparado com a alergia e as observações do seu perfil</span></div>`}
 function refillCard(id){if(outOf(id))return outCard(id);return `<div class="alert glass sev-repor"><span class="sevpill">Reposição</span><h3>Repor ${DB[id].nome}</h3>
   <p>Você já usou <b style="color:var(--ink)">${Math.round(used(id)*100)}% da caixa</b>. Restam ${stock(id)} de ${BOX[id]} ${UNIT[id]||'comprimidos'}, o que dá para cerca de ${daysLeft(id)} dias.</p>
   <div class="meter low"><i style="width:${(1-used(id))*100}%"></i></div>
@@ -1278,7 +1292,8 @@ function parcResults(){const a=S.parea||'todas',q=PQ.trim().toLowerCase(),me=her
   const r=all.filter(p=>p.d<=raio);
   if(!r.length)return `<div class="glass" style="padding:16px;text-align:center"><p class="sub" style="margin:0 0 10px">Ainda não há parceiros ${a==='todas'?'':'desta atividade '}na sua região.</p>${LOC.st==='ok'?'<button class="btn ghost sm tap" data-locdemo>Ver parceiros de Maringá</button>':''}</div>`;
   return r.map(p=>`<button class="item glass tap" data-parc="${p.id}">${pav(p,40)}<div class="info"><b>${esc(p.nome)}</b><span>${esc(p.area)}${p.dom?' · atende em casa':''}</span></div><span class="dist">${IC.pin}${fmtKm(p.d)}</span></button>`).join('')}
-function vEquipe(){const ps=PROS.filter(p=>!(S.hiddenPros||[]).includes(p.id));
+function vEquipe(){return `<h2 style="margin:0">Equipe de cuidado</h2><div class="glass" style="padding:18px;border-radius:var(--r)"><b>Em breve</b><p class="sub" style="margin:6px 0 0">Em breve você vai poder compartilhar sua lista com médico, farmacêutico e cuidadores. Por enquanto, use a Família conectada acima para acompanhar quem você cuida, e o PDF para levar à consulta.</p></div>`}
+function vEquipeAntigo(){const ps=PROS.filter(p=>!(S.hiddenPros||[]).includes(p.id));
   return `<h2 style="margin:0">Profissionais cadastrados</h2>
   <div class="glass clist">${ps.map(p=>`<button class="crow tap" data-contact="${p.id}">${avatar(p.id,36)}
     <div class="info"><b>${esc(p.nome)}</b><span>${esc(p.area)}</span></div><span class="chev">${sv('<path d="M9 6l6 6-6 6"/>',2)}</span></button>`).join('')||'<p class="sub" style="padding:12px">Nenhum contato ainda.</p>'}
@@ -1404,7 +1419,12 @@ function sheetInvite(){const st=INV.step;
     <div style="display:flex;gap:10px"><button class="btn ghost tap" style="flex:1" data-close>Agora não</button><button class="btn primary tap" style="flex:1" data-invok>Aprovar acesso</button></div>`}
 
 
-function sheetPeriod(pid){const P=PERIODS.find(x=>x.id===pid),d=doses().filter(x=>mins(x.h)>=P.de&&mins(x.h)<P.ate),dn=d.filter(x=>S.taken[x.key]).length;
+function sheetPeriod(pid){const P=PERIODS.find(x=>x.id===pid),dow=new Date().getDay(),sel=S.day??dow;
+  if(sel<dow){const dt=new Date();dt.setDate(dt.getDate()-dow+sel);const hd=S.hist[dkey(dt)],hl=hd?hd.doses.filter(x=>mins(x.h)>=P.de&&mins(x.h)<P.ate):[];
+    return `<div class="phead p-${P.id}">${P.svg}<div><h1>${P.nome}</h1><span class="sub">${!hd?'Sem registro neste dia':hl.length?hl.filter(x=>hd.taken[x.key]).length+' de '+hl.length+' doses tomadas':'Nenhuma dose neste turno'}</span></div></div>
+    <div class="list">${hl.map(x=>`<div class="dose glass ${hd.taken[x.key]?'done':''}"><div class="info"><b>${esc(x.nome)} ${esc(x.dose)}</b><div class="meta"><span>${x.h} · ${hd.taken[x.key]?'tomada':'sem marcar'}</span></div></div></div>`).join('')}</div>
+    <button class="btn ghost block tap" data-close>Fechar</button>`}
+  const d=doses().filter(x=>mins(x.h)>=P.de&&mins(x.h)<P.ate),dn=d.filter(x=>S.taken[x.key]).length;
   return `<div class="phead p-${P.id}">${P.svg}<div><h1>${P.nome}</h1><span class="sub">${d.length?dn+' de '+d.length+' doses tomadas':'Nenhuma dose neste turno'}</span></div></div>
   <div class="list stagger">${d.map(doseRow).join('')||'<p class="sub">Aproveite: nada para tomar neste turno.</p>'}</div>
   <button class="btn ghost block tap" data-close>Fechar</button>`}
@@ -1418,10 +1438,11 @@ function vPerfil(){const p=S.profile,P=PLANS.find(x=>x.id===S.plan);
     <span class="badge-plan ${S.plan==='gratis'?'':'prem'}">${P.nome}</span></div>
   ${idCard()}
   <p class="sub" style="font-size:13px;text-align:center;margin-top:-4px">Toque em qualquer dado para editar. Tudo é salvo na hora.</p>
+  <div class="glass pgroup"><div class="prow"><label>Seus dados</label><div style="display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap"><a class="btn ghost sm" href="../privacidade.html" target="_blank" rel="noopener">Privacidade</a><a class="btn ghost sm" href="../termos.html" target="_blank" rel="noopener">Termos</a><button class="btn ghost sm tap" data-wipe>Apagar dados deste celular</button></div></div></div>
   <h2>Preferências</h2>
   <div class="glass pgroup"><div class="prow"><label>Ficha de emergência ao abrir</label><div style="display:flex;justify-content:flex-end;gap:8px;align-items:center"><button class="btn ghost sm tap" data-sos>Ver</button><button class="switch ${S.lockOn?'on':''}" data-lock role="switch" aria-checked="${S.lockOn}" aria-label="Mostrar ficha de emergência ao abrir"></button></div></div><div class="prow"><label>Tamanho do texto</label><div class="seg"><button class="${S.big?'':'on'}" data-big="0">Normal</button><button class="${S.big?'on':''}" data-big="1">Grande</button></div></div></div>
   <h2>Dados pessoais</h2>
-  <div class="glass pgroup">${f('nome','Nome completo')}${f('nasc','Nascimento','date')}${sel('sexo','Sexo',['Feminino','Masculino','Outro','Prefiro não dizer'])}${f('cpf','CPF','text','inputmode="numeric"')}</div>
+  <div class="glass pgroup">${f('nome','Nome completo')}${f('nasc','Nascimento','date','min="1900-01-01" max="'+dkey(new Date())+'"')}${sel('sexo','Sexo',['Feminino','Masculino','Outro','Prefiro não dizer'])}</div>
   <h2>Contato</h2>
   <div class="glass pgroup">${f('tel','Celular','tel')}${f('email','E-mail','email')}${f('end','Endereço')}${f('cidade','Cidade')}${f('cep','CEP','text','inputmode="numeric"')}</div>
   <h2>Saúde</h2>
@@ -1438,10 +1459,10 @@ const money=v=>brl(v).replace(',00','');
 function plBtn(P,lbl,cls='primary'){return S.plan===P.id?'<span class="pl-cur">'+IC.check+' Seu plano atual</span>':`<button class="btn ${cls} block tap" data-plan="${P.id}">${lbl}</button>`}
 function plFeats(arr){return `<ul class="feats">${arr.map(x=>`<li>${IC.check}<span>${x}</span></li>`).join('')}</ul>`}
 function plAsk(t,who,feats,id){return `<div class="plan glass"><div class="top"><div><h3>${t}</h3><span class="who">${who}</span></div><div class="price sm">Sob consulta</div></div>${plFeats(feats)}<button class="btn primary block tap" data-plancontact="${id}">Falar com a equipe</button></div>`}
-function vPlanos(){const T=S.planTab,G=id=>PLANS.find(p=>p.id===id);
-  const tabs=[['pac','Para você'],['pro','Profissional'],['neg','Clínica e farmácia'],['par','Parceiros']];
+function vPlanos(){const T='pac',G=id=>PLANS.find(p=>p.id===id);
+  const tabs=[['pac','Para você']];
   let body='';
-  if(T==='pac'){const ano=S.bill==='ano',P=G(ano?'premium-ano':'premium'),F=G('familia'),FR=G('gratis');
+  if(T==='pac'){const ano=false,P=G(ano?'premium-ano':'premium'),F=G('familia'),FR=G('gratis');
     body=`<div class="plan glass pl-free">
       <div class="top"><div><h3>Grátis</h3><span class="who">O essencial para começar</span></div><div class="price">R$ 0</div></div>
       ${plFeats(FREE_FEATS)}
@@ -1449,7 +1470,7 @@ function vPlanos(){const T=S.planTab,G=id=>PLANS.find(p=>p.id===id);
       ${S.plan==='gratis'?'<span class="pl-cur">'+IC.check+' Seu plano atual</span>':`<button class="btn ghost block tap" data-plan="gratis">Voltar para o Grátis</button>`}
     </div>
     <div class="plan glass pl-prem ${ano?'feat':''}" ${ano?'data-badge="Mais escolhido"':''}>
-      <div class="seg pl-bill"><button class="${ano?'on':''}" data-bill="ano">Anual</button><button class="${ano?'':'on'}" data-bill="mes">Mensal</button></div>
+      
       <div class="top"><div><h3>Premium</h3><span class="who">Tudo liberado para você</span></div>
         <div class="price">${ano?'R$ 8,25<small>por mês</small><span class="pl-yr">R$ 99 cobrado 1x por ano</span>':money(P.preco)+'<small>por mês</small>'}</div></div>
       
@@ -1463,9 +1484,7 @@ function vPlanos(){const T=S.planTab,G=id=>PLANS.find(p=>p.id===id);
       ${plFeats(FAM_FEATS)}
       ${plBtn(F,'Assinar o Família','ghost')}
     </div>
-    <div class="plan glass pl-ask"><div class="top"><div><h3>Profissional, Clínicas e Farmácias</h3><span class="who">Para quem cuida de muitos pacientes ou clientes</span></div></div><div class="price sm" style="text-align:left">Sob consulta</div>
-      <button class="btn primary block tap" data-plancontact="pro">Falar com a equipe</button></div>
-    <div class="pl-tip">${sv('<path d="M20 12v8a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-8"/><rect x="2.5" y="7.5" width="19" height="4.5" rx="1"/><path d="M12 21V7.5M12 7.5H8.2a2.3 2.3 0 1 1 0-4.6C11 2.9 12 7.5 12 7.5zm0 0h3.8a2.3 2.3 0 1 0 0-4.6C13 2.9 12 7.5 12 7.5z"/>')}<span><b>Convite do seu profissional?</b> Quem chega pelo convite de um profissional ganha 30 dias de Premium.</span></div>`}
+    <div class="pl-tip" style="display:none">${sv('<path d="M20 12v8a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-8"/><rect x="2.5" y="7.5" width="19" height="4.5" rx="1"/><path d="M12 21V7.5M12 7.5H8.2a2.3 2.3 0 1 1 0-4.6C11 2.9 12 7.5 12 7.5zm0 0h3.8a2.3 2.3 0 1 0 0-4.6C13 2.9 12 7.5 12 7.5z"/>')}<span><b>Convite do seu profissional?</b> Quem chega pelo convite de um profissional ganha 30 dias de Premium.</span></div>`}
   else if(T==='pro'){
     body=`${plAsk('Profissional','Médicos, nutricionistas, farmacêuticos e outros profissionais de saúde',PRO_FEATS,'pro')}
     <p class="sub" style="margin:0;text-align:center;font-size:13.5px">O valor depende de quantos pacientes você acompanha.</p>`}
@@ -1517,7 +1536,7 @@ function sheetAdd(){return `<h1>Adicionar à lista</h1>
   <button class="scan live tap" data-scan="1"><span class="ic">${IC.barcode}</span><span style="flex:1;min-width:0"><b style="display:block">Escanear a caixa</b><span class="sub" style="font-size:13px">Abre a câmera e lê o código de barras</span></span><span class="go">${IC.cam}</span></button>
   <div class="scan photo2" id="scan"><span style="flex:1;min-width:0;padding-left:4px"><b style="display:block">Foto da receita ou bula</b><span class="sub" style="font-size:13px">Tire na hora ou importe</span></span><span class="acts"><button class="go tap" data-photo="new" aria-label="Tirar foto">${IC.cam}<small>Câmera</small></button><button class="go tap" data-gal="new" aria-label="Importar da galeria">${IC.gal}<small>Galeria</small></button></span></div>
   <label class="search" for="q">${IC.search}<input id="q" placeholder="Ou digite o nome do remédio" autocomplete="off"></label>
-  <p class="dbsrc">${IC.shield}<span>Busca na <b>lista da Anvisa (CMED)</b>, com cerca de 13 mil remédios, e em suplementos comuns. Pode digitar com a dose, como “losartana 50”. As combinações são checadas na base revisada (demonstração com 25 substâncias).</span></p>
+  <p class="dbsrc">${IC.shield}<span>Busca na <b>lista da Anvisa (CMED)</b>, com cerca de 13 mil remédios, e em suplementos comuns. Pode digitar com a dose, como “losartana 50”. As combinações são checadas na base revisada (base inicial com 25 substâncias).</span></p>
   <div id="results">${resultsHtml(filterDB(''))}</div>`}
 /* lista completa da Anvisa (CMED): arquivo cmed.json ao lado do app, carregado na primeira busca */
 let CMED=null,CMEDP=null,CMEDERR=false;
@@ -1568,7 +1587,7 @@ function didYouMean(q){const P=qParse(q);if(!CMED||!P.w.length)return [];
 function suplItem(i){const x=SUPL[i],id='s'+nrm(x.nome).replace(/[^A-Z0-9]/g,'').toLowerCase();if(DB[id])return id;
   const db={nome:x.nome,dose:x.dose,cat:x.cat,qtd:'Conforme a orientação ou a embalagem',para:'Confira com seu médico, farmacêutico ou nutricionista.',como:'Siga a orientação de quem indicou e a embalagem.',evitar:'Avise quem cuida de você que usa este produto.',horas:['08:00'],por:'',src:'supl',sub:x.sub,ap:'',ean:'',base:null};
   const d={db,box:30,unit:x.unit,comp:x.sub.toLowerCase()};CUST[id]=d;regCustom(id,d);return id}
-function manualItem(nome,cat){const id='m'+Date.now().toString(36);const P=qParse(nome),dose=P.n.length?P.n[0]+' '+((nrm(nome).match(/\d\s*(MCG|MG|ML|UI|G)\b/)||[,'mg'])[1].toLowerCase()):'';
+function manualItem(nome,cat){nome=clean(nome);const id='m'+Date.now().toString(36);const P=qParse(nome),dose=P.n.length?P.n[0]+' '+((nrm(nome).match(/\d\s*(MCG|MG|ML|UI|G)\b/)||[,'mg'])[1].toLowerCase()):'';
   const db={nome:tc(nome.replace(/\s*\d.*$/,'').trim()||nome.trim()),dose,cat,qtd:'Conforme a receita',para:'Item adicionado por você.',como:'Siga a orientação de quem receitou ou a embalagem.',evitar:'Confira a bula ou a embalagem.',horas:['08:00'],por:'',src:'manual',sub:'',ap:'',ean:'',base:null};
   const d={db,box:30,unit:'',comp:nome.trim().toLowerCase()};CUST[id]=d;regCustom(id,d);return id}
 function cmedHtml(q){if(nrm(q.trim()).length<2)return '';
@@ -1589,7 +1608,7 @@ function renderAddResults(){const q=$('#q'),R=$('#results');if(!q||!R)return;con
   if(long&&!CMED&&!CMEDERR)loadCmed().then(renderAddResults,renderAddResults)}
 function resultsHtml(res){return res.map(id=>{const has=S.list.includes(id);
   const would=has?[]:interWith(id);
-  return `<button class="result tap" data-add="${id}" ${has?'disabled':''}>${pillic(id)}<div class="info"><b>${DB[id].nome} ${DB[id].dose}</b><br><span>${CAT[DB[id].cat].label}${allergyFor(id)?` · <span style="color:var(--rose-ink);font-weight:700">você tem alergia a ${esc(allergyFor(id))}</span>`:''}${would.length?` · <span style="color:var(--peach-ink);font-weight:600">${would.length===1?'1 alerta com sua lista':would.length+' alertas com sua lista'}</span>`:''}</span></div>${has?'<span class="src">Na lista</span>':''}</button>`}).join('')||'<p class="sub">Não encontrei. Tente outro nome, escaneie a caixa ou anexe uma foto.</p>'}
+  return `<button class="result tap" data-add="${id}" ${has?'disabled':''}>${pillic(id)}<div class="info"><b>${DB[id].nome} ${DB[id].dose}</b><br><span>${CAT[DB[id].cat].label}${allergyFor(id)?` · <span style="color:var(--rose-ink);font-weight:700">você informou ${alW(allergyFor(id))} a ${esc(allergyFor(id))}</span>`:''}${would.length?` · <span style="color:var(--peach-ink);font-weight:600">${would.length===1?'1 alerta com sua lista':would.length+' alertas com sua lista'}</span>`:''}</span></div>${has?'<span class="src">Na lista</span>':''}</button>`}).join('')||'<p class="sub">Não encontrei. Tente outro nome, escaneie a caixa ou anexe uma foto.</p>'}
 
 function sheetItem(id){const D=DB[id],al=alerts().filter(i=>i.a===id||i.b===id);
   return `<div style="display:flex;gap:14px;align-items:center">${pillic(id)}<div><h1>${D.nome}</h1><span class="chip ${cls(id)}">${CAT[D.cat].label} · ${D.dose}</span></div></div>
@@ -1612,7 +1631,7 @@ function sheetItem(id){const D=DB[id],al=alerts().filter(i=>i.a===id||i.b===id);
     <div class="fact"><small>Como costuma ser usado (bula)</small>${D.qtd}. ${D.como}</div>
     <div class="fact"><small>Pontos de atenção (bula)</small>${D.evitar}</div>
   </div>
-  ${al.length?`<h2>Com outros itens da sua lista</h2>${al.map(a=>alertCard(a)).join('')}`:unkOf(id)?`<div class="todo warnnote">${IC.shield}<span>Este item veio da lista da Anvisa e ainda não está na nossa base de combinações revisada. Mostre sua lista ao farmacêutico.</span></div>`:`<div class="todo">${IC.ok}<span>Sem conflitos com os outros itens da sua lista.</span></div>`}
+  ${al.length?`<h2>Com outros itens da sua lista</h2>${al.map(a=>alertCard(a)).join('')}`:unkOf(id)?`<div class="todo warnnote">${IC.shield}<span>Este item ainda não está na nossa base de combinações, então não conseguimos checar se ele combina com os outros. Mostre sua lista ao farmacêutico.</span></div>`:`<div class="todo">${IC.ok}<span>Sem conflitos com os outros itens da sua lista.</span></div>`}
   <p class="holdhint">Para tirar da lista, segure o item na tela Minha lista.</p>`}
 const BULANOME={omega3:'',calcio:'',ferro:'',magnesio:'',k2:'',b12:'',vitd:'',ginkgo:'ginkgo',saojoao:'hypericum',aas:'acido acetilsalicilico',potassio:'cloreto de potassio'};
 function bulaUrl(id){const D=DB[id];let n=D.src==='cmed'?D.nome:(id in BULANOME?BULANOME[id]:D.nome);if(!n)return '';n=n.normalize('NFD').replace(/[̀-ͯ]/g,'');return 'https://consultas.anvisa.gov.br/#/bulario/q/?nomeProduto='+encodeURIComponent(n.toUpperCase())}
@@ -1627,7 +1646,7 @@ function daysLabel(d){const n=d.filter(Boolean).length;if(n===7)return 'todos os
 function sheetAlarm(key){const [id]=key.split('#'),A=alarm(key),D=DB[id],L=['D','S','T','Q','Q','S','S'];
   return `<div style="display:flex;gap:14px;align-items:center">${pillic(id)}<div><h1>Alarme</h1><span class="sub">${D.nome} ${D.dose} · ${D.qtd}</span></div></div>
   <div class="timebox"><label for="atime"><small>Horário da dose</small></label><input type="time" id="atime" class="timebig" value="${A.time}"></div>
-  <div class="field"><span class="lbl">Alarme ligado<small>Toca mesmo com o celular no silencioso</small></span><button class="switch ${A.on?'on':''}" data-aset="on" role="switch" aria-checked="${A.on}" aria-label="Alarme ligado"></button></div>
+  <div class="field"><span class="lbl">Alarme ligado<small>Toca com o WePill aberto. Em segundo plano, chega como notificação. Com o app fechado, ainda não toca.</small></span><button class="switch ${A.on?'on':''}" data-aset="on" role="switch" aria-checked="${A.on}" aria-label="Alarme ligado"></button></div>
   <div><h2 style="margin-bottom:10px">Repetir</h2><div class="days">${L.map((l,i)=>`<button class="dchip ${A.days[i]?'on':''}" data-day="${i}">${l}</button>`).join('')}</div></div>
   <div><h2 style="margin-bottom:10px">Som</h2><div class="seg">${Object.keys(SOUNDS).map(s=>`<button class="${A.sound===s?'on':''}" data-sound="${s}">${s[0].toUpperCase()+s.slice(1)}</button>`).join('')}</div></div>
   <div><h2 style="margin-bottom:10px">Adiar por</h2><div class="seg">${[5,10,15,30].map(m=>`<button class="${A.snooze===m?'on':''}" data-snooze="${m}">${m} min</button>`).join('')}</div></div>
@@ -1705,6 +1724,15 @@ function ring(key){const [id]=key.split('#'),A=alarm(key),D=DB[id];closeSheet();
    <div class="row"><button class="btn ghost tap" data-snz="${key}">Adiar ${A.snooze} min</button><button class="btn primary tap" data-took="${key}">${IC.check} Tomei</button></div>`;
   $('#alarm').classList.add('on');beep(SOUNDS[A.sound]);clearInterval(loop);loop=setInterval(()=>beep(SOUNDS[A.sound]),1800)}
 function stopRing(){$('#alarm').classList.remove('on');clearInterval(loop)}
+/* v76: verifica os horários sozinho. Toca na hora com o app aberto; em segundo plano, manda notificação. */
+function rungGet(k){const r=S.rung;return r&&r.day===dkey(new Date())?r.next[k]:undefined}
+function rungSet(k,v){if(!S.rung||S.rung.day!==dkey(new Date()))S.rung={day:dkey(new Date()),next:{}};S.rung.next[k]=v;save()}
+function notify(key){try{if(!('Notification' in window)||Notification.permission!=='granted'||!navigator.serviceWorker)return;const [id]=key.split('#'),D=DB[id],A=alarm(key);
+  navigator.serviceWorker.ready.then(r=>r.showNotification('Hora de tomar: '+D.nome,{body:`${A.time} · ${D.qtd}${D.dose?' de '+D.dose:''}`,tag:'wepill-'+key,renotify:true,requireInteraction:true,icon:'icon-192.png',badge:'icon-192.png',data:{key}})).catch(()=>{})}catch(e){}}
+function alarmTick(){if(!S.registered||$('#alarm').classList.contains('on'))return;const now=new Date(),nm=now.getHours()*60+now.getMinutes(),dw=now.getDay();
+  for(const x of doses()){const A=alarm(x.key);if(!A.on||!A.days[dw]||S.taken[x.key])continue;const t=mins(A.time);if(nm<t||nm-t>180)continue;
+    const nx=rungGet(x.key);if(nx===undefined||(nx!==null&&Date.now()>=nx)){rungSet(x.key,A.insist?Date.now()+A.snooze*6e4:null);if(document.hidden)notify(x.key);ring(x.key);return}}}
+setInterval(alarmTick,20000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(alarmTick,800)});setTimeout(alarmTick,3000);
 
 let toastT;function toast(t){$('#toast').innerHTML=IC.spark+'<span>'+t+'</span>';$('#toast').classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>$('#toast').classList.remove('on'),3200)}
 
@@ -1721,7 +1749,7 @@ function sheetSched(id){const D=DB[id],n=D.horas.length;SCH={id,n:FREQ.some(f=>f
   <button class="btn ghost block tap" data-sback="1" style="margin-top:8px">Voltar à busca</button>`}
 function addItem(id){if(S.list.includes(id))return finishAdd(id);openSheet(sheetSched(id))}
 function finishAdd(id){if(CUST[id]&&!S.custom[id])S.custom[id]=CUST[id];const before=alerts().length;if(!S.list.includes(id))S.list.push(id);S.fresh=id;save();closeSheet();const n=alerts().length-before;
-  if(allergyFor(id)){go('hoje');toast(`Atenção: você informou alergia a ${allergyFor(id)}. Veja o destaque no painel.`)}else if(n>0){toast(`${DB[id].nome} adicionado. Encontrei ${n===1?'1 combinação':n+' combinações'} que merece${n===1?'':'m'} cuidado.`);go('alertas')}else{toast(`${DB[id].nome} adicionado. Nenhuma combinação de risco encontrada na nossa base, o que não garante que a combinação seja segura.`);go('lista')}
+  if(allergyFor(id)){go('hoje');toast(`Atenção: você informou ${alW(allergyFor(id))} a ${esc(allergyFor(id))}. Veja o destaque no painel.`)}else if(n>0){toast(`${DB[id].nome} adicionado. Encontrei ${n===1?'1 combinação':n+' combinações'} que merece${n===1?'':'m'} cuidado.`);go('alertas')}else{toast(`${DB[id].nome} adicionado. Nenhuma combinação de risco encontrada na nossa base, o que não garante que a combinação seja segura.`);go('lista')}
   setTimeout(()=>{S.fresh=null},1200)}
 
 
@@ -1772,7 +1800,7 @@ function camResult(id,src,photo){const D=DB[id],has=S.list.includes(id),al=aller
   const hits=interWith(id);
   if(photo&&!photos[id])photos[id]=photo;
   const chk=[];
-  chk.push(al?`<div class="chk bad">${IC.alert||IC.shield}<span><b>Alergia:</b> você informou alergia a ${esc(al)}.</span></div>`:`<div class="chk ok">${IC.check}<span>Não encontramos suas alergias na composição cadastrada. Confira também a bula.</span></div>`);
+  chk.push(al?`<div class="chk bad">${IC.alert||IC.shield}<span><b>${isAl(al)?'Alergia':'Intolerância'}:</b> você informou ${alW(al)} a ${esc(al)}.</span></div>`:`<div class="chk ok">${IC.check}<span>Não encontramos suas alergias na composição cadastrada. Confira também a bula.</span></div>`);
   if(hits.length)hits.slice(0,2).forEach(i=>{const o=i.a===id?i.b:i.a;chk.push(`<div class="chk ${i.sev==='grave'?'bad':'warn'}">${IC.shield}<span><b>${SEVLBL[i.sev]} com ${DB[o].nome}:</b> ${esc(i.t)}.</span></div>`)});
   else if(unkOf(id))chk.push(`<div class="chk warn">${IC.shield}<span>Este item ainda não está na nossa base de combinações revisada. Mostre sua lista ao farmacêutico.</span></div>`);
   else chk.push(`<div class="chk ok">${IC.check}<span>Nenhuma combinação de risco encontrada na nossa base com os ${S.list.length} itens da sua lista. Isso não garante que a combinação seja segura.</span></div>`);
@@ -1862,7 +1890,7 @@ document.addEventListener('click',e=>{if(DRAGGED){e.stopPropagation();e.preventD
   if(ds.home!==undefined||ds.tab==='hoje'){S.day=null;return go('hoje')}
   if(ds.tab)return go(ds.tab);
   if(ds.go)return go(ds.go);
-  if(ds.take){const k=ds.take;S.taken[k]=!S.taken[k];const iid=k.split('#')[0],was=needsRefill(iid);S.stock[iid]=Math.max(0,Math.min(BOX[iid],stock(iid)+(S.taken[k]?-1:1)));save();if(outOf(iid))setTimeout(()=>toast(`Essa foi a última dose de ${DB[iid].nome}. O remédio está em falta: veja em Alertas.`),400);else if(!was&&needsRefill(iid))setTimeout(()=>toast(`Você já usou 80% da caixa de ${DB[iid].nome}. Veja em Alertas.`),400);renderDock();const row=t.closest('.dose');t.classList.toggle('on');row.classList.toggle('done');
+  if(ds.take){const k=ds.take;S.taken[k]=!S.taken[k];if(S.taken[k])S.takenAt[k]=new Date().toISOString();else delete S.takenAt[k];const iid=k.split('#')[0],was=needsRefill(iid);S.stock[iid]=Math.max(0,Math.min(BOX[iid],stock(iid)+(S.taken[k]?-1:1)));save();if(outOf(iid))setTimeout(()=>toast(`Essa foi a última dose de ${DB[iid].nome}. O remédio está em falta: veja em Alertas.`),400);else if(!was&&needsRefill(iid))setTimeout(()=>toast(`Você já usou 80% da caixa de ${DB[iid].nome}. Veja em Alertas.`),400);renderDock();const row=t.closest('.dose');t.classList.toggle('on');row.classList.toggle('done');
     const b=row.querySelector('.info b');b.innerHTML=S.taken[k]?`<s>${b.textContent}</s>`:b.textContent;
     if(S.tab==='hoje')refresh();const d=doses();if(d.every(x=>S.taken[x.key]))toast('Todas as doses de hoje foram tomadas. Muito bem!');return}
   if(ds.filter){const F=FCATS,o=F.indexOf(S.filter),n=F.indexOf(ds.filter);SWIPE=n>o?'r':n<o?'l':'';S.filter=ds.filter;render(true);SWIPE='';return centerChip()}
@@ -1872,7 +1900,8 @@ document.addEventListener('click',e=>{if(DRAGGED){e.stopPropagation();e.preventD
   if(ds.rz){RZ=Math.max(.8,Math.min(1.5,RZ+(+ds.rz)));$('#reader').style.setProperty('--rz',RZ);return}
   if(ds.rate){RATE=+ds.rate;t.parentNode.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b===t));if(speaking){stopSpeak();toggleSpeak()}return}
   if(ds.speakch!==undefined){READTXT=ds.speakch;return toggleSpeak()}
-  if(ds.unlock!==undefined){hideSos();return toast('Desbloqueado. Bom dia!')}
+  if(ds.unlock!==undefined){hideSos();return}
+  if(ds.wipe!==undefined){if(!t.dataset.sure){t.dataset.sure='1';t.textContent='Toque de novo para apagar tudo';return}try{localStorage.removeItem('medlist-v2')}catch(e){}location.reload();return}
   if(ds.sos!==undefined)return showSos();
   if(ds.lock!==undefined){S.lockOn=!S.lockOn;t.classList.toggle('on');t.setAttribute('aria-checked',S.lockOn);save();return}
   if(ds.onbnext!==undefined){return onbI<ONB.length-1?moveOnb(onbI+1):endOnb()}
@@ -1881,12 +1910,15 @@ document.addEventListener('click',e=>{if(DRAGGED){e.stopPropagation();e.preventD
   if(ds.regsave!==undefined){document.querySelectorAll('#reg .tgin').forEach(i=>tagCommit(i,false));const v={};document.querySelectorAll('[data-rf]').forEach(el=>v[el.dataset.rf]=el.value.trim());
     const miss=['nome','nasc'].filter(k=>!v[k]);['nome','nasc'].forEach(k=>$('#rg-'+k).classList.toggle('bad',!v[k]));
     if(miss.length){$('#rg-'+miss[0]).focus();return toast('Preencha nome e data de nascimento.')}
-    S.profile={...v};S.registered=true;save();$('#reg').classList.remove('on');renderDock();render();return toast(`Cadastro salvo. Boas-vindas, ${esc(v.nome.split(' ')[0])}!`)}
+    if(v.nasc>dkey(new Date())||v.nasc<'1900-01-01'){$('#rg-nasc').classList.add('bad');$('#rg-nasc').focus();return toast('Confira a data de nascimento.')}
+    if(!$('#rg-ok').checked)return toast('Para continuar, aceite os Termos e a Política de Privacidade.');
+    S.consent=new Date().toISOString();
+    S.profile={...S.profile,...v};S.registered=true;save();$('#reg').classList.remove('on');renderDock();render();return toast(`Cadastro salvo. Boas-vindas, ${esc(v.nome.split(' ')[0])}!`)}
   if(ds.onbshow!==undefined)return showOnb(0);
   if(ds.wday!==undefined){const dow=new Date().getDay();S.day=+ds.wday===dow?null:+ds.wday;closeSheet();return go('hoje')}
   if(ds.afilter){S.afilter=ds.afilter;return refresh()}
   if(ds.goalert){S.afilter=ds.goalert==='repor'?'repor':'todos';return go('alertas')}
-  if(ds.takenext){const k=ds.takenext;S.taken[k]=true;const iid=k.split('#')[0],was=needsRefill(iid);S.stock[iid]=Math.max(0,stock(iid)-1);save();renderDock();refresh();
+  if(ds.takenext){const k=ds.takenext;S.taken[k]=true;S.takenAt[k]=new Date().toISOString();const iid=k.split('#')[0],was=needsRefill(iid);S.stock[iid]=Math.max(0,stock(iid)-1);save();renderDock();refresh();
     toast(`${DB[iid].nome} registrado às ${new Date().toTimeString().slice(0,5)}.`);if(outOf(iid))setTimeout(()=>toast(`Essa foi a última dose de ${DB[iid].nome}. O remédio está em falta: veja em Alertas.`),2600);else if(!was&&needsRefill(iid))setTimeout(()=>toast(`Você já usou 80% da caixa de ${DB[iid].nome}. Veja em Alertas.`),2600);return}
   if(ds.big){S.big=ds.big==='1';save();renderWeek();return refresh()}
   if(ds.refill){const id=ds.refill;S.refillOff[id]=!S.refillOff[id];t.classList.toggle('on');t.setAttribute('aria-checked',!S.refillOff[id]);save();refresh();return}
@@ -1900,7 +1932,7 @@ document.addEventListener('click',e=>{if(DRAGGED){e.stopPropagation();e.preventD
   if(ds.sok){const id=SCH.id,T=schTimes();Object.keys(S.alarms).forEach(k=>{if(k.split('#')[0]===id)delete S.alarms[k]});DB[id].horas=[...T];S.horasOv[id]=[...T];if(CUST[id])CUST[id].db.horas=[...T];T.forEach((x,i)=>alarm(id+'#'+i));SCH=null;return finishAdd(id)}
   if(ds.supl!==undefined)return addItem(suplItem(+ds.supl));
   if(ds.qset){const q=$('#q');q.value=ds.qset;return renderAddResults()}
-  if(ds.manual){const q=$('#q');if(q&&q.value.trim())return addItem(manualItem(q.value,ds.manual));return}
+  if(ds.manual){const q=$('#q');if(q&&q.value.trim()){const nn=nrm(clean(q.value).replace(/\s*\d.*$/,'').trim()||q.value);const dup=S.list.find(id=>DB[id]&&nrm(DB[id].nome)===nn);if(dup)return toast(`${DB[dup].nome} já está na sua lista.`);return addItem(manualItem(q.value,ds.manual))}return}
   if(ds.cma){const [i,j]=ds.cma.split(':').map(Number);return addItem(cmedItem(i,j))}
   if(ds.confirm)return addItem(ds.confirm);
   if(ds.gal){if($('#cam').classList.contains('on')){closeCam();openSheet(sheetAdd())}photoTarget=ds.gal;return $('#filegal').click()}
@@ -1916,7 +1948,7 @@ document.addEventListener('click',e=>{if(DRAGGED){e.stopPropagation();e.preventD
   if(ds.saveparc){const p=PARC.find(x=>x.id===ds.saveparc),id='c'+Date.now();const np={id,nome:p.nome,area:p.area,ini:p.ini,c:p.c,tel:p.tel,end:p.end,ig:p.ig,parc:p.id};PROS.push(np);(S.extraPros=S.extraPros||[]).push(np);save();closeSheet();refresh();if($('#perto').classList.contains('on'))refreshPerto();return toast(p.nome+' salvo nos seus contatos.')}
   if(ds.bepartner!==undefined)return openSheet(sheetBePartner());
   if(ds.partnerok!==undefined){closeSheet();return toast('Recebemos seu interesse. A equipe do WePill entra em contato.')}
-  if(ds.report!==undefined)return toast('Obrigado. Um farmacêutico vai revisar este alerta.');
+  if(ds.report!==undefined)return;
   if(ds.contact)return openSheet(sheetContact(ds.contact));
   if(ds.newcontact!==undefined){openSheet(sheetNewContact());setTimeout(()=>{const i=$('#nc-nome');if(i)i.focus()},350);return}
   if(ds.savecontact!==undefined){const v=k=>($('#nc-'+k).value||'').trim(),nome=v('nome');if(!nome)return toast('Escreva o nome do profissional.');
@@ -1935,13 +1967,14 @@ document.addEventListener('click',e=>{if(DRAGGED){e.stopPropagation();e.preventD
       if(back&&back.k==='item')openSheet(sheetItem(back.v),{item:back.v});else if(back&&back.k==='period')openSheet(sheetPeriod(back.v),{period:back.v});else closeSheet();refresh();return}
   }
   if(ds.ring){const v=$('#atime');if(v&&sheetCtx&&sheetCtx.alarm===ds.ring&&v.value)alarm(ds.ring).time=v.value;return ring(ds.ring)}
-  if(ds.took){stopRing();S.taken[ds.took]=true;save();render();return toast('Dose registrada. Ótimo!')}
-  if(ds.snz){stopRing();return toast(`Tudo bem. Vou lembrar de novo em ${alarm(ds.snz).snooze} minutos.`)}
+  if(ds.took){stopRing();const k=ds.took;if(!S.taken[k]){S.taken[k]=true;S.takenAt[k]=new Date().toISOString();const iid=k.split('#')[0];if(DB[iid])S.stock[iid]=Math.max(0,stock(iid)-1)}save();renderDock();render();return toast('Dose registrada. Ótimo!')}
+  if(ds.notif!==undefined){try{Notification.requestPermission().then(()=>refresh())}catch(e){}return}
+  if(ds.snz){stopRing();const A=alarm(ds.snz);rungSet(ds.snz,Date.now()+A.snooze*6e4);return toast(`Tudo bem. Vou lembrar de novo em ${A.snooze} minutos, com o WePill aberto ou em segundo plano.`)}
   if(ds.period)return openSheet(sheetPeriod(ds.period),{period:ds.period});
   if(ds.pltab){S.planTab=ds.pltab;save();refresh();$('#main').scrollTop=0;const b=document.querySelector('.pl-tabs .on');if(b){const c=b.parentElement;c.scrollTo({left:b.offsetLeft-c.clientWidth/2+b.offsetWidth/2,behavior:'smooth'})}return}
   if(ds.bill){S.bill=ds.bill;save();return refresh()}
-  if(ds.plancontact)return toast(['pro','cli','farm','neg'].includes(ds.plancontact)?'Pedido enviado. Nossa equipe entra em contato em até 1 dia útil.':'Recebemos seu interesse. A equipe do WePill entra em contato.');
-  if(ds.plan){const P=PLANS.find(x=>x.id===ds.plan);if(P.preco===null)return toast('Pedido enviado. Nossa equipe comercial entra em contato em até 1 dia útil.');if(P.id===S.plan)return toast('Este já é o seu plano.');
+  if(ds.plancontact)return toast('Em breve.');
+  if(ds.plan){const P=PLANS.find(x=>x.id===ds.plan);if(P.preco)return toast('As assinaturas abrem em breve. Enquanto isso, todos os recursos estão liberados.');if(P.preco===null)return;if(P.id===S.plan)return toast('Este já é o seu plano.');
     if(P.preco===0){S.plan='gratis';save();refresh();return toast('Você voltou para o plano Grátis.')}
     CO={plan:P.id,pay:'loja',login:null};return openSheet(coLogin(),{co:1})}
   if(ds.login){CO.login=ds.login;openSheet(`<span class="sim">Simulação</span><div class="spin"></div><p class="sub" style="text-align:center">Conectando com ${ds.login==='apple'?'sua conta Apple':ds.login==='google'?'sua conta Google':'seu e-mail'}…</p>`,{co:1});return setTimeout(()=>openSheet(coPay(),{co:1}),1100)}
@@ -1982,7 +2015,7 @@ document.addEventListener('click',e=>{if(DRAGGED){e.stopPropagation();e.preventD
     save();reopenThread(tid);return toast('Sugestão recusada.')}
 });
 document.addEventListener('input',e=>{maskIt(e.target);if(e.target.id==='pq'){PQ=e.target.value;const L=$('#parclist');L.innerHTML=(S.parea&&S.parea!=='todas')||PQ.trim()?parcResults():'<p class="pick">Escolha uma opção acima para ver quem está perto de você.</p>';return}if(e.target.id==='q')renderAddResults();if(e.target.id==='sfirst'&&SCH&&e.target.value){SCH.first=e.target.value;$('#sprev').innerHTML=schPrev()}if(e.target.dataset.pf){S.profile[e.target.dataset.pf]=e.target.value;save()}});
-document.addEventListener('change',e=>{if(e.target.dataset.pf){S.profile[e.target.dataset.pf]=e.target.value;save();if(['nome','nasc'].includes(e.target.dataset.pf))refresh()}});
+document.addEventListener('change',e=>{if(e.target.dataset.pf){if(e.target.dataset.pf==='nasc'&&(e.target.value>dkey(new Date())||e.target.value<'1900-01-01')){e.target.value=S.profile.nasc||'';return toast('Confira a data de nascimento.')}S.profile[e.target.dataset.pf]=e.target.value;save();if(['nome','nasc'].includes(e.target.dataset.pf))refresh()}});
 document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.dataset&&e.target.dataset.read){e.preventDefault();e.target.click()}if(e.key==='Escape'){stopRing();closeReader();closeSheet();closeCam()}if(e.key==='Enter'&&e.target.id==='cmsg'){const b=document.querySelector('[data-send]');if(b)b.click()}});
 matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',applyTheme);
 
@@ -2047,14 +2080,14 @@ function regHtml(){
   const sel=(k,l,opts,def)=>`<div class="prow"><label for="rg-${k}">${l}</label><select class="inp" id="rg-${k}" data-rf="${k}">${opts.map(o=>`<option ${o===def?'selected':''}>${o}</option>`).join('')}</select></div>`;
   return `<div class="rgtop">${$('#onb .brand').outerHTML}</div><div class="rgbody">
   <div><span class="step">Primeiro acesso</span><h1>Crie seu cadastro</h1><p class="sub">Leva 1 minuto. Depois você edita tudo no Perfil. Só nome e nascimento são obrigatórios.</p></div>
-  <h2>Dados pessoais</h2><div class="glass pgroup">${f('nome','Nome completo *','Seu nome','text','autocomplete="name"')}${f('nasc','Nascimento *','','date')}${sel('sexo','Sexo',['Feminino','Masculino','Outro','Prefiro não dizer'],'Prefiro não dizer')}${f('cpf','CPF','000.000.000-00','text','inputmode="numeric" maxlength="14"')}</div>
+  <h2>Dados pessoais</h2><div class="glass pgroup">${f('nome','Nome completo *','Seu nome','text','autocomplete="name"')}${f('nasc','Nascimento *','','date','min="1900-01-01" max="'+dkey(new Date())+'"')}${sel('sexo','Sexo',['Feminino','Masculino','Outro','Prefiro não dizer'],'Prefiro não dizer')}</div>
   <h2>Contato</h2><div class="glass pgroup">${f('tel','Celular','(44) 90000-0000','tel')}${f('email','E-mail','voce@email.com','email')}${f('end','Endereço','Rua e número')}${f('cidade','Cidade','Maringá - PR')}${f('cep','CEP','00000-000','text','inputmode="numeric"')}</div>
   <h2>Saúde</h2><div class="glass pgroup">${f('peso','Peso (kg)','70','text','inputmode="decimal"')}${f('altura','Altura (m)','1,70','text','inputmode="decimal"')}${sel('sangue','Tipo sanguíneo',['A+','A-','B+','B-','AB+','AB-','O+','O-','Não sei'],'Não sei')}${tagField('alergias','Alergia a medicamentos','Ex.: dipirona','','rf')}${tagField('obs','Intolerâncias e observações','Ex.: lactose','','rf')}${tagField('condicoes','Condições de saúde','Ex.: hipertensão','','rf')}</div>
   <h2>Plano de saúde</h2><div class="glass pgroup">${f('plano','Convênio','Nome do plano')}${f('carteira','Nº da carteirinha','Número')}</div>
   <h2>Emergência e cuidador</h2><div class="glass pgroup">${f('emerg','Contato de emergência','Nome')}${f('emergtel','Telefone','(44) 90000-0000','tel')}${f('cuidador','Cuidador com acesso','Nome')}</div>
+  <label class="consent" style="display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:1.45;margin:4px 2px"><input type="checkbox" id="rg-ok" style="width:22px;height:22px;flex:none;margin-top:1px;accent-color:var(--accent)"><span>Li e aceito os <a href="../termos.html" target="_blank" rel="noopener">Termos de Uso</a> e a <a href="../privacidade.html" target="_blank" rel="noopener">Política de Privacidade</a>, e autorizo o WePill a guardar os dados de saúde que eu informar para organizar meus remédios.</span></label>
   <button class="btn primary block tap" data-regsave>Salvar e começar</button>
-  <button class="linkbtn tap" data-regdemo>Preencher com dados de exemplo</button>
-  <p class="disclaimer">No app real seus dados ficam criptografados e protegidos pela LGPD.</p></div>`}
+  <p class="disclaimer">Seus dados ficam guardados neste celular. Só vão para o servidor do WePill se você criar uma conta (Família conectada ou cópia de segurança). Você pode apagar tudo no Perfil.</p></div>`}
 function showReg(){const el=$('#reg');el.innerHTML=regHtml();el.classList.add('on')}
 $('#qrbtn').innerHTML=`<span class="pdfic">${sv('<path d="M6 2.5h8l4.5 4.5v14.5H6z"/><path d="M14 2.5V7h4.5M9 11h6M9 14h4"/>',1.8)}<b>PDF</b></span>`;
 function fitPhone(){const ph=$('#phone'),mob=innerWidth<=480;let h;
@@ -2073,10 +2106,10 @@ function showSos(){const p=S.profile,n=new Date(),terms=allergyTerms().map(x=>x.
   <div class="emcard glass"><span class="ttl">${sv('<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/>')} Contato de emergência</span>
     <div class="emrow"><div><b>${esc(p.emerg)}</b><span class="emtel num">${esc(p.emergtel)}</span></div><button class="btn primary sm tap" data-copy="${esc(p.emergtel)}">Copiar</button></div></div>
   <div class="sosacts"><div class="call">${sv('<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/>')} SAMU 192</div><button class="btn primary tap" data-unlock>${sv('<rect x="5" y="11" width="14" height="10" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 7.6-1.7"/>')} Desbloquear</button></div>
-  <p class="sosnote">No app instalado, esta ficha fica na tela de bloqueio do celular, sem precisar de senha.</p>`;
+  <p class="sosnote">Mostre esta ficha em uma emergência. Você escolhe no Perfil se ela aparece ao abrir o app.</p>`;
   $('#sos').classList.remove('off')}
 function hideSos(){$('#sos').classList.add('off')}
-if(S.lockOn&&S.registered)showSos();showOnb(0); /* as 3 etapas de boas-vindas aparecem sempre que o app abre */
+if(S.lockOn&&S.registered)showSos();if(!S.onboarded)showOnb(0);else if(!S.registered)showReg(); /* v76: boas-vindas só no primeiro acesso */
 
 
 /* v69: Família conectada (beta) com Supabase */
@@ -2105,9 +2138,15 @@ async function famLoad(){if(!FAM.user)return;const sb=SB;
   const ids=FAM.membros.map(m=>m.user_id);
   const {data:ps}=await R(sb.from('perfis').select('id,nome').in('id',ids));const nm={};(ps||[]).forEach(p=>nm[p.id]=p.nome);FAM.membros.forEach(m=>m.nome=m.apelido||nm[m.user_id]||'Sem nome');
   const d0=new Date();d0.setHours(0,0,0,0);const d1=new Date(d0.getTime()+864e5);
-  const {data:it}=await R(sb.from('itens').select('user_id,item_id,dados').in('user_id',ids).eq('ativo',true));FAM.itens={};(it||[]).forEach(r=>(FAM.itens[r.user_id]=FAM.itens[r.user_id]||[]).push(r));
+  const {data:it}=await R(sb.from('itens').select('user_id,item_id,dados').in('user_id',ids).eq('ativo',true));FAM.itens={};(it||[]).forEach(r=>{if(r.dados){r.dados.nome=clean(r.dados.nome);r.dados.dose=clean(r.dados.dose)}});famRestore((it||[]).filter(r=>r.user_id===FAM.user.id));(it||[]).forEach(r=>(FAM.itens[r.user_id]=FAM.itens[r.user_id]||[]).push(r));
   const {data:ds}=await R(sb.from('doses').select('user_id,item_id,previsto_para,status,tomado_em').in('user_id',ids).gte('previsto_para',d0.toISOString()).lt('previsto_para',d1.toISOString()).order('previsto_para'));FAM.doses={};(ds||[]).forEach(r=>(FAM.doses[r.user_id]=FAM.doses[r.user_id]||[]).push(r));
   FAM.membros.forEach(m=>famExpand(m.user_id));famSub()}
+/* v76: cópia de segurança. Celular novo (lista vazia) recebe a lista salva na conta. */
+function famRestore(mine){FAM.restoreChecked=true;if(S.list.length||!mine.length)return;let n=0;
+  mine.forEach(r=>{const dd=r.dados||{},id=String(r.item_id).replace(/[^\w-]/g,'').slice(0,64);if(!id)return;const horas=(Array.isArray(dd.horas)?dd.horas:[]).filter(h=>/^\d{2}:\d{2}$/.test(h));
+    if(!DB[id]){const nome=clean(dd.nome)||'Item';const d={db:{nome,dose:clean(dd.dose),cat:CAT[dd.cat]?dd.cat:'remedio',qtd:'Conforme a receita',para:'Item restaurado da sua cópia de segurança.',como:'Siga a orientação de quem receitou.',evitar:'Confira a bula ou a embalagem.',horas:horas.length?horas:['08:00'],por:'',src:'backup',sub:'',ap:'',ean:'',base:null},box:30,unit:'',comp:nome.toLowerCase()};S.custom[id]=d;regCustom(id,d)}
+    if(horas.length){DB[id].horas=[...horas];S.horasOv[id]=[...horas]}if(!S.list.includes(id)){S.list.push(id);n++}});
+  if(n){save();renderDock();render();toast(`Sua lista foi restaurada da cópia de segurança: ${n} ${n>1?'itens':'item'}.`)}}
 /* doses esperadas pelos horários da lista, mesmo se a pessoa ainda não abriu o app hoje */
 function famExpand(uid){const L=FAM.doses[uid]=FAM.doses[uid]||[],day=new Date();day.setHours(0,0,0,0);
   (FAM.itens[uid]||[]).forEach(it=>((it.dados&&it.dados.horas)||[]).forEach(h=>{const [a,b]=String(h).split(':').map(Number);if(isNaN(a))return;const t=new Date(day);t.setHours(a,b||0,0,0);
@@ -2115,13 +2154,13 @@ function famExpand(uid){const L=FAM.doses[uid]=FAM.doses[uid]||[],day=new Date()
   L.sort((x,y)=>new Date(x.previsto_para)-new Date(y.previsto_para))}
 function famSub(){if(FAM.ch||!FAM.fid)return;FAM.ch=SB.channel('fam-'+FAM.fid).on('postgres_changes',{event:'*',schema:'public',table:'doses'},p=>{const r=p.new||{};if(!FAM.membros.some(m=>m.user_id===r.user_id))return;
     const L=FAM.doses[r.user_id]=FAM.doses[r.user_id]||[];const i=L.findIndex(x=>x.item_id===r.item_id&&+new Date(x.previsto_para)===+new Date(r.previsto_para));if(i>=0)L[i]=r;else L.push(r);
-    if(r.user_id!==FAM.user.id&&r.status==='tomada'&&p.old&&p.old.status!=='tomada'){const m=FAM.membros.find(x=>x.user_id===r.user_id),it=(FAM.itens[r.user_id]||[]).find(x=>x.item_id===r.item_id);toast(`${m?m.nome.split(' ')[0]:'Alguém'} tomou ${it?it.dados.nome:'um remédio'}.`)}
+    if(r.user_id!==FAM.user.id&&r.status==='tomada'&&p.old&&p.old.status!=='tomada'){const m=FAM.membros.find(x=>x.user_id===r.user_id),it=(FAM.itens[r.user_id]||[]).find(x=>x.item_id===r.item_id);toast(esc(`${m?m.nome.split(' ')[0]:'Alguém'} tomou ${it?it.dados.nome:'um remédio'}.`))}
     famRefresh()}).subscribe()}
 function famUnsub(){if(FAM.ch&&SB){SB.removeChannel(FAM.ch);FAM.ch=null}}
 function famRefresh(){const sh=$('#famsheet');if(sh)sh.outerHTML=famSheetBody();if(S.tab==='hoje'||S.tab==='equipe')refresh()}
 /* envia minha lista e as doses de hoje (chamado depois de cada save) */
 let famT=null;function famSyncSoon(){if(!FAM.user)return;clearTimeout(famT);famT=setTimeout(famSync,1500)}
-async function famSync(){if(!FAM.user||!SB)return;const uid=FAM.user.id;
+async function famSync(){if(!FAM.user||!SB)return;if(!S.list.length&&!FAM.restoreChecked)return;const uid=FAM.user.id;
   try{const rows=S.list.filter(id=>DB[id]).map(id=>({user_id:uid,item_id:id,ativo:true,atualizado_em:new Date().toISOString(),dados:{nome:DB[id].nome,dose:DB[id].dose||'',cat:DB[id].cat||'',horas:(DB[id].horas||[]).map((h,i)=>alarm(id+'#'+i).time)}}));
     if(rows.length)await SB.from('itens').upsert(rows);
     const {data:mine}=await SB.from('itens').select('item_id').eq('user_id',uid).eq('ativo',true);const gone=(mine||[]).map(r=>r.item_id).filter(x=>!S.list.includes(x));if(gone.length)await SB.from('itens').update({ativo:false}).eq('user_id',uid).in('item_id',gone);
@@ -2137,22 +2176,25 @@ function famCard(){const n=FAM.membros.length;
   return `<button class="famcard tap" data-fam><span class="pic">${sv('<circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3.5 19c.6-3 2.8-5 5.5-5s4.9 2 5.5 5M14.5 14.2c2.6-.4 5 1.3 5.8 4.3"/>',2)}</span><span class="pt"><b>Família conectada <em>beta</em></b><span>${FAM.fid?`${n} ${n>1?'pessoas':'pessoa'} · veja quem já tomou hoje`:FAM.user?'Crie sua família ou entre com um convite':'Acompanhe as doses de quem você cuida'}</span></span><span class="chev">${sv('<path d="M9 6l6 6-6 6"/>',2)}</span></button>`}
 function famInput(id,ph,type,val){return `<label class="fact" style="display:block;margin:10px 0"><small>${ph}</small><input id="${id}" type="${type}" ${type==='email'?'autocomplete="email"':type==='password'?'autocomplete="current-password" minlength="6"':'inputmode="numeric" autocomplete="one-time-code" maxlength="6"'} value="${esc(val||'')}" style="width:100%;border:0;background:transparent;font:inherit;font-size:18px;color:var(--ink);outline:none;padding:4px 0"></label>`}
 function famSheetBody(){const E=FAM.err?`<p class="famerr">${esc(FAM.err)}</p>`:'',B=FAM.busy?' disabled':'';let h='';
-  if(!FAM.user){const nova=FAM.step==='nova';h=`<p class="sub">${nova?'Crie sua conta com e-mail e uma senha (mínimo 6 caracteres).':'Entre com seu e-mail e senha para conectar sua família.'}</p>${famInput('famemail','Seu e-mail','email',FAM.email)}${famInput('fampass','Senha','password','')}${E}
+  if(FAM.recovery){h=`<p class="sub">Crie uma senha nova para a sua conta (mínimo 8 caracteres).</p>${famInput('famnewpw','Senha nova','password','')}${E}<button class="btn primary block tap" data-famnewpw${B}>${FAM.busy?'Aguarde…':'Salvar senha nova'}</button>`}
+  else if(!FAM.user){const nova=FAM.step==='nova';h=`<p class="sub">${nova?'Crie sua conta com e-mail e uma senha (mínimo 8 caracteres). A conta também guarda uma cópia de segurança da sua lista.':'Entre com seu e-mail e senha para conectar sua família.'}</p>${famInput('famemail','Seu e-mail','email',FAM.email)}${famInput('fampass','Senha','password','')}${E}
       <button class="btn primary block tap" data-famlogin${B}>${FAM.busy?'Aguarde…':nova?'Criar conta':'Entrar'}</button>
-      <button class="btn ghost block tap" data-famtoggle style="margin-top:8px">${nova?'Já tenho conta':'Primeira vez? Criar conta'}</button>`}
+      <button class="btn ghost block tap" data-famtoggle style="margin-top:8px">${nova?'Já tenho conta':'Primeira vez? Criar conta'}</button>
+      ${nova?'':`<button class="linkbtn tap" data-famforgot style="display:block;margin:10px auto 0">Esqueci minha senha</button>`}${FAM.info?`<p class="sub" style="margin-top:10px">${esc(FAM.info)}</p>`:''}`}
   else if(!FAM.loaded)h=FAM.err?`${E}<button class="btn primary block tap" data-famreload>Tentar de novo</button><button class="btn ghost sm tap" data-famout style="margin-top:12px">Sair da conta</button>`:`<div class="spin"></div><p class="sub" style="text-align:center">Carregando sua família…</p>`;
   else if(!FAM.fid){h=`<p class="sub">Conectado como <b>${esc(FAM.user.email)}</b>.</p>
       <div class="fact"><b>Vou cuidar da família</b><p class="sub" style="margin:4px 0 10px">Você vira o responsável e convida até 3 pessoas.</p><button class="btn primary block tap" data-famcreate${B}>Criar minha família</button></div>
       <div class="fact" style="margin-top:10px"><b>Recebi um convite</b>${famInput('faminv','Código do convite','text',S.pendingInvite||'').replace('inputmode="numeric" ','').replace('maxlength="6"','maxlength="8" style="text-transform:uppercase"')}<button class="btn ghost block tap" data-famjoin${B}>Entrar na família</button></div>${E}
-      <button class="btn ghost sm tap" data-famout style="margin-top:12px">Sair da conta</button>`}
+      <button class="btn ghost sm tap" data-famout style="margin-top:12px">Sair da conta</button>${famDelBtn()}`}
   else{const resp=FAM.papel==='responsavel';
     h=`${FAM.membros.map(m=>{const ds=FAM.doses[m.user_id]||[],tk=ds.filter(d=>d.status==='tomada').length,late=famLate(m.user_id),nm=famName(m.user_id),me=m.user_id===FAM.user.id;
       return `<div class="fammem${late.length?' late':''}"><div class="fmh">${avatarTxt(m.nome)}<div><b>${esc(m.nome)}${me?' (você)':''}</b><span>${m.papel==='responsavel'?'Responsável':'Membro'} · ${ds.length?`${tk} de ${ds.length} doses hoje`:'nenhuma dose hoje'}</span></div></div>
         ${ds.length?`<div class="fmd">${ds.map(d=>{const st=d.status==='tomada'?'ok':famLate(m.user_id).includes(d)?'late':'';return `<span class="${st}">${new Date(d.previsto_para).toTimeString().slice(0,5)} ${esc(nm(d.item_id))}</span>`}).join('')}</div>`:''}</div>`}).join('')}
       ${resp&&FAM.membros.length<4?`<button class="btn primary block tap" data-faminvite${B}>${IC.plus} Convidar pessoa (${4-FAM.membros.length} ${4-FAM.membros.length>1?'vagas':'vaga'})</button>`:''}
       ${FAM.code?`<div class="faminv"><small>Convite (vale 48 horas)</small><b>${FAM.code}</b><a class="btn ghost block tap" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent('Entre na minha família no WePill para eu acompanhar seus remédios: https://wepill.com.br/app/?convite='+FAM.code)}">Enviar pelo WhatsApp</a></div>`:''}${E}
-      <div class="row" style="margin-top:12px"><button class="btn ghost sm tap" data-famreload>Atualizar</button><button class="btn ghost sm tap" data-famleave>${resp?'Desfazer família':'Sair da família'}</button><button class="btn ghost sm tap" data-famout>Sair da conta</button></div>`}
+      <div class="row" style="margin-top:12px"><button class="btn ghost sm tap" data-famreload>Atualizar</button><button class="btn ghost sm tap" data-famleave>${resp?'Desfazer família':'Sair da família'}</button><button class="btn ghost sm tap" data-famout>Sair da conta</button></div>${famDelBtn()}`}
   return `<div id="famsheet"><h1>Família conectada <span class="sim">beta</span></h1>${h}<p class="disclaimer">Cada pessoa vê só a lista e as doses da própria família. Seus dados ficam guardados com segurança no servidor do WePill.</p></div>`}
+function famDelBtn(){return `<button class="linkbtn tap" data-famdel style="display:block;margin:14px auto 0;color:var(--rose-ink)">Apagar minha conta e meus dados do servidor</button>`}
 function avatarTxt(n){const p=(n||'?').trim().split(/\s+/),t=((p[0]||'?')[0]+(p.length>1?p[p.length-1][0]:'')).toUpperCase();return `<span class="famav">${esc(t)}</span>`}
 async function openFam(){FAM.err='';openSheet(famSheetBody());try{await sbLoad();if(FAM.user&&!FAM.loaded)await famLoad()}catch(e){FAM.err=famErr(e)}famRefresh()}
 async function famDo(fn,btn){if(FAM.busy)return;FAM.busy=true;FAM.err='';if(btn){btn.disabled=true;btn.textContent='Aguarde…'}try{await fn()}catch(e){FAM.err=famErr(e)}FAM.busy=false;famRefresh();if(FAM.err){const x=$('.famerr');if(x)x.scrollIntoView({block:'center'})}}
@@ -2160,12 +2202,19 @@ document.addEventListener('click',e=>{const t=e.target.closest('[data-fam],[data
   if(ds.fam!==undefined)return openFam();
   if(ds.famtoggle!==undefined){FAM.step=FAM.step==='nova'?'email':'nova';FAM.err='';FAM.email=(($('#famemail')||{}).value||FAM.email).trim();return famRefresh()}
   if(ds.famlogin!==undefined){FAM.email=((($('#famemail')||{}).value)||'').trim().toLowerCase();const pw=($('#fampass')||{}).value||'';
-    if(!/^\S+@\S+\.\S+$/.test(FAM.email)){FAM.err='Digite um e-mail válido.';return famRefresh()}if(pw.length<6){FAM.err='A senha precisa ter pelo menos 6 caracteres.';return famRefresh()}
+    if(!/^\S+@\S+\.\S+$/.test(FAM.email)){FAM.err='Digite um e-mail válido.';return famRefresh()}if(pw.length<(FAM.step==='nova'?8:6)){FAM.err=FAM.step==='nova'?'A senha precisa ter pelo menos 8 caracteres.':'A senha precisa ter pelo menos 6 caracteres.';return famRefresh()}
+    if(FAM.step==='nova'&&/^(\d)\1+$|^(12345678|123456789|87654321|senha123|password|qwerty12)/i.test(pw)){FAM.err='Essa senha é fácil de adivinhar. Escolha outra.';return famRefresh()}
     const nova=FAM.step==='nova';
     return famDo(async()=>{const sb=await sbLoad();const r=nova?await sb.auth.signUp({email:FAM.email,password:pw}):await sb.auth.signInWithPassword({email:FAM.email,password:pw},t);
       if(r.error)throw r.error;if(!r.data.session)throw new Error('Conta criada, mas falta confirmar o e-mail. Avise o suporte do WePill.');
       FAM.user=r.data.user;FAM.step='email';await famLoad();famSync();toast(nova?'Conta criada.':'Pronto, você entrou.')})}
   if(ds.famcreate!==undefined)return famDo(async()=>{await R(SB.rpc('criar_familia',{p_nome:'Família de '+((S.profile&&S.profile.nome)||'').split(' ')[0]}));await famSync();await famLoad();toast('Família criada. Agora convide quem você cuida.')},t);
+  if(ds.famforgot!==undefined){FAM.email=((($('#famemail')||{}).value)||'').trim().toLowerCase();FAM.info='';if(!/^\S+@\S+\.\S+$/.test(FAM.email)){FAM.err='Digite seu e-mail acima e toque de novo em "Esqueci minha senha".';return famRefresh()}
+    return famDo(async()=>{const sb=await sbLoad();await R(sb.auth.resetPasswordForEmail(FAM.email,{redirectTo:location.origin+location.pathname}));FAM.info='Se existir uma conta com esse e-mail, enviamos um link para criar uma senha nova. Confira também a caixa de spam.'},t)}
+  if(ds.famnewpw!==undefined){const pw=($('#famnewpw')||{}).value||'';if(pw.length<8){FAM.err='A senha precisa ter pelo menos 8 caracteres.';return famRefresh()}
+    return famDo(async()=>{const sb=await sbLoad();const rc=FAM.recovery;if(rc.code)await R(sb.auth.exchangeCodeForSession(rc.code));else if(rc.a)await R(sb.auth.setSession({access_token:rc.a,refresh_token:rc.r}));await R(sb.auth.updateUser({password:pw}));FAM.recovery=null;const {data}=await R(sb.auth.getSession());FAM.user=data.session&&data.session.user||null;if(FAM.user){await famLoad();famSync()}toast('Senha nova salva.')},t)}
+  if(ds.famdel!==undefined){if(!t.dataset.sure){t.dataset.sure='1';t.textContent='Tem certeza? Toque de novo para apagar a conta para sempre';return}
+    return famDo(async()=>{await R(SB.rpc('apagar_minha_conta'));famUnsub();try{await SB.auth.signOut({scope:'local'})}catch(e){}try{localStorage.removeItem('wepill-auth')}catch(e){}FAM.user=null;FAM.fid=null;FAM.loaded=false;FAM.membros=[];toast('Sua conta e seus dados no servidor foram apagados.')},t)}
   if(ds.famjoin!==undefined){const c=(($('#faminv')||{}).value||'').trim().toUpperCase();if(!c){FAM.err='Digite o código do convite.';return famRefresh()}
     return famDo(async()=>{await R(SB.rpc('aceitar_convite',{p_codigo:c}));S.pendingInvite='';await famSync();await famLoad();toast('Você entrou na família.')},t)}
   if(ds.faminvite!==undefined)return famDo(async()=>{const {data}=await R(SB.rpc('gerar_convite'));FAM.code=data},t);
@@ -2178,6 +2227,10 @@ document.addEventListener('click',e=>{const t=e.target.closest('[data-fam],[data
 {const _save=save;save=function(){_save.apply(this,arguments);famSyncSoon()}}
 {const _vh=vHoje;vHoje=function(){return famBanner()+_vh.apply(this,arguments)}}
 {const _ve=vEquipe;vEquipe=function(){return famCard()+_ve.apply(this,arguments)}}
+{const H=new URLSearchParams(location.hash.slice(1)),Q=new URLSearchParams(location.search);
+  if(H.get('type')==='recovery'&&H.get('access_token')){FAM.recovery={a:H.get('access_token'),r:H.get('refresh_token')};try{history.replaceState(null,'',location.pathname)}catch(e){}setTimeout(openFam,900)}
+  else if(Q.get('code')){FAM.recovery={code:Q.get('code')};try{history.replaceState(null,'',location.pathname)}catch(e){}setTimeout(openFam,900)}
+  else if(H.get('error_description')){FAM.info='O link expirou ou já foi usado. Peça outro em "Esqueci minha senha".';try{history.replaceState(null,'',location.pathname)}catch(e){}setTimeout(openFam,900)}}
 {const q=new URLSearchParams(location.search).get('convite');if(q){S.pendingInvite=q.toUpperCase();try{history.replaceState(null,'',location.pathname)}catch(e){}setTimeout(openFam,900)}}
 setTimeout(famBoot,600);setInterval(()=>{if(FAM.fid&&!document.hidden){famSync().then(()=>{if(S.tab==='hoje')refresh()})}},5*6e4);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&FAM.fid)famLoad().then(famRefresh,()=>{})});
