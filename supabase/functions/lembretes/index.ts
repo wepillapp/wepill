@@ -55,7 +55,10 @@ function mensagem(a) {
 Deno.serve(async (req) => {
   if (req.headers.get("x-cron-secret") !== Deno.env.get("CRON_SECRET")) return new Response("não autorizado", { status: 401 });
   webpush.setVapidDetails("mailto:wepilladm@gmail.com", Deno.env.get("VAPID_PUBLIC")!, Deno.env.get("VAPID_PRIVATE")!);
-  const db = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
+  // chave de servidor: a antiga (service_role) ou a nova (sb_secret_...)
+  let KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+  if (!KEY) { try { const o = JSON.parse(Deno.env.get("SUPABASE_SECRET_KEYS") || "{}"); KEY = o.default || Object.values(o)[0] || ""; } catch (_e) { /* sem chave */ } }
+  const db = createClient(Deno.env.get("SUPABASE_URL")!, KEY, { auth: { persistSession: false } });
   const { data: subs, error } = await db.from("push_subs").select("*");
   if (error) return new Response(JSON.stringify({ erro: error.message }), { status: 500 });
   const now = new Date(); let enviados = 0, removidos = 0, falhas = 0;
