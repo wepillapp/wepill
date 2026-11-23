@@ -1780,7 +1780,12 @@ function qr(){let s='',seed=S.list.join('').length*7+3;const n=13,c=8;
 
 /* alarme tocando */
 let actx,loop;
-function beep(seq){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();seq.forEach((f,i)=>{const o=actx.createOscillator(),g=actx.createGain();o.type='sine';o.frequency.value=f;const t=actx.currentTime+i*.18;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.18,t+.02);g.gain.exponentialRampToValueAtTime(.001,t+.6);o.connect(g).connect(actx.destination);o.start(t);o.stop(t+.65)})}catch(e){}}
+/* v92: no iPhone o som só sai se for liberado por um toque e no modo "reprodução" (toca mesmo com a chave do silencioso) */
+try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){}
+function audioUnlock(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();if(actx.state!=='running')actx.resume();const bf=actx.createBuffer(1,1,22050),sr=actx.createBufferSource();sr.buffer=bf;sr.connect(actx.destination);sr.start(0)}catch(e){}}
+['pointerdown','touchend','keydown'].forEach(ev=>document.addEventListener(ev,()=>{if(!actx||actx.state!=='running')audioUnlock()},{capture:true,passive:true}));
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&actx&&actx.state!=='running')actx.resume().catch(()=>{})});
+function beep(seq){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();if(actx.state==='suspended')actx.resume().catch(()=>{});seq.forEach((f,i)=>{const o=actx.createOscillator(),g=actx.createGain();o.type='sine';o.frequency.value=f;const t=actx.currentTime+i*.18;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.18,t+.02);g.gain.exponentialRampToValueAtTime(.001,t+.6);o.connect(g).connect(actx.destination);o.start(t);o.stop(t+.65)})}catch(e){}}
 function ring(key){const [id]=key.split('#'),A=alarm(key),D=DB[id];closeSheet();
   $('#alarm').innerHTML=`<div class="pulse"><div class="core">${IC.capsule}</div></div><div class="clock num">${A.time}</div>
    <div><div style="font-family:var(--font-display);font-size:20px;font-weight:600">Hora de tomar: ${D.nome}</div><div class="sub">${D.qtd} de ${D.dose} · ${esc(D.como)}</div></div>
