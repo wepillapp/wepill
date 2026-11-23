@@ -1,0 +1,15 @@
+Cole nos dois modelos: Authentication > Emails > "Magic Link" e "Confirm signup".
+(O primeiro acesso de um e-mail novo usa "Confirm signup"; os seguintes usam "Magic Link".)
+
+ASSUNTO (Subject):
+Seu código do WePill: {{ .Token }}
+
+CORPO (Body / Message):
+<div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;color:#1C2033">
+  <h2 style="color:#17805F">Seu código para entrar no WePill</h2>
+  <p>Digite este código no app, na tela da Família conectada:</p>
+  <p style="text-align:center;margin:28px 0;font-size:34px;font-weight:bold;letter-spacing:8px;color:#17805F">{{ .Token }}</p>
+  <p style="font-size:13px;color:#565C75">O código vale por 1 hora. Não precisa de senha.</p>
+  <p style="font-size:13px;color:#565C75">Se não foi você quem pediu, pode ignorar este e-mail.</p>
+  <p style="font-size:13px;color:#565C75">Equipe WePill · wepill.com.br</p>
+</div>

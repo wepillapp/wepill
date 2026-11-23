@@ -1107,7 +1107,7 @@ function allergyFor(id){const hay=(DB[id].nome+' '+(COMP[id]||'')).toLowerCase()
 function isAl(t){return (S.profile.alergias||'').toLowerCase().replace(/alergia a/g,',').split(/[,;]| e /).map(x=>x.trim()).includes(t)}
 const alW=t=>isAl(t)?'alergia':'intolerância';
 function allergyHits(list=S.list){return list.map(id=>({id,t:allergyFor(id)})).filter(x=>x.t)}
-function save(){try{localStorage.setItem('medlist-v2',JSON.stringify({list:S.list,taken:S.taken,takenDay:S.takenDay,seedV:S.seedV,pros:S.pros,alarms:S.alarms,theme:S.theme,plan:S.plan,trialStart:S.trialStart,locOk:S.locOk,praio:S.praio,planTab:S.planTab,bill:S.bill,profile:S.profile,stock:S.stock,refillOff:S.refillOff,big:S.big,onboarded:S.onboarded,hist:S.hist,takenAt:S.takenAt,rung:S.rung,notifAsk:S.notifAsk,consent:S.consent,lockOn:S.lockOn,threads:S.threads,extraPros:S.extraPros,hiddenPros:S.hiddenPros,changes:S.changes,custom:S.custom,horasOv:S.horasOv,registered:S.registered,hadAccount:S.hadAccount,demoClean:S.demoClean}))}catch(e){}}
+function save(){try{localStorage.setItem('medlist-v2',JSON.stringify({list:S.list,taken:S.taken,takenDay:S.takenDay,seedV:S.seedV,pros:S.pros,alarms:S.alarms,theme:S.theme,plan:S.plan,trialStart:S.trialStart,locOk:S.locOk,praio:S.praio,planTab:S.planTab,bill:S.bill,profile:S.profile,stock:S.stock,refillOff:S.refillOff,big:S.big,onboarded:S.onboarded,hist:S.hist,takenAt:S.takenAt,rung:S.rung,notifAsk:S.notifAsk,consent:S.consent,lockOn:S.lockOn,threads:S.threads,extraPros:S.extraPros,hiddenPros:S.hiddenPros,changes:S.changes,custom:S.custom,horasOv:S.horasOv,registered:S.registered,hadAccount:S.hadAccount,pendingInvite:S.pendingInvite||"",demoClean:S.demoClean}))}catch(e){}}
 
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -1931,7 +1931,7 @@ document.addEventListener('click',e=>{if(DRAGGED){e.stopPropagation();e.preventD
     if(v.nasc>dkey(new Date())||v.nasc<'1900-01-01'){$('#rg-nasc').classList.add('bad');$('#rg-nasc').focus();return toast('Confira a data de nascimento.')}
     if(!$('#rg-ok').checked)return toast('Para continuar, aceite os Termos e a Política de Privacidade.');
     S.consent=new Date().toISOString();
-    S.profile={...S.profile,...v};S.registered=true;save();$('#reg').classList.remove('on');renderDock();render();return toast(`Cadastro salvo. Boas-vindas, ${esc(v.nome.split(' ')[0])}!`)}
+    S.profile={...S.profile,...v};S.registered=true;save();$('#reg').classList.remove('on');renderDock();render();if(S.pendingInvite)setTimeout(openFam,600);return toast(`Cadastro salvo. Boas-vindas, ${esc(v.nome.split(' ')[0])}!`)}
   if(ds.onbshow!==undefined)return showOnb(0);
   if(ds.wday!==undefined){const dow=new Date().getDay();S.day=+ds.wday===dow?null:+ds.wday;closeSheet();return go('hoje')}
   if(ds.afilter){S.afilter=ds.afilter;return refresh()}
@@ -2135,7 +2135,7 @@ if(S.lockOn&&S.registered)showSos();if(!S.onboarded)showOnb(0);else if(!S.regist
 
 /* v69: Família conectada (beta) com Supabase */
 /* v77: servidor em São Paulo (LGPD) */const SBURL='https://bdltkeymohiegmiyneka.supabase.co',SBKEY='sb_publishable_bONMbFwORbfrHz1Fe3XUpQ_uStVdhhx';
-let SB=null,SBP=null;const FAM={user:null,fid:null,papel:null,membros:[],itens:{},doses:{},step:'email',email:'',busy:false,err:'',code:'',loaded:false,ch:null};
+let SB=null,SBP=null;const FAM={user:null,fid:null,papel:null,membros:[],itens:{},doses:{},step:'inicio',email:'',busy:false,err:'',code:'',loaded:false,ch:null};
 function sbLoad(){if(SB)return Promise.resolve(SB);if(SBP)return SBP;
   SBP=loadScript('supabase.js').catch(()=>loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.1/dist/umd/supabase.js')).then(()=>{
     SB=supabase.createClient(SBURL,SBKEY,{auth:{persistSession:true,autoRefreshToken:true,storageKey:'wepill-auth-br',detectSessionInUrl:false,lock:async(n,t,fn)=>await fn()}});
@@ -2143,6 +2143,13 @@ function sbLoad(){if(SB)return Promise.resolve(SB);if(SBP)return SBP;
 async function R(pr){const r=await Promise.race([pr,new Promise((_,no)=>setTimeout(()=>no(new Error('O servidor não respondeu. Confira a internet e tente de novo.')),15000))]);if(r&&r.error)throw r.error;return r}
 function famErr(e){const m=(e&&(e.message||e.error_description))||String(e||'');
   if(/Failed to fetch|NetworkError|network/i.test(m))return 'Sem conexão agora. Tente de novo.';
+  if(/CONVITE_INVALIDO/.test(m))return 'Código não encontrado ou vencido. Confira os números ou peça um convite novo para quem te convidou.';
+  if(/muitas tentativas/i.test(m))return 'Muitas tentativas com código errado. Espere 1 hora ou peça um convite novo.';
+  if(/já tem [34] pessoas/i.test(m))return 'Essa família já está completa (3 pessoas). Peça para o responsável remover alguém.';
+  if(/já está em uma família/i.test(m))return 'Você já está em uma família. Para entrar em outra, saia da atual primeiro.';
+  if(/anonymous.*disabled|Anonymous sign-ins/i.test(m))return 'A entrada por convite ainda não foi ligada no servidor. Avise quem te convidou.';
+  if(/token.*(expired|invalid)|otp.*(expired|invalid)/i.test(m))return 'Código errado ou vencido. Confira o último e-mail ou toque em "Reenviar código".';
+  if(/signups? not allowed/i.test(m))return 'Não foi possível criar a conta com esse e-mail agora.';
   if(/rate|security purposes|too many/i.test(m))return 'Muitas tentativas. Espere alguns minutos e tente de novo.';
   if(/Invalid login credentials/i.test(m))return 'E-mail ou senha incorretos. Se é sua primeira vez, toque em "Criar conta".';
   if(/already registered|already been registered/i.test(m))return 'Esse e-mail já tem conta. Toque em "Já tenho conta" e entre.';
@@ -2151,7 +2158,7 @@ function famErr(e){const m=(e&&(e.message||e.error_description))||String(e||'');
   const c=e&&e.code?` (código ${e.code})`:'';return (m.replace(/^.*?:\s*/,'')||'Algo deu errado. Tente de novo.')+c}
 async function famBoot(){try{const sb=await sbLoad();const {data}=await R(sb.auth.getSession());FAM.user=data.session&&data.session.user||null;if(FAM.user)await famLoad()}catch(e){}}
 async function famLoad(){if(!FAM.user)return;const sb=SB;
-  try{await R(sb.from('perfis').upsert({id:FAM.user.id,nome:(S.profile&&S.profile.nome)||FAM.user.email.split('@')[0]}))}catch(e){console.warn('perfil',e)}
+  try{await R(sb.from('perfis').upsert({id:FAM.user.id,nome:((S.profile&&S.profile.nome)||(FAM.user.email||'').split('@')[0]||'Convidado').slice(0,80)}))}catch(e){console.warn('perfil',e)}
   const {data:f}=await R(sb.rpc('minha_familia'));FAM.fid=f||null;FAM.loaded=true;
   if(!FAM.fid){FAM.membros=[];famUnsub();return}
   const {data:ms}=await R(sb.from('membros').select('user_id,papel,apelido').eq('familia_id',FAM.fid));FAM.membros=ms||[];
@@ -2194,56 +2201,77 @@ function famName(uid){const it=FAM.itens[uid]||[];return id=>{const r=it.find(x=
 function famBanner(){if(!FAM.fid||!FAM.user)return '';const L=FAM.membros.filter(m=>m.user_id!==FAM.user.id).map(m=>({m,late:famLate(m.user_id)})).filter(x=>x.late.length);if(!L.length)return '';
   return `<button class="famalert tap" data-fam>${IC.shield}<span><b>${L.map(x=>esc(x.m.nome.split(' ')[0])).join(', ')} ${L.length>1?'têm':'tem'} dose atrasada</b><small>${L.map(x=>x.late.map(d=>esc(famName(x.m.user_id)(d.item_id))+' '+new Date(d.previsto_para).toTimeString().slice(0,5)).join(', ')).join(' · ')}</small></span></button>`}
 function famCard(){const n=FAM.membros.length;
-  return `<button class="famcard tap" data-fam><span class="pic">${sv('<circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3.5 19c.6-3 2.8-5 5.5-5s4.9 2 5.5 5M14.5 14.2c2.6-.4 5 1.3 5.8 4.3"/>',2)}</span><span class="pt"><b>Família conectada <em>beta</em></b><span>${FAM.fid?`${n} ${n>1?'pessoas':'pessoa'} · veja quem já tomou hoje`:FAM.user?'Crie sua família ou entre com um convite':'Acompanhe as doses de quem você cuida'}</span></span><span class="chev">${sv('<path d="M9 6l6 6-6 6"/>',2)}</span></button>`}
-function famInput(id,ph,type,val){return `<label class="fact" style="display:block;margin:10px 0"><small>${ph}</small><input id="${id}" type="${type}" ${type==='email'?'autocomplete="email"':type==='password'?'autocomplete="current-password" minlength="6"':'inputmode="numeric" autocomplete="one-time-code" maxlength="6"'} value="${esc(val||'')}" style="width:100%;border:0;background:transparent;font:inherit;font-size:18px;color:var(--ink);outline:none;padding:4px 0"></label>`}
+  return `<button class="famcard tap" data-fam><span class="pic">${sv('<circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3.5 19c.6-3 2.8-5 5.5-5s4.9 2 5.5 5M14.5 14.2c2.6-.4 5 1.3 5.8 4.3"/>',2)}</span><span class="pt"><b>Família conectada <em>beta</em></b><span>${FAM.fid?`${n} ${n>1?'pessoas':'pessoa'} · veja quem já tomou hoje`:FAM.user?(famIsAnon()?'Digite o código do convite':'Crie sua família ou entre com um convite'):'Acompanhe quem você cuida ou entre com um convite'}</span></span><span class="chev">${sv('<path d="M9 6l6 6-6 6"/>',2)}</span></button>`}
+function famInput(id,ph,type,val){const a=type==='email'?'type="email" autocomplete="email"':type==='password'?'type="password" autocomplete="new-password"':'type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="'+(type==='otp'?8:9)+'"';
+  return `<label class="fact" style="display:block;margin:10px 0"><small>${ph}</small><input id="${id}" ${a} value="${esc(val||'')}" style="width:100%;min-width:0;box-sizing:border-box;border:0;background:transparent;font:inherit;font-size:20px;color:var(--ink);outline:none;padding:4px 0${type==='otp'||type==='code'?';letter-spacing:.18em':''}"></label>`}
+/* v84: Família mais simples. Quem cuida entra com um código por e-mail (sem senha). Quem é convidado só digita o código do convite (sem cadastro). Titular + 2. */
+const FAMMAX=3;
+function famFmt(c){c=String(c||'');return /^\d{6}$/.test(c)?c.slice(0,3)+' '+c.slice(3):c}
+function famIsAnon(){return !!(FAM.user&&(FAM.user.is_anonymous||!FAM.user.email))}
+function famInviteMsg(c){return `Oi! Quero acompanhar seus remédios pelo WePill.\n\n1. Toque no link para abrir o app: https://wepill.com.br/app/?convite=${c}\n2. Se você já tem o WePill instalado, abra o app, toque em Família conectada > Recebi um convite e digite o código: ${famFmt(c)}\n\nNão precisa criar conta nem senha. O código vale por 48 horas.`}
+function famJoinBox(primeiro){return `<div class="fact"${primeiro?' style="border-color:var(--accent)"':''}><b>Recebi um convite</b><p class="sub" style="margin:4px 0 0">Digite o código que chegou pelo WhatsApp. Não precisa de cadastro nem senha.</p>${famInput('faminv','Código do convite','code',famFmt(S.pendingInvite||''))}<button class="btn ${primeiro?'primary':'ghost'} block tap" data-famjoin${FAM.busy?' disabled':''}>Entrar na família</button></div>`}
 function famSheetBody(){const E=FAM.err?`<p class="famerr">${esc(FAM.err)}</p>`:'',B=FAM.busy?' disabled':'';let h='';
   if(FAM.recovery){h=`<p class="sub">Crie uma senha nova para a sua conta (mínimo 8 caracteres).</p>${famInput('famnewpw','Senha nova','password','')}${E}<button class="btn primary block tap" data-famnewpw${B}>${FAM.busy?'Aguarde…':'Salvar senha nova'}</button>`}
-  else if(!FAM.user){const nova=FAM.step==='nova';h=`<p class="sub">${nova?'Para conectar a família, crie uma conta com seu e-mail e uma senha nova (mínimo 8 caracteres, com letras e números). Vamos mandar um link para confirmar o e-mail. A conta também guarda uma cópia de segurança da sua lista.':'Já tem conta? Entre com o e-mail e a senha que você criou para a Família conectada.'}</p>${famInput('famemail','Seu e-mail','email',FAM.email)}${famInput('fampass','Senha','password','')}${E}
-      <button class="btn primary block tap" data-famlogin${B}>${FAM.busy?'Aguarde…':nova?'Criar conta':'Entrar'}</button>
-      <button class="btn ghost block tap" data-famtoggle style="margin-top:8px">${nova?'Já tenho conta':'Primeira vez? Criar conta'}</button>
-      ${nova?'':`<button class="linkbtn tap" data-famforgot style="display:block;margin:10px auto 0">Esqueci minha senha</button>`}${FAM.info?`<p class="sub" style="margin-top:10px">${esc(FAM.info)}</p>`:''}`}
+  else if(!FAM.user&&FAM.step==='codigo'){h=`<p class="sub">Enviamos um código para <b>${esc(FAM.email)}</b>. Abra o e-mail (veja também o spam) e digite o código aqui.</p>${famInput('famotp','Código do e-mail','otp','')}${E}
+      <button class="btn primary block tap" data-famverify${B}>${FAM.busy?'Aguarde…':'Entrar'}</button>
+      <div class="row" style="margin-top:10px;justify-content:center;gap:18px"><button class="linkbtn tap" data-famsend>Reenviar código</button><button class="linkbtn tap" data-famback>Usar outro e-mail</button></div>${FAM.info?`<p class="sub" style="margin-top:10px">${esc(FAM.info)}</p>`:''}`}
+  else if(!FAM.user){const conv=!!S.pendingInvite;
+    const dono=`<div class="fact"${conv?'':' style="border-color:var(--accent)"'}><b>Vou cuidar da família</b><p class="sub" style="margin:4px 0 0">Digite seu e-mail. Mandamos um código para você entrar, sem precisar de senha.</p>${famInput('famemail','Seu e-mail','email',FAM.email)}<button class="btn ${conv?'ghost':'primary'} block tap" data-famsend${B}>${FAM.busy&&!conv?'Aguarde…':'Receber código por e-mail'}</button></div>`;
+    h=`<p class="sub">Veja quem já tomou os remédios hoje. Até 3 pessoas: você e mais 2.</p>${conv?famJoinBox(1)+'<div style="height:10px"></div>'+dono:dono+'<div style="height:10px"></div>'+famJoinBox(0)}${E}${FAM.info?`<p class="sub" style="margin-top:10px">${esc(FAM.info)}</p>`:''}`}
   else if(!FAM.loaded)h=FAM.err?`${E}<button class="btn primary block tap" data-famreload>Tentar de novo</button><button class="btn ghost sm tap" data-famout style="margin-top:12px">Sair da conta</button>`:`<div class="spin"></div><p class="sub" style="text-align:center">Carregando sua família…</p>`;
+  else if(!FAM.fid&&famIsAnon()){h=`${famJoinBox(1)}${E}<button class="btn ghost sm tap" data-famout style="margin-top:12px">Voltar</button>`}
   else if(!FAM.fid){h=`<p class="sub">Conectado como <b>${esc(FAM.user.email)}</b>.</p>
-      <div class="fact"><b>Vou cuidar da família</b><p class="sub" style="margin:4px 0 10px">Você vira o responsável e convida até 3 pessoas.</p><button class="btn primary block tap" data-famcreate${B}>Criar minha família</button></div>
-      <div class="fact" style="margin-top:10px"><b>Recebi um convite</b>${famInput('faminv','Código do convite','text',S.pendingInvite||'').replace('inputmode="numeric" ','').replace('maxlength="6"','maxlength="8" style="text-transform:uppercase"')}<button class="btn ghost block tap" data-famjoin${B}>Entrar na família</button></div>${E}
+      <div class="fact"><b>Vou cuidar da família</b><p class="sub" style="margin:4px 0 10px">Você vira o responsável e convida mais 2 pessoas.</p><button class="btn primary block tap" data-famcreate${B}>Criar minha família</button></div>
+      <div style="height:10px"></div>${famJoinBox(0)}${E}
       <button class="btn ghost sm tap" data-famout style="margin-top:12px">Sair da conta</button>${famDelBtn()}`}
-  else{const resp=FAM.papel==='responsavel';
+  else{const resp=FAM.papel==='responsavel',anon=famIsAnon(),vagas=FAMMAX-FAM.membros.length;
     h=`${FAM.membros.map(m=>{const ds=FAM.doses[m.user_id]||[],tk=ds.filter(d=>d.status==='tomada').length,late=famLate(m.user_id),nm=famName(m.user_id),me=m.user_id===FAM.user.id;
-      return `<div class="fammem${late.length?' late':''}"><div class="fmh">${avatarTxt(m.nome)}<div><b>${esc(m.nome)}${me?' (você)':''}</b><span>${m.papel==='responsavel'?'Responsável':'Membro'} · ${ds.length?`${tk} de ${ds.length} doses hoje`:'nenhuma dose hoje'}</span></div></div>
+      return `<div class="fammem${late.length?' late':''}"><div class="fmh">${avatarTxt(m.nome)}<div style="flex:1"><b>${esc(m.nome)}${me?' (você)':''}</b><span>${m.papel==='responsavel'?'Responsável':'Membro'} · ${ds.length?`${tk} de ${ds.length} doses hoje`:'nenhuma dose hoje'}</span></div>${resp&&!me?`<button class="linkbtn tap" data-famrm="${esc(m.user_id)}" style="color:var(--rose-ink);font-size:13px">Remover</button>`:''}</div>
         ${ds.length?`<div class="fmd">${ds.map(d=>{const st=d.status==='tomada'?'ok':famLate(m.user_id).includes(d)?'late':'';return `<span class="${st}">${new Date(d.previsto_para).toTimeString().slice(0,5)} ${esc(nm(d.item_id))}</span>`}).join('')}</div>`:''}</div>`}).join('')}
-      ${resp&&FAM.membros.length<4?`<button class="btn primary block tap" data-faminvite${B}>${IC.plus} Convidar pessoa (${4-FAM.membros.length} ${4-FAM.membros.length>1?'vagas':'vaga'})</button>`:''}
-      ${FAM.code?`<div class="faminv"><small>Convite (vale 48 horas)</small><b>${FAM.code}</b><a class="btn ghost block tap" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent('Entre na minha família no WePill para eu acompanhar seus remédios: https://wepill.com.br/app/?convite='+FAM.code)}">Enviar pelo WhatsApp</a></div>`:''}${E}
-      <div class="row" style="margin-top:12px"><button class="btn ghost sm tap" data-famreload>Atualizar</button><button class="btn ghost sm tap" data-famleave>${resp?'Desfazer família':'Sair da família'}</button><button class="btn ghost sm tap" data-famout>Sair da conta</button></div>${famDelBtn()}`}
+      ${resp&&vagas>0&&!FAM.code?`<button class="btn primary block tap" data-faminvite${B}>${IC.plus} Convidar pessoa (${vagas} ${vagas>1?'vagas':'vaga'})</button>`:''}
+      ${resp&&FAM.code&&vagas>0?`<div class="faminv"><small>Código do convite (vale 48 horas)</small><b>${famFmt(FAM.code)}</b><a class="btn primary block tap" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(famInviteMsg(FAM.code))}">Enviar pelo WhatsApp</a><button class="btn ghost block tap" data-famshare style="margin-top:8px">Compartilhar de outro jeito</button><p class="sub" style="font-size:12.5px;margin:10px 0 0">A pessoa baixa o WePill, toca em Família conectada > Recebi um convite e digita o código. Ela não precisa criar conta.</p></div>`:''}${E}
+      <div class="row" style="margin-top:12px"><button class="btn ghost sm tap" data-famreload>Atualizar</button><button class="btn ghost sm tap" data-famleave>${resp?'Desfazer família':'Sair da família'}</button>${anon?'':'<button class="btn ghost sm tap" data-famout>Sair da conta</button>'}</div>${anon?'':famDelBtn()}`}
   return `<div id="famsheet"><h1>Família conectada <span class="sim">beta</span></h1>${h}<p class="disclaimer">Cada pessoa vê só a lista e as doses da própria família. Seus dados ficam guardados com segurança no servidor do WePill.</p></div>`}
 function famDelBtn(){return `<button class="linkbtn tap" data-famdel style="display:block;margin:14px auto 0;color:var(--rose-ink)">Apagar minha conta e meus dados do servidor</button>`}
 function avatarTxt(n){const p=(n||'?').trim().split(/\s+/),t=((p[0]||'?')[0]+(p.length>1?p[p.length-1][0]:'')).toUpperCase();return `<span class="famav">${esc(t)}</span>`}
-async function openFam(){FAM.err='';/* v82: quem nunca teve conta começa em "Criar conta", com o e-mail do perfil */if(!FAM.user&&!FAM.recovery&&!S.hadAccount&&FAM.step==='email'&&!FAM.info)FAM.step='nova';if(!FAM.email&&S.profile&&S.profile.email)FAM.email=String(S.profile.email).trim().toLowerCase();openSheet(famSheetBody());try{await sbLoad();if(FAM.user&&!FAM.loaded)await famLoad()}catch(e){FAM.err=famErr(e)}famRefresh()}
+async function openFam(){FAM.err='';if(!FAM.email&&S.profile&&S.profile.email)FAM.email=String(S.profile.email).trim().toLowerCase();openSheet(famSheetBody());try{await sbLoad();if(FAM.user&&!FAM.loaded)await famLoad()}catch(e){FAM.err=famErr(e)}famRefresh()}
 async function famDo(fn,btn){if(FAM.busy)return;FAM.busy=true;FAM.err='';if(btn){btn.disabled=true;btn.textContent='Aguarde…'}try{await fn()}catch(e){FAM.err=famErr(e)}FAM.busy=false;famRefresh();if(FAM.err){const x=$('.famerr');if(x)x.scrollIntoView({block:'center'})}}
-document.addEventListener('click',e=>{const t=e.target.closest('[data-fam],[data-famlogin],[data-famtoggle],[data-famcreate],[data-famjoin],[data-faminvite],[data-famleave],[data-famout],[data-famreload]');if(!t)return;const ds=t.dataset;
+function famCode(){return ((($('#faminv')||{}).value)||'').replace(/[^0-9a-z]/gi,'').replace(/^wp/i,'').toUpperCase()}
+/* convidado: entra sem cadastro (conta anônima do servidor) e já aceita o convite */
+async function famAnonJoin(c){const sb=await sbLoad();
+  for(let i=0;i<2;i++){if(!FAM.user){const r=await R(sb.auth.signInAnonymously());FAM.user=r.data.user}
+    try{const {data}=await R(sb.rpc('aceitar_convite',{p_codigo:c}));return data}
+    catch(e){/* conta anônima antiga que foi removida da família: começa uma nova */if(i||!famIsAnon()||!/foreign key|violates|not.?found|jwt|sub claim|faça login/i.test((e&&e.message)||''))throw e;try{await sb.auth.signOut({scope:'local'})}catch(_){}FAM.user=null}}}
+document.addEventListener('click',e=>{const t=e.target.closest('[data-fam],[data-famsend],[data-famverify],[data-famback],[data-famcreate],[data-famjoin],[data-faminvite],[data-famshare],[data-famrm],[data-famleave],[data-famout],[data-famreload],[data-famdel],[data-famnewpw]');if(!t)return;const ds=t.dataset;
   if(ds.fam!==undefined)return openFam();
-  if(ds.famtoggle!==undefined){FAM.step=FAM.step==='nova'?'email':'nova';FAM.err='';FAM.email=(($('#famemail')||{}).value||FAM.email).trim();return famRefresh()}
-  if(ds.famlogin!==undefined){FAM.email=((($('#famemail')||{}).value)||'').trim().toLowerCase();const pw=($('#fampass')||{}).value||'';
-    if(!/^\S+@\S+\.\S+$/.test(FAM.email)){FAM.err='Digite um e-mail válido.';return famRefresh()}if(pw.length<(FAM.step==='nova'?8:6)){FAM.err=FAM.step==='nova'?'A senha precisa ter pelo menos 8 caracteres.':'A senha precisa ter pelo menos 6 caracteres.';return famRefresh()}
-    if(FAM.step==='nova'&&/^(\d)\1+$|^(12345678|123456789|87654321|senha123|password|qwerty12)/i.test(pw)){FAM.err='Essa senha é fácil de adivinhar. Escolha outra.';return famRefresh()}
-    if(FAM.step==='nova'&&!(/[a-zA-Z]/.test(pw)&&/\d/.test(pw))){FAM.err='A senha precisa ter letras e números.';return famRefresh()}
-    const nova=FAM.step==='nova';
-    return famDo(async()=>{const sb=await sbLoad();const r=nova?await sb.auth.signUp({email:FAM.email,password:pw,options:{emailRedirectTo:location.origin+location.pathname}}):await sb.auth.signInWithPassword({email:FAM.email,password:pw},t);
-      if(r.error)throw r.error;S.hadAccount=true;save();if(!r.data.session){FAM.step='email';FAM.info='Quase lá! Enviamos um link de confirmação para '+FAM.email+'. Abra o e-mail (veja também o spam) e toque em Confirmar. Depois volte aqui e toque em Entrar, com seu e-mail e senha.';return}
-      FAM.user=r.data.user;FAM.step='email';await famLoad();famSync();toast(nova?'Conta criada.':'Pronto, você entrou.')})}
+  if(ds.famback!==undefined){FAM.step='inicio';FAM.err='';FAM.info='';return famRefresh()}
+  if(ds.famsend!==undefined){const inp=$('#famemail');if(inp)FAM.email=(inp.value||'').trim().toLowerCase();FAM.info='';
+    if(!/^\S+@\S+\.\S+$/.test(FAM.email)){FAM.err='Digite um e-mail válido.';return famRefresh()}
+    return famDo(async()=>{const sb=await sbLoad();await R(sb.auth.signInWithOtp({email:FAM.email,options:{shouldCreateUser:true}}));if(FAM.step==='codigo')FAM.info='Mandamos um código novo. Use o mais recente.';FAM.step='codigo';setTimeout(()=>{const x=$('#famotp');if(x)x.focus()},100)},t)}
+  if(ds.famverify!==undefined){const c=((($('#famotp')||{}).value)||'').replace(/\D/g,'');if(c.length<6){FAM.err='Digite o código que chegou no seu e-mail.';return famRefresh()}
+    return famDo(async()=>{const sb=await sbLoad();const r=await R(sb.auth.verifyOtp({email:FAM.email,token:c,type:'email'}));FAM.user=r.data.user||(r.data.session&&r.data.session.user)||null;if(!FAM.user)throw new Error('Token has expired or is invalid');
+      FAM.step='inicio';FAM.info='';S.hadAccount=true;save();await famLoad();
+      if(!FAM.fid&&S.pendingInvite){try{await R(SB.rpc('aceitar_convite',{p_codigo:S.pendingInvite}))}catch(e){}S.pendingInvite='';await famLoad()}
+      if(!FAM.fid){await R(SB.rpc('criar_familia',{p_nome:'Família de '+((S.profile&&S.profile.nome)||'').split(' ')[0]}));await famLoad();famSync();return toast('Pronto! Sua família foi criada. Agora convide quem você cuida.')}
+      famSync();toast('Pronto, você entrou.')},t)}
   if(ds.famcreate!==undefined)return famDo(async()=>{await R(SB.rpc('criar_familia',{p_nome:'Família de '+((S.profile&&S.profile.nome)||'').split(' ')[0]}));await famSync();await famLoad();toast('Família criada. Agora convide quem você cuida.')},t);
-  if(ds.famforgot!==undefined){FAM.email=((($('#famemail')||{}).value)||'').trim().toLowerCase();FAM.info='';if(!/^\S+@\S+\.\S+$/.test(FAM.email)){FAM.err='Digite seu e-mail acima e toque de novo em "Esqueci minha senha".';return famRefresh()}
-    return famDo(async()=>{const sb=await sbLoad();await R(sb.auth.resetPasswordForEmail(FAM.email,{redirectTo:location.origin+location.pathname}));FAM.info='Se existir uma conta com esse e-mail, enviamos um link para criar uma senha nova. Confira também a caixa de spam.'},t)}
+  if(ds.famjoin!==undefined){const c=famCode();if(c.length<6){FAM.err='Digite o código do convite (6 números).';return famRefresh()}
+    return famDo(async()=>{let f;if(FAM.user&&!famIsAnon()){const {data}=await R(SB.rpc('aceitar_convite',{p_codigo:c}));f=data}else f=await famAnonJoin(c);
+      if(!f){FAM.loaded=true;throw new Error('CONVITE_INVALIDO')}S.pendingInvite='';save();FAM.loaded=false;await famLoad();await famSync();toast('Você entrou na família.')},t)}
+  if(ds.faminvite!==undefined)return famDo(async()=>{const {data}=await R(SB.rpc('gerar_convite'));FAM.code=data},t);
+  if(ds.famshare!==undefined){const msg=famInviteMsg(FAM.code);if(navigator.share){navigator.share({text:msg}).catch(()=>{})}else if(navigator.clipboard){navigator.clipboard.writeText(msg).then(()=>toast('Convite copiado. Cole onde quiser.'),()=>{})}return}
+  if(ds.famrm!==undefined){if(!t.dataset.sure){t.dataset.sure='1';t.textContent='Toque de novo para remover';return}
+    return famDo(async()=>{await R(SB.rpc('remover_membro',{p_user:ds.famrm}));await famLoad();toast('Pessoa removida da família.')},t)}
   if(ds.famnewpw!==undefined){const pw=($('#famnewpw')||{}).value||'';if(pw.length<8||!(/[a-zA-Z]/.test(pw)&&/\d/.test(pw))){FAM.err='A senha precisa ter pelo menos 8 caracteres, com letras e números.';return famRefresh()}
     return famDo(async()=>{const sb=await sbLoad();const rc=FAM.recovery;if(rc.code)await R(sb.auth.exchangeCodeForSession(rc.code));else if(rc.a)await R(sb.auth.setSession({access_token:rc.a,refresh_token:rc.r}));await R(sb.auth.updateUser({password:pw}));FAM.recovery=null;const {data}=await R(sb.auth.getSession());FAM.user=data.session&&data.session.user||null;if(FAM.user){await famLoad();famSync()}toast('Senha nova salva.')},t)}
   if(ds.famdel!==undefined){if(!t.dataset.sure){t.dataset.sure='1';t.textContent='Tem certeza? Toque de novo para apagar a conta para sempre';return}
-    return famDo(async()=>{await R(SB.rpc('apagar_minha_conta'));famUnsub();try{await SB.auth.signOut({scope:'local'})}catch(e){}try{localStorage.removeItem('wepill-auth')}catch(e){}FAM.user=null;FAM.fid=null;FAM.loaded=false;FAM.membros=[];toast('Sua conta e seus dados no servidor foram apagados.')},t)}
-  if(ds.famjoin!==undefined){const c=(($('#faminv')||{}).value||'').trim().toUpperCase();if(!c){FAM.err='Digite o código do convite.';return famRefresh()}
-    return famDo(async()=>{await R(SB.rpc('aceitar_convite',{p_codigo:c}));S.pendingInvite='';await famSync();await famLoad();toast('Você entrou na família.')},t)}
-  if(ds.faminvite!==undefined)return famDo(async()=>{const {data}=await R(SB.rpc('gerar_convite'));FAM.code=data},t);
+    return famDo(async()=>{await R(SB.rpc('apagar_minha_conta'));famUnsub();try{await SB.auth.signOut({scope:'local'})}catch(e){}FAM.user=null;FAM.fid=null;FAM.loaded=false;FAM.membros=[];FAM.code='';toast('Sua conta e seus dados no servidor foram apagados.')},t)}
   if(ds.famreload!==undefined)return famDo(async()=>{if(FAM.loaded)await famSync();famUnsub();await famLoad()},t);
   if(ds.famleave!==undefined){if(!t.dataset.sure){t.dataset.sure='1';t.textContent='Toque de novo para confirmar';return}
+    /* convidado sem e-mail: sair da família apaga a conta anônima (sem ela não dá para voltar a entrar) */
+    if(famIsAnon())return famDo(async()=>{await R(SB.rpc('apagar_minha_conta'));famUnsub();try{await SB.auth.signOut({scope:'local'})}catch(e){}FAM.user=null;FAM.fid=null;FAM.loaded=false;FAM.membros=[];toast('Você saiu da família.')},t);
     return famDo(async()=>{await R(SB.rpc('sair_da_familia'));FAM.code='';famUnsub();await famLoad()},t)}
-  if(ds.famout!==undefined)return famDo(async()=>{famUnsub();try{await R(SB.auth.signOut({scope:'local'}))}catch(e){}try{localStorage.removeItem('wepill-auth')}catch(e){}FAM.user=null;FAM.fid=null;FAM.loaded=false;FAM.membros=[]},t)
+  if(ds.famout!==undefined)return famDo(async()=>{famUnsub();try{await R(SB.auth.signOut({scope:'local'}))}catch(e){}FAM.user=null;FAM.fid=null;FAM.loaded=false;FAM.membros=[];FAM.code='';FAM.step='inicio'},t)
 },true);
 /* liga a sincronização ao save() e o aviso de atraso ao Início */
 {const _save=save;save=function(){_save.apply(this,arguments);famSyncSoon()}}
@@ -2253,7 +2281,7 @@ document.addEventListener('click',e=>{const t=e.target.closest('[data-fam],[data
 function showLinkDone(ok){const el=$('#reg');$('#onb').classList.remove('on');
   el.innerHTML=`<div class="rgtop">${$('#onb .brand').outerHTML}</div><div class="rgbody" style="justify-content:center;text-align:center">
   <h1>${ok?'E-mail confirmado!':'Este link já foi usado'}</h1>
-  <p class="sub">${ok?'Sua conta do WePill está ativa.':'Se você já confirmou o e-mail antes, sua conta está ativa.'} Agora abra o <b>app WePill</b> (o ícone na tela do celular) e entre em <b>Família conectada</b> com seu e-mail e senha.</p>
+  <p class="sub">${ok?'Sua conta do WePill está ativa.':'Se você já confirmou o e-mail antes, sua conta está ativa.'} Agora abra o <b>app WePill</b> (o ícone na tela do celular) e entre em <b>Família conectada</b> com seu e-mail (mandamos um código, sem senha).</p>
   <p class="sub" style="font-size:13px">Você pode fechar esta página.</p>
   <button class="btn ghost block tap" data-linkgo>Usar o WePill neste navegador</button></div>`;el.classList.add('on')}
 {const H=new URLSearchParams(location.hash.slice(1)),Q=new URLSearchParams(location.search);
@@ -2261,10 +2289,10 @@ function showLinkDone(ok){const el=$('#reg');$('#onb').classList.remove('on');
   if(!S.onboarded&&(viaLink||linkErr)){try{history.replaceState(null,'',location.pathname)}catch(e){}showLinkDone(!!viaLink)}else
   if(H.get('type')==='recovery'&&H.get('access_token')){FAM.recovery={a:H.get('access_token'),r:H.get('refresh_token')};try{history.replaceState(null,'',location.pathname)}catch(e){}setTimeout(openFam,900)}
   else if(/^(signup|email|invite|magiclink)$/.test(H.get('type')||'')&&H.get('access_token')){const a=H.get('access_token'),r=H.get('refresh_token');try{history.replaceState(null,'',location.pathname)}catch(e){}
-    /* v81: link de confirmação do e-mail. Entra sozinho. */setTimeout(async()=>{try{const sb=await sbLoad();await R(sb.auth.setSession({access_token:a,refresh_token:r}));const {data}=await R(sb.auth.getSession());FAM.user=data.session&&data.session.user||null;if(FAM.user){await famLoad();famSync();openFam();toast('E-mail confirmado. Você já está na sua conta.')}}catch(e){FAM.info='Não deu para entrar pelo link. Entre com seu e-mail e senha.';openFam()}},700)}
+    /* v81: link de confirmação do e-mail. Entra sozinho. */setTimeout(async()=>{try{const sb=await sbLoad();await R(sb.auth.setSession({access_token:a,refresh_token:r}));const {data}=await R(sb.auth.getSession());FAM.user=data.session&&data.session.user||null;if(FAM.user){await famLoad();famSync();openFam();toast('E-mail confirmado. Você já está na sua conta.')}}catch(e){FAM.info='Não deu para entrar pelo link. Digite seu e-mail para receber um código.';openFam()}},700)}
   else if(Q.get('code')){FAM.recovery={code:Q.get('code')};try{history.replaceState(null,'',location.pathname)}catch(e){}setTimeout(openFam,900)}
-  else if(H.get('error_description')){FAM.info='Esse link já foi usado ou venceu. Se você já confirmou o e-mail, é só entrar com seu e-mail e senha. Para trocar a senha, peça outro link em "Esqueci minha senha".';try{history.replaceState(null,'',location.pathname)}catch(e){}setTimeout(openFam,900)}}
-{const q=new URLSearchParams(location.search).get('convite');if(q){S.pendingInvite=q.toUpperCase();try{history.replaceState(null,'',location.pathname)}catch(e){}setTimeout(openFam,900)}}
+  else if(H.get('error_description')){FAM.info='Esse link já foi usado ou venceu. Digite seu e-mail para receber um código e entrar.';try{history.replaceState(null,'',location.pathname)}catch(e){}setTimeout(openFam,900)}}
+{const q=new URLSearchParams(location.search).get('convite');if(q){S.pendingInvite=q.replace(/[^0-9a-z]/gi,'').toUpperCase().slice(0,12);save();try{history.replaceState(null,'',location.pathname)}catch(e){}setTimeout(openFam,900)}}
 setTimeout(famBoot,600);setInterval(()=>{if(FAM.fid&&!document.hidden){famSync().then(()=>{if(S.tab==='hoje')refresh()})}},5*6e4);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&FAM.fid)famLoad().then(famRefresh,()=>{})});
 
