@@ -4,7 +4,7 @@
 <title>WePill</title>
 <meta name="theme-color" content="#D0E9DD">
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="WePill">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="WePill">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -41,7 +41,7 @@
   --accent:#3CC39C; --accent-2:#9BEBD6; --accent-ink:#06231B; --glow:rgba(60,195,156,.35);
   --shadow:0 1px 1px rgba(0,0,0,.3),0 12px 32px -8px rgba(0,0,0,.5); --aurora-op:0; color-scheme:dark}
 
-html,body{height:100%}
+html,body{height:100%;margin:0} /* v89: sem a margem padrão de 8px (bordas escuras no iPhone) */
 body{background:var(--bg);color:var(--ink);font-family:var(--font-ui);font-size:15px;line-height:1.5;transition:background-color .5s var(--ease),color .5s var(--ease);
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px;box-sizing:border-box}
 *{box-sizing:border-box}
@@ -53,7 +53,7 @@ button{font:inherit;color:inherit;cursor:pointer;background:none;border:0}
   box-shadow:0 30px 80px -20px rgba(30,35,60,.35),0 0 0 1px var(--hair);isolation:isolate;transition:background-color .5s var(--ease)}
 /* fora do celular: aparelho de 390x844 (9:19,5) reduzido por escala para caber, sem distorcer */
 @media (min-width:481px){body{overflow:hidden;display:flex;justify-content:center;align-items:flex-start}.phone{flex:none;width:390px;height:844px;max-height:none;margin:0;transform-origin:top center}}
-@media (max-width:480px){body{padding:0}.phone{border-radius:0;max-height:none;box-shadow:none;width:100%}}
+@media (max-width:480px){body{padding:0}.phone{border-radius:0;max-height:none;max-width:none;box-shadow:none;width:100%;padding-top:env(safe-area-inset-top,0px)}} /* v89: tela inteira no celular, inclusive atrás da barra de status */
 .aurora{position:absolute;inset:-20%;z-index:-1;opacity:var(--aurora-op);filter:blur(50px);pointer-events:none;transition:opacity .6s}
 .aurora i{position:absolute;border-radius:50%;animation:drift 18s ease-in-out infinite alternate}
 .aurora i:nth-child(1){width:60%;height:40%;left:5%;top:2%;background:var(--a1)}
@@ -2152,7 +2152,8 @@ if(S.lockOn&&S.registered)showSos();if(!S.onboarded)showOnb(0);else if(!S.regist
 const SPV='a';/* v86: abertura curta com a arte do logo ao reabrir. Estilo: a=desfoque, b=cápsula assenta, c=círculo abre */
 /* ao reabrir (quem já fez o primeiro acesso). Fica abaixo do alarme e da ficha, toque pula. */
 if(S.onboarded&&S.registered&&!location.hash){const sp=document.createElement('div');sp.className='splash';sp.setAttribute('aria-hidden','true');sp.classList.add('v-'+SPV);sp.innerHTML='<div class="sp-art">'+(SPV==='a'?'<img src="abertura.webp" alt="">':'<span class="sp-shadow"></span><span class="sp-iris"><img class="sp-top" src="abertura.webp" alt=""></span><img class="sp-bot" src="abertura.webp" alt="">')+'</div>';
-  ($('#onb').parentNode).appendChild(sp);const bye=()=>{if(sp.classList.contains('out'))return;sp.classList.add('out');setTimeout(()=>sp.remove(),450)};sp.addEventListener('click',bye);setTimeout(bye,1700)}
+  ($('#onb').parentNode).appendChild(sp);
+  const bye=()=>{if(sp.classList.contains('out'))return;sp.classList.add('out');setTimeout(()=>sp.remove(),450)};sp.addEventListener('click',bye);setTimeout(bye,1700)}
 
 
 /* v69: Família conectada (beta) com Supabase */
