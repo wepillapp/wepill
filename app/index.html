@@ -2113,11 +2113,11 @@ if(S.lockOn&&S.registered)showSos();if(!S.onboarded)showOnb(0);else if(!S.regist
 
 
 /* v69: Família conectada (beta) com Supabase */
-const SBURL='https://gqlmevpmyckwmcxfmmoe.supabase.co',SBKEY='sb_publishable_3bWFv8h2WgI6BjWew4RzUA_pJpRlc3f';
+/* v77: servidor em São Paulo (LGPD) */const SBURL='https://bdltkeymohiegmiyneka.supabase.co',SBKEY='sb_publishable_bONMbFwORbfrHz1Fe3XUpQ_uStVdhhx';
 let SB=null,SBP=null;const FAM={user:null,fid:null,papel:null,membros:[],itens:{},doses:{},step:'email',email:'',busy:false,err:'',code:'',loaded:false,ch:null};
 function sbLoad(){if(SB)return Promise.resolve(SB);if(SBP)return SBP;
   SBP=loadScript('supabase.js').catch(()=>loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.1/dist/umd/supabase.js')).then(()=>{
-    SB=supabase.createClient(SBURL,SBKEY,{auth:{persistSession:true,autoRefreshToken:true,storageKey:'wepill-auth',detectSessionInUrl:false,lock:async(n,t,fn)=>await fn()}});
+    SB=supabase.createClient(SBURL,SBKEY,{auth:{persistSession:true,autoRefreshToken:true,storageKey:'wepill-auth-br',detectSessionInUrl:false,lock:async(n,t,fn)=>await fn()}});
     SB.auth.onAuthStateChange((ev,s)=>{FAM.user=s&&s.user||null;if(ev==='SIGNED_OUT'){FAM.fid=null;FAM.membros=[];famUnsub()}});return SB}).catch(e=>{SBP=null;throw e});return SBP}
 async function R(pr){const r=await Promise.race([pr,new Promise((_,no)=>setTimeout(()=>no(new Error('O servidor não respondeu. Confira a internet e tente de novo.')),15000))]);if(r&&r.error)throw r.error;return r}
 function famErr(e){const m=(e&&(e.message||e.error_description))||String(e||'');
