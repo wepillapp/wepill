@@ -56,6 +56,7 @@ button{font:inherit;color:inherit;cursor:pointer;background:none;border:0}
 /* fora do celular: aparelho de 390x844 (9:19,5) reduzido por escala para caber, sem distorcer */
 @media (min-width:481px){body{overflow:hidden;display:flex;justify-content:center;align-items:flex-start}.phone{flex:none;width:390px;height:844px;max-height:none;margin:0;transform-origin:top center}}
 @media (max-width:480px){body{padding:0}.phone{border-radius:0;max-height:none;max-width:none;box-shadow:none;width:100%;padding-top:env(safe-area-inset-top,0px)}} /* v89: tela inteira no celular, inclusive atrás da barra de status */
+@media (max-width:480px){body .phone nav.dock{left:0;right:0;bottom:0;border-radius:24px 24px 0 0;padding:8px 10px calc(6px + env(safe-area-inset-bottom,0px));border-bottom:0}} /* v91: barra de baixo colada no fim da tela, sem faixa verde embaixo */
 .aurora{position:absolute;inset:-20%;z-index:-1;opacity:var(--aurora-op);filter:blur(50px);pointer-events:none;transition:opacity .6s}
 .aurora i{position:absolute;border-radius:50%;animation:drift 18s ease-in-out infinite alternate}
 .aurora i:nth-child(1){width:60%;height:40%;left:5%;top:2%;background:var(--a1)}
@@ -115,6 +116,7 @@ h2::after{content:"";flex:1;height:1px;background:var(--hair)}
 .next{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
 .eyebrow{font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);font-family:var(--font-display)}
 .next .nm{font-family:var(--font-display);font-weight:600;font-size:17px;line-height:1.25}
+.nmlink{background:none;border:0;padding:0;margin:0;color:inherit;text-align:left;cursor:pointer;display:block}.nmpen{display:inline-flex;vertical-align:-2px;margin-left:6px;color:var(--ink-3);opacity:.8}.nmpen svg{width:15px;height:15px}
 .countdown{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--accent);font-weight:600}
 .countdown::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 0 var(--glow);animation:pulse 2s infinite}
 @keyframes pulse{70%{box-shadow:0 0 0 8px transparent}100%{box-shadow:0 0 0 0 transparent}}
@@ -946,6 +948,7 @@ a.btn{text-decoration:none}
 
 const sv=(d,w=1.8)=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 const IC={
+  pen:sv('<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>'),
   speaker:sv('<path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/>'),
   close:sv('<path d="M6 6l12 12M18 6L6 18"/>',2),
   box:sv('<path d="M3.5 7.5L12 3l8.5 4.5v9L12 21l-8.5-4.5z"/><path d="M3.5 7.5L12 12l8.5-4.5M12 12v9"/>'),
@@ -1095,6 +1098,13 @@ const clean=v=>String(v==null?'':v).replace(/[<>"'`]/g,'').slice(0,120);
 function regCustom(id,d){if(d&&d.db){d.db.nome=clean(d.db.nome);d.db.dose=clean(d.db.dose)}if(d)d.comp=clean(d.comp);DB[id]=d.db;BOX[id]=d.box;if(d.unit)UNIT[id]=d.unit;COMP[id]=d.comp}
 Object.entries(S.custom).forEach(([id,d])=>regCustom(id,d));
 if(!S.horasOv)S.horasOv={};Object.entries(S.horasOv).forEach(([id,h])=>{if(DB[id])DB[id].horas=[...h]});
+/* v91: edição de qualquer item da lista (nome, dose, tipo, unidade, quantidade por dose, embalagem, como usar) */
+if(!S.itemEd)S.itemEd={};
+const UNITS={comprimidos:'comprimido','cápsulas':'cápsula',gotas:'gota',ml:'ml','sachês':'sachê','aplicações':'aplicação',unidades:'unidade'};
+const uName=(u,n)=>n==1?(UNITS[u]||u):u;
+const PER=id=>(S.itemEd[id]&&+S.itemEd[id].n)||1;
+function applyEd(id){const e=S.itemEd[id],D=DB[id];if(!e||!D)return;['nome','dose','como'].forEach(k=>{if(e[k])D[k]=e[k]});if(CAT[e.cat])D.cat=e.cat;if(e.unit)UNIT[id]=e.unit;if(e.box)BOX[id]=e.box;if(e.n)D.qtd=String(e.n).replace('.',',')+' '+uName(UNIT[id]||'comprimidos',e.n)+' por dose'}
+Object.keys(S.itemEd).forEach(applyEd);
 S.list=S.list.filter(id=>DB[id]);
 const dkey=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 if(!S.hist)S.hist={};if(!S.takenAt)S.takenAt={};
@@ -1121,7 +1131,7 @@ const used=id=>Math.min(1,Math.max(0,1-stock(id)/BOX[id]));
 const needsRefill=id=>used(id)>=.8&&!S.refillOff[id];
 const outOf=id=>stock(id)<=0;
 const needsAlert=id=>needsRefill(id)||outOf(id);
-function daysLeft(id){const per=DB[id].horas.length||1;return Math.floor(stock(id)/per)}
+function daysLeft(id){const per=(DB[id].horas.length||1)*PER(id);return Math.floor(stock(id)/per)}
 /* alergias: compara o que o paciente informou (alergias + observações) com nome e composição de cada item */
 function allergyTerms(){return (S.profile.alergias+','+(S.profile.obs||'')).toLowerCase().replace(/intoler[aâ]ncia( leve)? a|alergia a/g,',').split(/[,;]| e /).map(x=>x.trim()).filter(x=>x.length>2)}
 function allergyFor(id){const hay=(DB[id].nome+' '+(COMP[id]||'')).toLowerCase();const syn={'frutos do mar':['peixe'],'lactose':['lactose','leite'],'dipirona':['dipirona','metamizol']};
@@ -1129,7 +1139,7 @@ function allergyFor(id){const hay=(DB[id].nome+' '+(COMP[id]||'')).toLowerCase()
 function isAl(t){return (S.profile.alergias||'').toLowerCase().replace(/alergia a/g,',').split(/[,;]| e /).map(x=>x.trim()).includes(t)}
 const alW=t=>isAl(t)?'alergia':'intolerância';
 function allergyHits(list=S.list){return list.map(id=>({id,t:allergyFor(id)})).filter(x=>x.t)}
-function save(){try{localStorage.setItem('medlist-v2',JSON.stringify({list:S.list,taken:S.taken,takenDay:S.takenDay,seedV:S.seedV,pros:S.pros,alarms:S.alarms,theme:S.theme,plan:S.plan,trialStart:S.trialStart,locOk:S.locOk,praio:S.praio,planTab:S.planTab,bill:S.bill,profile:S.profile,stock:S.stock,refillOff:S.refillOff,big:S.big,onboarded:S.onboarded,hist:S.hist,takenAt:S.takenAt,rung:S.rung,notifAsk:S.notifAsk,consent:S.consent,lockOn:S.lockOn,threads:S.threads,extraPros:S.extraPros,hiddenPros:S.hiddenPros,changes:S.changes,custom:S.custom,horasOv:S.horasOv,registered:S.registered,hadAccount:S.hadAccount,pendingInvite:S.pendingInvite||"",demoClean:S.demoClean}))}catch(e){}}
+function save(){try{localStorage.setItem('medlist-v2',JSON.stringify({list:S.list,taken:S.taken,takenDay:S.takenDay,seedV:S.seedV,pros:S.pros,alarms:S.alarms,theme:S.theme,plan:S.plan,trialStart:S.trialStart,locOk:S.locOk,praio:S.praio,planTab:S.planTab,bill:S.bill,profile:S.profile,stock:S.stock,refillOff:S.refillOff,big:S.big,onboarded:S.onboarded,hist:S.hist,takenAt:S.takenAt,rung:S.rung,notifAsk:S.notifAsk,consent:S.consent,lockOn:S.lockOn,threads:S.threads,extraPros:S.extraPros,hiddenPros:S.hiddenPros,changes:S.changes,custom:S.custom,horasOv:S.horasOv,registered:S.registered,hadAccount:S.hadAccount,pendingInvite:S.pendingInvite||"",demoClean:S.demoClean,itemEd:S.itemEd}))}catch(e){}}
 
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -1194,7 +1204,7 @@ function vHoje(){
   <div class="hero glass">
     <div class="ringwrap"><div class="ring"><svg viewBox="0 0 120 120"><circle class="track" cx="60" cy="60" r="50" fill="none" stroke-width="10"/><circle class="bar" id="ringbar" cx="60" cy="60" r="50" fill="none" stroke-width="10" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-pct)}"/></svg>
       <div class="mid"><b class="num" id="ringnum">${done}/${d.length}</b></div></div><small class="ringlbl">${isToday?'doses hoje':past?'doses tomadas':'doses previstas'}</small></div>
-    <div class="next">${next?`<span class="eyebrow"${late?' style="color:var(--rose-ink)"':''}>${late?'Dose atrasada':'Próxima dose'}</span><span class="nm">${DB[next.id].nome} <span style="font-weight:400;color:var(--ink-2)">${DB[next.id].dose}</span></span>
+    <div class="next">${next?`<span class="eyebrow"${late?' style="color:var(--rose-ink)"':''}>${late?'Dose atrasada':'Próxima dose'}</span><button class="nm nmlink tap" data-item="${next.id}" aria-label="Ver e editar ${esc(DB[next.id].nome)}">${DB[next.id].nome} <span style="font-weight:400;color:var(--ink-2)">${DB[next.id].dose}</span><span class="nmpen">${IC.pen}</span></button>
       <span class="countdown"${late?' style="color:var(--rose-ink)"':''}>${next.h} · ${cd}</span><div class="nextacts"><button class="btn primary sm tap" data-takenext="${next.key}">${IC.check} Tomar agora</button><button class="iconbtn tap" data-ring="${next.key}" aria-label="Testar o alarme desta dose">${IC.bell}</button></div>`
       :isToday&&!S.list.length?`<span class="eyebrow">Comece por aqui</span><span class="nm">Adicione seu primeiro remédio</span><div class="nextacts"><button class="btn primary sm tap" onclick="document.getElementById('fab').click()">${IC.plus} Adicionar</button></div>`
       :isToday?`<span class="eyebrow">Tudo certo</span><span class="nm">Você tomou todas as doses de hoje</span>`
@@ -1628,7 +1638,7 @@ function suplItem(i){const x=SUPL[i],id='s'+nrm(x.nome).replace(/[^A-Z0-9]/g,'')
   const d={db,box:30,unit:x.unit,comp:x.sub.toLowerCase()};CUST[id]=d;regCustom(id,d);return id}
 function manualItem(nome,cat){nome=clean(nome);const id='m'+Date.now().toString(36);const P=qParse(nome),dose=P.n.length?P.n[0]+' '+((nrm(nome).match(/\d\s*(MCG|MG|ML|UI|G)\b/)||[,'mg'])[1].toLowerCase()):'';
   const db={nome:tc(nome.replace(/\s*\d.*$/,'').trim()||nome.trim()),dose,cat,qtd:'Conforme a receita',para:'Item adicionado por você.',como:'Siga a orientação de quem receitou ou a embalagem.',evitar:'Confira a bula ou a embalagem.',horas:['08:00'],por:'',src:'manual',sub:'',ap:'',ean:'',base:null};
-  const d={db,box:30,unit:'',comp:nome.trim().toLowerCase()};CUST[id]=d;regCustom(id,d);return id}
+  const d={db,box:cat==='fito'?600:30,unit:cat==='fito'?'gotas':'',comp:nome.trim().toLowerCase()};CUST[id]=d;regCustom(id,d);return id}
 function cmedHtml(q){if(nrm(q.trim()).length<2)return '';
   if(!CMED)return CMEDERR?'<p class="sub cmload">Sem conexão com a lista da Anvisa agora. Tente de novo em instantes.</p>':`<p class="sub cmload"><i class="spin"></i>Buscando na lista da Anvisa…</p>`;
   let r=cmedSearch(q);const su=suplSearch(q);if((r.numMiss||r.partial)&&su.length)r=[];let h='';
@@ -1650,7 +1660,8 @@ function resultsHtml(res){return res.map(id=>{const has=S.list.includes(id);
   return `<button class="result tap" data-add="${id}" ${has?'disabled':''}>${pillic(id)}<div class="info"><b>${DB[id].nome} ${DB[id].dose}</b><br><span>${CAT[DB[id].cat].label}${allergyFor(id)?` · <span style="color:var(--rose-ink);font-weight:700">você informou ${alW(allergyFor(id))} a ${esc(allergyFor(id))}</span>`:''}${would.length?` · <span style="color:var(--peach-ink);font-weight:600">${would.length===1?'1 alerta com sua lista':would.length+' alertas com sua lista'}</span>`:''}</span></div>${has?'<span class="src">Na lista</span>':''}</button>`}).join('')||'<p class="sub">Não encontrei. Tente outro nome, escaneie a caixa ou anexe uma foto.</p>'}
 
 function sheetItem(id){const D=DB[id],al=alerts().filter(i=>i.a===id||i.b===id);
-  return `<div style="display:flex;gap:14px;align-items:center">${pillic(id)}<div><h1>${D.nome}</h1><span class="chip ${cls(id)}">${CAT[D.cat].label} · ${D.dose}</span></div></div>
+  return `<div style="display:flex;gap:14px;align-items:center">${pillic(id)}<div style="flex:1;min-width:0"><h1>${D.nome}</h1><span class="chip ${cls(id)}">${CAT[D.cat].label}${D.dose?' · '+D.dose:''}</span></div><button class="btn ghost sm tap" data-editem="${id}" aria-label="Editar ${esc(D.nome)}">${IC.pen} Editar</button></div>
+  ${UNIT[id]==='gotas'&&!(S.itemEd[id]&&S.itemEd[id].n)?`<button class="todo tap" data-editem="${id}" style="text-align:left">${IC.pen}<span>Quantas gotas você toma por vez? Toque aqui para ajustar.</span></button>`:''}
   <div class="photo-slot ${cls(id)}"><div class="thumb">${photos[id]?`<img src="${photos[id]}" alt="Foto de ${D.nome}">`:IC.cam}</div>
     <div style="flex:1;min-width:0"><b style="display:block">${photos[id]?'Foto do remédio':'Sem foto ainda'}</b><span class="sub" style="font-size:13px">Ajuda a reconhecer a caixa na hora de tomar</span></div>
     <button class="btn ghost sm tap" data-photo="${id}">${IC.cam} ${photos[id]?'Trocar':'Anexar'}</button></div>
@@ -1658,7 +1669,7 @@ function sheetItem(id){const D=DB[id],al=alerts().filter(i=>i.a===id||i.b===id);
   <h2>Caixa e reposição</h2>
   <div class="box"><div class="lineh"><b>${stock(id)} de ${BOX[id]} ${UNIT[id]||'comprimidos'}</b><span class="sub" style="font-size:13px">${Math.round(used(id)*100)}% usado</span></div>
     <div class="meter ${used(id)>=.8?'low':''}"><i style="width:${(1-used(id))*100}%"></i></div>
-    <span class="sub" style="font-size:12.5px">Caixa com ${BOX[id]} ${UNIT[id]||'comprimidos'} conforme a bula. A linha marca 80%: ao passar dela, o WePill avisa para repor. Dá para cerca de ${daysLeft(id)} dias.</span>
+    <span class="sub" style="font-size:12.5px">Embalagem com ${BOX[id]} ${UNIT[id]||'comprimidos'}${S.itemEd[id]&&S.itemEd[id].box?', como você informou':' conforme a bula'}${PER(id)>1?`, usando ${String(PER(id)).replace('.',',')} por dose`:''}. A linha marca 80%: ao passar dela, o WePill avisa para repor. Dá para cerca de ${daysLeft(id)} dias.</span>
     <div class="field" style="padding:10px 0;background:none;border:0"><span class="lbl">Avisar ao usar 80%<small>Lembrete na tela inicial e notificação</small></span><button class="switch ${S.refillOff[id]?'':'on'}" data-refill="${id}" role="switch" aria-checked="${!S.refillOff[id]}" aria-label="Avisar ao usar 80% da caixa"></button></div>
     <button class="btn ghost sm tap" data-newbox="${id}">${IC.box} Comprei uma caixa nova</button></div>
   <h2>Alarmes</h2>
@@ -1677,6 +1688,19 @@ function bulaUrl(id){const D=DB[id];let n=D.src==='cmed'?D.nome:(id in BULANOME?
 function bulaBox(id){const u=bulaUrl(id),D=DB[id];
   return `<div class="bula glass"><div class="bt"><span class="bic">${sv('<path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 15.5h5M10 9h2"/>')}</span><div><b>${u?'Bula oficial da Anvisa':'Rótulo do produto'}</b><span>${u?'Texto completo, aprovado pela Anvisa':'Suplementos não têm bula: confira o rótulo da embalagem'}</span></div></div>
   ${u?`<a class="btn primary block tap" href="${u}" target="_blank" rel="noopener">${sv('<path d="M14 4h6v6M20 4l-9 9M18 14v5H5V6h5"/>',2)} Abrir a bula de ${esc(D.nome)}</a><span class="bnote">Abre o Bulário Eletrônico da Anvisa. Toque no nome do produto e depois em "Bula do paciente".</span>`:''}</div>`}
+function sheetEditItem(id){const D=DB[id],e=S.itemEd[id]||{},u=UNIT[id]||'comprimidos';
+  const f=(k,lbl,v,ph,ex='')=>`<label class="fact" style="display:block"><small>${lbl}</small><input id="ie-${k}" value="${esc(v||'')}" placeholder="${ph}" autocomplete="off" ${ex} style="width:100%;border:0;background:transparent;font:inherit;color:var(--ink);outline:none;padding:4px 0"></label>`;
+  const sel=(k,lbl,opts,cur)=>`<label class="fact" style="display:block"><small>${lbl}</small><select id="ie-${k}" style="width:100%;border:0;background:transparent;font:inherit;font-weight:600;color:var(--ink);outline:none;padding:4px 22px 4px 0;appearance:none;-webkit-appearance:none;background:url(&quot;data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%2394a3b8%27 stroke-width=%272.4%27%3E%3Cpath d=%27M6 9l6 6 6-6%27/%3E%3C/svg%3E&quot;) right center/18px no-repeat">${opts.map(([v,t])=>`<option value="${v}"${v===cur?' selected':''}>${t}</option>`).join('')}</select></label>`;
+  return `<div style="display:flex;gap:14px;align-items:center">${pillic(id)}<div><h1>Editar</h1><span class="sub">${esc(D.nome)}</span></div></div>
+  <div class="facts">${f('nome','Nome',D.nome,'Ex.: Floral de Bach')}${f('dose','Dose ou concentração (opcional)',D.dose,'Ex.: 50 mg')}
+  ${sel('cat','Tipo',Object.keys(CAT).map(c=>[c,CAT[c].label]),D.cat)}
+  ${sel('unit','Como vem',Object.keys(UNITS).map(x=>[x,x[0].toUpperCase()+x.slice(1)]),u)}
+  ${f('n','Quanto você toma por vez',e.n||1,'Ex.: 4','inputmode="decimal"')}
+  ${f('box','Quanto vem na embalagem',BOX[id],'Ex.: 30','inputmode="numeric"')}
+  ${f('como','Como usar (opcional)',D.como,'Ex.: Embaixo da língua, 4 vezes ao dia')}</div>
+  <p class="sub" style="font-size:12.5px;margin:0">Dica: um frasco de 30 ml tem cerca de 600 gotas.</p>
+  <button class="btn primary block tap" data-saveitem="${id}">${IC.check} Salvar</button>
+  <button class="btn ghost block tap" data-item="${id}">Cancelar</button>`}
 function sheetDel(id){const D=DB[id];return `<div style="display:flex;gap:14px;align-items:center">${pillic(id)}<div><h1>Tirar da lista?</h1><span class="sub">${esc(D.nome)} ${esc(D.dose)}</span></div></div>
   <p class="sub">O item sai da sua lista, dos alarmes e dos alertas. Isso não muda nenhuma receita: converse com quem receitou antes de parar um remédio.</p>
   <div style="display:flex;gap:10px"><button class="btn ghost tap" style="flex:1" data-close>Cancelar</button><button class="btn danger tap" style="flex:1" data-remove="${id}">Tirar da lista</button></div>`}
@@ -1929,7 +1953,7 @@ document.addEventListener('click',e=>{if(DRAGGED){e.stopPropagation();e.preventD
   if(ds.home!==undefined||ds.tab==='hoje'){S.day=null;return go('hoje')}
   if(ds.tab)return go(ds.tab);
   if(ds.go)return go(ds.go);
-  if(ds.take){const k=ds.take;S.taken[k]=!S.taken[k];if(S.taken[k])S.takenAt[k]=new Date().toISOString();else delete S.takenAt[k];const iid=k.split('#')[0],was=needsRefill(iid);S.stock[iid]=Math.max(0,Math.min(BOX[iid],stock(iid)+(S.taken[k]?-1:1)));save();if(outOf(iid))setTimeout(()=>toast(`Essa foi a última dose de ${DB[iid].nome}. O remédio está em falta: veja em Alertas.`),400);else if(!was&&needsRefill(iid))setTimeout(()=>toast(`Você já usou 80% da caixa de ${DB[iid].nome}. Veja em Alertas.`),400);renderDock();const row=t.closest('.dose');t.classList.toggle('on');row.classList.toggle('done');
+  if(ds.take){const k=ds.take;S.taken[k]=!S.taken[k];if(S.taken[k])S.takenAt[k]=new Date().toISOString();else delete S.takenAt[k];const iid=k.split('#')[0],was=needsRefill(iid);S.stock[iid]=Math.max(0,Math.min(BOX[iid],stock(iid)+(S.taken[k]?-PER(iid):PER(iid))));save();if(outOf(iid))setTimeout(()=>toast(`Essa foi a última dose de ${DB[iid].nome}. O remédio está em falta: veja em Alertas.`),400);else if(!was&&needsRefill(iid))setTimeout(()=>toast(`Você já usou 80% da caixa de ${DB[iid].nome}. Veja em Alertas.`),400);renderDock();const row=t.closest('.dose');t.classList.toggle('on');row.classList.toggle('done');
     const b=row.querySelector('.info b');b.innerHTML=S.taken[k]?`<s>${b.textContent}</s>`:b.textContent;
     if(S.tab==='hoje')refresh();const d=doses();if(d.every(x=>S.taken[x.key]))toast('Todas as doses de hoje foram tomadas. Muito bem!');return}
   if(ds.filter){const F=FCATS,o=F.indexOf(S.filter),n=F.indexOf(ds.filter);SWIPE=n>o?'r':n<o?'l':'';S.filter=ds.filter;render(true);SWIPE='';return centerChip()}
@@ -1958,11 +1982,22 @@ document.addEventListener('click',e=>{if(DRAGGED){e.stopPropagation();e.preventD
   if(ds.wday!==undefined){const dow=new Date().getDay();S.day=+ds.wday===dow?null:+ds.wday;closeSheet();return go('hoje')}
   if(ds.afilter){S.afilter=ds.afilter;return refresh()}
   if(ds.goalert){S.afilter=ds.goalert==='repor'?'repor':'todos';return go('alertas')}
-  if(ds.takenext){const k=ds.takenext;S.taken[k]=true;S.takenAt[k]=new Date().toISOString();const iid=k.split('#')[0],was=needsRefill(iid);S.stock[iid]=Math.max(0,stock(iid)-1);save();renderDock();refresh();
+  if(ds.takenext){const k=ds.takenext;S.taken[k]=true;S.takenAt[k]=new Date().toISOString();const iid=k.split('#')[0],was=needsRefill(iid);S.stock[iid]=Math.max(0,stock(iid)-PER(iid));save();renderDock();refresh();
     toast(`${DB[iid].nome} registrado às ${new Date().toTimeString().slice(0,5)}.`);if(outOf(iid))setTimeout(()=>toast(`Essa foi a última dose de ${DB[iid].nome}. O remédio está em falta: veja em Alertas.`),2600);else if(!was&&needsRefill(iid))setTimeout(()=>toast(`Você já usou 80% da caixa de ${DB[iid].nome}. Veja em Alertas.`),2600);return}
   if(ds.big){S.big=ds.big==='1';save();renderWeek();return refresh()}
   if(ds.refill){const id=ds.refill;S.refillOff[id]=!S.refillOff[id];t.classList.toggle('on');t.setAttribute('aria-checked',!S.refillOff[id]);save();refresh();return}
   if(ds.newbox){const id=ds.newbox;S.stock[id]=BOX[id];save();if(sheetCtx&&sheetCtx.item)openSheet(sheetItem(id),{item:id});renderDock();refresh();return toast(`Caixa nova de ${DB[id].nome} registrada: ${BOX[id]} ${UNIT[id]||'comprimidos'}.`)}
+  if(ds.editem)return openSheet(sheetEditItem(ds.editem),{edit:ds.editem});
+  if(ds.saveitem!==undefined){const id=ds.saveitem,v=k=>clean(($('#ie-'+k)||{}).value||'').trim(),num=k=>parseFloat(v(k).replace(',','.'));
+    const nome=v('nome'),n=num('n'),box=Math.round(num('box'));
+    if(!nome){$('#ie-nome').focus();return toast('Escreva o nome.')}
+    if(!(n>0&&n<=200)){$('#ie-n').focus();return toast('Confira quanto você toma por vez.')}
+    if(!(box>=1&&box<=5000)){$('#ie-box').focus();return toast('Confira quanto vem na embalagem.')}
+    const oldU=UNIT[id]||'comprimidos',unit=UNITS[v('unit')]?v('unit'):oldU;
+    S.itemEd[id]={nome,dose:v('dose'),cat:CAT[v('cat')]?v('cat'):DB[id].cat,unit,n,box,como:v('como')};
+    if(!v('dose'))DB[id].dose='';if(!v('como'))S.itemEd[id].como='';
+    applyEd(id);if(unit!==oldU)S.stock[id]=box;else if(stock(id)>box)S.stock[id]=box;
+    save();renderDock();render();openSheet(sheetItem(id),{item:id});return toast(`${nome} atualizado.`)}
   if(ds.item){if(HELD)return;return openSheet(sheetItem(ds.item),{item:ds.item})}
   if(ds.add)return addItem(ds.add);
   if(ds.cmp){$('#results').innerHTML=cmedPres(+ds.cmp);$('#sheetBody').scrollTop=0;return}
@@ -2010,7 +2045,7 @@ document.addEventListener('click',e=>{if(DRAGGED){e.stopPropagation();e.preventD
       if(back&&back.k==='item')openSheet(sheetItem(back.v),{item:back.v});else if(back&&back.k==='period')openSheet(sheetPeriod(back.v),{period:back.v});else closeSheet();refresh();return}
   }
   if(ds.ring){const v=$('#atime');if(v&&sheetCtx&&sheetCtx.alarm===ds.ring&&v.value)alarm(ds.ring).time=v.value;return ring(ds.ring)}
-  if(ds.took){stopRing();const k=ds.took;if(!S.taken[k]){S.taken[k]=true;S.takenAt[k]=new Date().toISOString();const iid=k.split('#')[0];if(DB[iid])S.stock[iid]=Math.max(0,stock(iid)-1)}save();renderDock();render();return toast('Dose registrada. Ótimo!')}
+  if(ds.took){stopRing();const k=ds.took;if(!S.taken[k]){S.taken[k]=true;S.takenAt[k]=new Date().toISOString();const iid=k.split('#')[0];if(DB[iid])S.stock[iid]=Math.max(0,stock(iid)-PER(iid))}save();renderDock();render();return toast('Dose registrada. Ótimo!')}
   if(ds.notif!==undefined){try{Notification.requestPermission().then(()=>refresh())}catch(e){}return}
   if(ds.snz){stopRing();const A=alarm(ds.snz);rungSet(ds.snz,Date.now()+A.snooze*6e4);return toast(`Tudo bem. Vou lembrar de novo em ${A.snooze} minutos, com o WePill aberto ou em segundo plano.`)}
   if(ds.period)return openSheet(sheetPeriod(ds.period),{period:ds.period});
