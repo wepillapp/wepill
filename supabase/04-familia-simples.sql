@@ -118,3 +118,18 @@ grant execute on function public.remover_membro(uuid) to authenticated;
 revoke execute on function public.apagar_minha_conta() from public, anon;
 grant execute on function public.apagar_minha_conta() to authenticated;
 grant execute on function public.criar_familia(text), public.gerar_convite(), public.aceitar_convite(text), public.sair_da_familia(), public.eh_anonimo() to authenticated;
+
+-- convidado sem e-mail só grava dados depois de entrar numa família (evita abuso de contas anônimas)
+create or replace function public.pode_gravar() returns boolean
+language sql stable security definer set search_path = public as $$
+  select not public.eh_anonimo() or exists (select 1 from membros where user_id = auth.uid());
+$$;
+grant execute on function public.pode_gravar() to authenticated;
+drop policy if exists perfis_meu on public.perfis;
+create policy perfis_meu on public.perfis for all using (id = auth.uid()) with check (id = auth.uid() and public.pode_gravar());
+drop policy if exists itens_meus on public.itens;
+create policy itens_meus on public.itens for all using (user_id = auth.uid()) with check (user_id = auth.uid() and public.pode_gravar());
+drop policy if exists doses_minhas on public.doses;
+create policy doses_minhas on public.doses for all using (user_id = auth.uid()) with check (user_id = auth.uid() and public.pode_gravar());
+drop policy if exists push_meu on public.push_inscricoes;
+create policy push_meu on public.push_inscricoes for all using (user_id = auth.uid()) with check (user_id = auth.uid() and public.pode_gravar());
