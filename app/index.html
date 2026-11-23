@@ -1139,7 +1139,7 @@ function allergyFor(id){const hay=(DB[id].nome+' '+(COMP[id]||'')).toLowerCase()
 function isAl(t){return (S.profile.alergias||'').toLowerCase().replace(/alergia a/g,',').split(/[,;]| e /).map(x=>x.trim()).includes(t)}
 const alW=t=>isAl(t)?'alergia':'intolerância';
 function allergyHits(list=S.list){return list.map(id=>({id,t:allergyFor(id)})).filter(x=>x.t)}
-function save(){try{localStorage.setItem('medlist-v2',JSON.stringify({list:S.list,taken:S.taken,takenDay:S.takenDay,seedV:S.seedV,pros:S.pros,alarms:S.alarms,theme:S.theme,plan:S.plan,trialStart:S.trialStart,locOk:S.locOk,praio:S.praio,planTab:S.planTab,bill:S.bill,profile:S.profile,stock:S.stock,refillOff:S.refillOff,big:S.big,onboarded:S.onboarded,hist:S.hist,takenAt:S.takenAt,rung:S.rung,notifAsk:S.notifAsk,consent:S.consent,lockOn:S.lockOn,threads:S.threads,extraPros:S.extraPros,hiddenPros:S.hiddenPros,changes:S.changes,custom:S.custom,horasOv:S.horasOv,registered:S.registered,hadAccount:S.hadAccount,pendingInvite:S.pendingInvite||"",demoClean:S.demoClean,itemEd:S.itemEd}))}catch(e){}}
+function save(){try{pushSoon()}catch(e){}try{localStorage.setItem('medlist-v2',JSON.stringify({list:S.list,taken:S.taken,takenDay:S.takenDay,seedV:S.seedV,pros:S.pros,alarms:S.alarms,theme:S.theme,plan:S.plan,trialStart:S.trialStart,locOk:S.locOk,praio:S.praio,planTab:S.planTab,bill:S.bill,profile:S.profile,stock:S.stock,refillOff:S.refillOff,big:S.big,onboarded:S.onboarded,hist:S.hist,takenAt:S.takenAt,rung:S.rung,notifAsk:S.notifAsk,consent:S.consent,lockOn:S.lockOn,threads:S.threads,extraPros:S.extraPros,hiddenPros:S.hiddenPros,changes:S.changes,custom:S.custom,horasOv:S.horasOv,registered:S.registered,hadAccount:S.hadAccount,pendingInvite:S.pendingInvite||"",demoClean:S.demoClean,itemEd:S.itemEd}))}catch(e){}}
 
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -1199,7 +1199,8 @@ function vHoje(){
   const cd=late?`atrasada há ${ago<60?ago+' min':Math.floor(ago/60)+'h '+String(ago%60).padStart(2,'0')+'min'}`:next?(diff<60?`em ${diff} min`:`em ${Math.floor(diff/60)}h ${String(diff%60).padStart(2,'0')}min`):'';
   const atn=alerts().filter(a=>a.sev!=='leve').length,low=S.list.filter(needsAlert).sort((a,b)=>outOf(b)-outOf(a)).length;
   const askN=isToday&&S.list.length&&('Notification' in window)&&Notification.permission==='default';
-  return `${askN?`<button class="famalert tap" data-notif>${IC.bell}<span><b>Ativar os avisos de remédio</b><small>Para o WePill avisar na hora, mesmo em segundo plano</small></span></button>`:''}${isToday?'':`<div class="dayview">${past?'Histórico de':'Planejado para'} ${dname}<button data-wday="${dow}">Voltar para hoje</button></div>`}
+  const iosAdd=isToday&&S.list.length&&!askN&&/iPad|iPhone|iPod/.test(navigator.userAgent)&&!(navigator.standalone===true||(window.matchMedia&&matchMedia('(display-mode: standalone)').matches));
+  return `${askN?`<button class="famalert tap" data-notif>${IC.bell}<span><b>Ativar os avisos de remédio</b><small>Para o WePill avisar na hora, mesmo com o app fechado</small></span></button>`:''}${iosAdd?`<div class="famalert">${IC.bell}<span><b>Alarme com o app fechado</b><small>No iPhone, abra o WePill pelo ícone da Tela de Início. No Safari: Compartilhar → Adicionar à Tela de Início.</small></span></div>`:''}${isToday?'':`<div class="dayview">${past?'Histórico de':'Planejado para'} ${dname}<button data-wday="${dow}">Voltar para hoje</button></div>`}
   ${idCard()}
   <div class="hero glass">
     <div class="ringwrap"><div class="ring"><svg viewBox="0 0 120 120"><circle class="track" cx="60" cy="60" r="50" fill="none" stroke-width="10"/><circle class="bar" id="ringbar" cx="60" cy="60" r="50" fill="none" stroke-width="10" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-pct)}"/></svg>
@@ -1795,12 +1796,30 @@ function stopRing(){$('#alarm').classList.remove('on');clearInterval(loop)}
 /* v76: verifica os horários sozinho. Toca na hora com o app aberto; em segundo plano, manda notificação. */
 function rungGet(k){const r=S.rung;return r&&r.day===dkey(new Date())?r.next[k]:undefined}
 function rungSet(k,v){if(!S.rung||S.rung.day!==dkey(new Date()))S.rung={day:dkey(new Date()),next:{}};S.rung.next[k]=v;save()}
-function notify(key){try{if(!('Notification' in window)||Notification.permission!=='granted'||!navigator.serviceWorker)return;const [id]=key.split('#'),D=DB[id],A=alarm(key);
+function notify(key){try{if(PUSHON||!('Notification' in window)||Notification.permission!=='granted'||!navigator.serviceWorker)return;const [id]=key.split('#'),D=DB[id],A=alarm(key);
   navigator.serviceWorker.ready.then(r=>r.showNotification('Hora de tomar: '+D.nome,{body:`${A.time} · ${D.qtd}${D.dose?' de '+D.dose:''}`,tag:'wepill-'+key,renotify:true,requireInteraction:true,icon:'icon-192.png',badge:'icon-192.png',data:{key}})).catch(()=>{})}catch(e){}}
 function alarmTick(){if(!S.registered||$('#alarm').classList.contains('on'))return;const now=new Date(),nm=now.getHours()*60+now.getMinutes(),dw=now.getDay();
   for(const x of doses()){const A=alarm(x.key);if(!A.on||!A.days[dw]||S.taken[x.key])continue;const t=mins(A.time);if(nm<t||nm-t>180)continue;
     const nx=rungGet(x.key);if(nx===undefined||(nx!==null&&Date.now()>=nx)){rungSet(x.key,A.insist?Date.now()+A.snooze*6e4:null);if(document.hidden)notify(x.key);ring(x.key);return}}}
 setInterval(alarmTick,20000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(alarmTick,800)});setTimeout(alarmTick,3000);
+/* v93: push. O servidor (Supabase, função "lembretes") manda o aviso na hora, mesmo com o app fechado.
+   Vai para o servidor só: horários, dias, se insiste e quais doses de hoje já foram tomadas. Nenhum nome de remédio. */
+const VAPID_PUB='BDtJZ1ywLlVKVj1ex3zdrHGVmUk1FsBBaJDlRJP973hUTCTHZ8sKReUiBY3UTuO6GNiJenoo_P1bjgIXvOvZRPw';
+const PUSHOK=('serviceWorker' in navigator)&&('PushManager' in window)&&('Notification' in window);
+const IOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+const STANDALONE=(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true;
+let SWREG=null,PUSHON=false,pushT=null;if('serviceWorker' in navigator)navigator.serviceWorker.ready.then(r=>{SWREG=r;return r.pushManager&&r.pushManager.getSubscription()}).then(x=>{PUSHON=!!x}).catch(()=>{});
+const b64u8=b=>{const p='='.repeat((4-b.length%4)%4),r=atob((b+p).replace(/-/g,'+').replace(/_/g,'/'));return Uint8Array.from(r,c=>c.charCodeAt(0))};
+function pushPlan(){const sc=[];S.list.forEach(id=>{if(!DB[id])return;DB[id].horas.forEach((h,i)=>{const k=id+'#'+i,A=alarm(k);if(A.on)sc.push({k,t:A.time,d:A.days.map(x=>x?1:0),n:A.insist?+A.snooze||10:0})})});
+  const day=dkey(new Date());return {sc,tk:{day,keys:Object.keys(S.taken).filter(k=>S.taken[k])}}}
+async function pushSync(force){try{if(!PUSHOK||Notification.permission!=='granted')return;const reg=SWREG||await navigator.serviceWorker.ready;
+  let sub=await reg.pushManager.getSubscription();if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u8(VAPID_PUB)});PUSHON=true;
+  const j=sub.toJSON(),P=pushPlan(),tz=(Intl.DateTimeFormat().resolvedOptions().timeZone)||'America/Sao_Paulo';
+  const h=JSON.stringify([j.endpoint,P,tz]);let last='';try{last=localStorage.getItem('wepill-push-h')||''}catch(e){}if(!force&&h===last)return;
+  const sb=await sbLoad();const r=await sb.rpc('push_save',{p_endpoint:j.endpoint,p_p256dh:j.keys.p256dh,p_auth:j.keys.auth,p_tz:tz,p_schedule:P.sc,p_taken:P.tk});
+  if(!r.error){try{localStorage.setItem('wepill-push-h',h)}catch(e){}}}catch(e){}}
+function pushSoon(){clearTimeout(pushT);pushT=setTimeout(()=>pushSync(false),2500)}
+setTimeout(()=>pushSync(false),4000);document.addEventListener('visibilitychange',()=>{if(document.hidden)pushSync(false)});
 
 let toastT;function toast(t){$('#toast').innerHTML=IC.spark+'<span>'+t+'</span>';$('#toast').classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>$('#toast').classList.remove('on'),3200)}
 
@@ -2051,7 +2070,7 @@ document.addEventListener('click',e=>{if(DRAGGED){e.stopPropagation();e.preventD
   }
   if(ds.ring){const v=$('#atime');if(v&&sheetCtx&&sheetCtx.alarm===ds.ring&&v.value)alarm(ds.ring).time=v.value;return ring(ds.ring)}
   if(ds.took){stopRing();const k=ds.took;if(!S.taken[k]){S.taken[k]=true;S.takenAt[k]=new Date().toISOString();const iid=k.split('#')[0];if(DB[iid])S.stock[iid]=Math.max(0,stock(iid)-PER(iid))}save();renderDock();render();return toast('Dose registrada. Ótimo!')}
-  if(ds.notif!==undefined){try{Notification.requestPermission().then(()=>refresh())}catch(e){}return}
+  if(ds.notif!==undefined){try{if(PUSHOK&&SWREG){SWREG.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u8(VAPID_PUB)}).then(()=>{PUSHON=true;return pushSync(true)},()=>{}).finally(()=>refresh())}else Notification.requestPermission().then(p=>{if(p==='granted')pushSync(true);refresh()})}catch(e){}return}
   if(ds.snz){stopRing();const A=alarm(ds.snz);rungSet(ds.snz,Date.now()+A.snooze*6e4);return toast(`Tudo bem. Vou lembrar de novo em ${A.snooze} minutos, com o WePill aberto ou em segundo plano.`)}
   if(ds.period)return openSheet(sheetPeriod(ds.period),{period:ds.period});
   if(ds.pltab){S.planTab=ds.pltab;save();refresh();$('#main').scrollTop=0;const b=document.querySelector('.pl-tabs .on');if(b){const c=b.parentElement;c.scrollTo({left:b.offsetLeft-c.clientWidth/2+b.offsetWidth/2,behavior:'smooth'})}return}

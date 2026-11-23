@@ -77,6 +77,16 @@ const BR=t=>new Date(t+'-03:00');
     const st=await p.evaluate(()=>{const id=S.list[0];return [stock(id),JSON.parse(localStorage.getItem('medlist-v2')).itemEd[id].n]});assert(st[0]===596&&st[1]===4,'estoque/salvo errado '+st);
     await p.reload();await p.waitForTimeout(600);assert((await p.evaluate(()=>DB[S.list[0]].nome))==='Floral de Bach Rescue','edição perdida ao reabrir');
     const d=await p.evaluate(()=>{const r=document.querySelector('#dock').getBoundingClientRect();return innerHeight-r.bottom});assert(Math.abs(d)<1,'barra não está colada no fim: '+d);await ctx.close()});
+  await t('Push: inscreve o celular e manda ao servidor só horários (sem nome de remédio) e as doses tomadas',async()=>{const {ctx,p}=await novo();
+    await p.addInitScript(()=>{window.PushManager=function(){};try{Object.defineProperty(Notification,'permission',{get:()=>'granted'})}catch(e){}
+      Object.defineProperty(navigator,'serviceWorker',{value:{ready:Promise.resolve({pushManager:{getSubscription:async()=>window.__sub||null,subscribe:async()=>(window.__sub={toJSON:()=>({endpoint:'https://fcm.googleapis.com/fcm/send/teste',keys:{p256dh:'P',auth:'A'}})})}}),register:async()=>({}),addEventListener(){},controller:null}});
+      window.__rpc=[];window.addEventListener('DOMContentLoaded',()=>{window.sbLoad=async()=>({rpc:async(n,a)=>{window.__rpc.push([n,JSON.parse(JSON.stringify(a))]);return {error:null}}})})});
+    await p.reload();await p.waitForTimeout(600);await cadastrar(p);await addManual(p,'Remedio Secreto');await p.evaluate(()=>go('hoje'));await p.waitForTimeout(3500);
+    let r=await p.evaluate(()=>window.__rpc);assert(r.length>=1&&r.at(-1)[0]==='push_save','não enviou ao servidor');let a=r.at(-1)[1];
+    assert(a.p_endpoint.includes('fcm.googleapis.com')&&a.p_schedule.length===1&&a.p_schedule[0].t==='08:00'&&a.p_schedule[0].n===10,'agenda errada '+JSON.stringify(a.p_schedule));
+    assert(!JSON.stringify(a).includes('Secreto'),'nome do remédio foi para o servidor');
+    await p.click('[data-takenext]');await p.waitForTimeout(3200);r=await p.evaluate(()=>window.__rpc);a=r.at(-1)[1];assert(a.p_taken.keys.length===1,'dose tomada não foi avisada');
+    const n=r.length;await p.evaluate(()=>save());await p.waitForTimeout(3000);assert((await p.evaluate(()=>window.__rpc.length))===n,'reenviou sem mudança');await ctx.close()});
   await t('Sem erros de JavaScript no fluxo principal',async()=>{const {ctx,p}=await novo();await cadastrar(p);await addManual(p,'Remedio Teste');for(const tab of ['lista','alertas','equipe','planos','perfil','hoje'])await p.evaluate(t=>go(t),tab);
     assert(!p.errs.length,p.errs.join(' | '));await ctx.close()});
   await b.close();srv.close();console.log(`\n${ok} passaram, ${fail} falharam`);process.exit(fail?1:0)})();
