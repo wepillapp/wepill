@@ -601,6 +601,8 @@ main{padding-bottom:calc(108px + env(safe-area-inset-bottom,0px))!important}
 .prow{display:grid;grid-template-columns:40% 1fr;gap:10px;align-items:center;padding:11px 0;border-bottom:1px solid var(--hair)}
 .prow:last-child{border-bottom:0}
 .prow label{font-size:13px;color:var(--ink-2)}
+.dlink{display:flex;align-items:center;justify-content:space-between;width:100%;padding:13px 0;border:0;border-bottom:1px solid var(--hair);background:none;font:inherit;font-size:15px;font-weight:600;color:var(--ink);text-decoration:none;text-align:left;cursor:pointer}
+.dlink:last-child{border-bottom:0}.dlink .chev{color:var(--ink-2);display:flex}.dlink .chev svg{width:18px;height:18px}.dlink.danger{color:var(--rose-ink)}
 .inp{border:0;background:transparent;font:inherit;font-weight:600;color:var(--ink);width:100%;min-width:0;text-align:right;padding:4px 6px;border-radius:8px;transition:background .25s}
 .inp:focus{outline:none;background:var(--glass-2)}
 select.inp{appearance:none;cursor:pointer}
@@ -1296,7 +1298,14 @@ function parcResults(){const a=S.parea||'todas',q=PQ.trim().toLowerCase(),me=her
   const r=all.filter(p=>p.d<=raio);
   if(!r.length)return `<div class="glass" style="padding:16px;text-align:center"><p class="sub" style="margin:0 0 10px">Ainda não há parceiros ${a==='todas'?'':'desta atividade '}na sua região.</p>${LOC.st==='ok'?'<button class="btn ghost sm tap" data-locdemo>Ver parceiros de Maringá</button>':''}</div>`;
   return r.map(p=>`<button class="item glass tap" data-parc="${p.id}">${pav(p,40)}<div class="info"><b>${esc(p.nome)}</b><span>${esc(p.area)}${p.dom?' · atende em casa':''}</span></div><span class="dist">${IC.pin}${fmtKm(p.d)}</span></button>`).join('')}
-function vEquipe(){return `<h2 style="margin:0">Equipe de cuidado</h2><div class="glass" style="padding:18px;border-radius:var(--r)"><b>Em breve</b><p class="sub" style="margin:6px 0 0">Em breve você vai poder compartilhar sua lista com médico, farmacêutico e cuidadores. Por enquanto, use a Família conectada acima para acompanhar quem você cuida, e o PDF para levar à consulta.</p></div>`}
+/* v79: Meus médicos. Agenda real de contatos de saúde, só no celular (sem profissionais de exemplo e sem conversas). */
+const myPros=()=>(S.extraPros||[]).filter(p=>!p.parc&&!p.reg&&!(S.hiddenPros||[]).includes(p.id));
+function vEquipe(){const ps=myPros();
+  return `<h2 style="margin:0">Meus médicos</h2>
+  <div class="glass clist">${ps.map(p=>`<button class="crow tap" data-contact="${p.id}">${avatar(p.id,36)}
+    <div class="info"><b>${esc(p.nome)}</b><span>${esc([p.area,p.clinica].filter(Boolean).join(' · '))}</span></div><span class="chev">${sv('<path d="M9 6l6 6-6 6"/>',2)}</span></button>`).join('')||'<p class="sub" style="padding:12px 14px;margin:0">Guarde aqui os dados dos seus médicos e da clínica: telefone, WhatsApp e endereço, para achar rápido.</p>'}
+    <button class="crow add tap" data-newcontact><span class="plus">${IC.plus}</span><b>Adicionar médico ou profissional</b></button></div>
+  <p class="disclaimer">Agenda só sua, guardada neste celular. O WePill não envia sua lista nem mensagens para esses profissionais.</p>`}
 function vEquipeAntigo(){const ps=PROS.filter(p=>!(S.hiddenPros||[]).includes(p.id));
   return `<h2 style="margin:0">Profissionais cadastrados</h2>
   <div class="glass clist">${ps.map(p=>`<button class="crow tap" data-contact="${p.id}">${avatar(p.id,36)}
@@ -1334,17 +1343,20 @@ const telHref=t=>'tel:+55'+String(t||'').replace(/\D/g,'');
 const igHref=h=>'https://www.instagram.com/'+String(h||'').replace(/^@/,'')+'/';
 const igIc=sv('<rect x="4" y="4" width="16" height="16" rx="5"/><circle cx="12" cy="12" r="3.6"/><circle cx="16.6" cy="7.4" r=".6" fill="currentColor"/>');
 const mapHref=e=>'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(e||'');
+const waHref=t=>{const d=String(t||'').replace(/\D/g,'');return 'https://wa.me/'+(d.length<=11?'55':'')+d};
 function sheetContact(id){const p=proOf(id);
   const row=(lbl,val,act)=>`<div class="fact" style="display:flex;align-items:center;gap:12px"><div style="flex:1;min-width:0"><small>${lbl}</small><b style="font-weight:600">${esc(val||'Não informado')}</b></div>${act||''}</div>`;
   return `<div style="display:flex;gap:14px;align-items:center">${avatar(p.id,56)}<div><h1 style="font-size:22px">${esc(p.nome)}</h1><span class="chip" style="--c:var(--${p.c});--ci:var(--${p.c}-ink)">${esc(p.area)}</span></div></div>
-  <div class="facts">${row('Telefone',p.tel,p.tel?`<a class="btn primary sm tap" href="${telHref(p.tel)}">Ligar</a>`:'')}
-  ${row('Especialidade',p.area)}
+  <div class="facts">${p.clinica?row('Clínica ou consultório',p.clinica):''}${p.crm?row('Registro (CRM/CRN/CRF)',p.crm):''}
+  ${row('Telefone',p.tel,p.tel?`<a class="btn primary sm tap" href="${telHref(p.tel)}">Ligar</a>`:'')}
+  ${p.wa?row('WhatsApp',p.wa,`<a class="btn ghost sm tap" href="${waHref(p.wa)}" target="_blank" rel="noopener">Abrir</a>`):''}
   ${p.ig?row('Instagram','@'+p.ig,`<a class="btn ghost sm tap" href="${igHref(p.ig)}" target="_blank" rel="noopener">${igIc} Abrir</a>`):''}
   ${row('Endereço',p.end,p.end?`<a class="btn ghost sm tap" href="${mapHref(p.end)}" target="_blank" rel="noopener">Mapa</a>`:'')}</div>
+  <button class="btn ghost block tap" data-editcontact="${p.id}">Editar</button>
   <button class="btn ghost block tap" data-delcontact="${p.id}">Remover dos contatos</button>`}
-function sheetNewContact(){const f=(id,lbl,ph,type='text')=>`<label class="fact" style="display:block"><small>${lbl}</small><input id="${id}" type="${type}" placeholder="${ph}" autocomplete="off" style="width:100%;border:0;background:transparent;font:inherit;color:var(--ink);outline:none;padding:4px 0"></label>`;
-  return `<h1>Novo profissional</h1><div class="facts">${f('nc-nome','Nome','Ex.: Dra. Carla Lima')}${f('nc-area','Especialidade','Ex.: Geriatra')}${f('nc-tel','Telefone','(44) 99999-0000','tel')}${f('nc-end','Endereço','Rua, número, bairro, cidade')}${f('nc-ig','Instagram (opcional)','@perfil')}</div>
-  <button class="btn primary block tap" data-savecontact>${IC.check} Salvar contato</button>`}
+function sheetNewContact(id){const p=id?proOf(id):{};const f=(k,lbl,ph,type='text')=>`<label class="fact" style="display:block"><small>${lbl}</small><input id="nc-${k}" type="${type}" placeholder="${ph}" value="${esc(p[k]||'')}" autocomplete="off" style="width:100%;border:0;background:transparent;font:inherit;color:var(--ink);outline:none;padding:4px 0"></label>`;
+  return `<h1>${id?'Editar contato':'Novo médico ou profissional'}</h1><div class="facts">${f('nome','Nome','Ex.: Dra. Carla Lima')}${f('area','Especialidade','Ex.: Cardiologista')}${f('clinica','Clínica ou consultório (opcional)','Ex.: Clínica Coração')}${f('crm','CRM / registro (opcional)','Ex.: CRM-PR 12345')}${f('tel','Telefone','(44) 3000-0000','tel')}${f('wa','WhatsApp (opcional)','(44) 99999-0000','tel')}${f('end','Endereço','Rua, número, sala, bairro, cidade')}</div>
+  <button class="btn primary block tap" data-savecontact="${id||''}">${IC.check} Salvar</button>`}
 
 let ctype='Dúvida',typingFor=null;
 function sheetThread(id){const t=S.threads.find(x=>x.id===id);t.unread=false;save();
@@ -1442,7 +1454,6 @@ function vPerfil(){const p=S.profile,P=PLANS.find(x=>x.id===S.plan);
     <span class="badge-plan ${S.plan==='gratis'?'':'prem'}">${P.nome}</span></div>
   ${idCard()}
   <p class="sub" style="font-size:13px;text-align:center;margin-top:-4px">Toque em qualquer dado para editar. Tudo é salvo na hora.</p>
-  <div class="glass pgroup"><div class="prow"><label>Seus dados</label><div style="display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap"><a class="btn ghost sm" href="../privacidade.html" target="_blank" rel="noopener">Privacidade</a><a class="btn ghost sm" href="../termos.html" target="_blank" rel="noopener">Termos</a><button class="btn ghost sm tap" data-wipe>Apagar dados deste celular</button></div></div></div>
   <h2>Preferências</h2>
   <div class="glass pgroup"><div class="prow"><label>Ficha de emergência ao abrir</label><div style="display:flex;justify-content:flex-end;gap:8px;align-items:center"><button class="btn ghost sm tap" data-sos>Ver</button><button class="switch ${S.lockOn?'on':''}" data-lock role="switch" aria-checked="${S.lockOn}" aria-label="Mostrar ficha de emergência ao abrir"></button></div></div><div class="prow"><label>Tamanho do texto</label><div class="seg"><button class="${S.big?'':'on'}" data-big="0">Normal</button><button class="${S.big?'on':''}" data-big="1">Grande</button></div></div></div>
   <h2>Dados pessoais</h2>
@@ -1455,9 +1466,11 @@ function vPerfil(){const p=S.profile,P=PLANS.find(x=>x.id===S.plan);
   <div class="glass pgroup">${f('plano','Convênio')}${f('carteira','Nº da carteirinha')}</div>
   <h2>Emergência e cuidador</h2>
   <div class="glass pgroup">${f('emerg','Contato de emergência')}${f('emergtel','Telefone','tel')}${f('cuidador','Cuidador com acesso')}</div>
+  <h2>Privacidade e dados</h2>
+  <div class="glass pgroup dlinks"><a class="dlink" href="../privacidade.html" target="_blank" rel="noopener">Política de privacidade<span class="chev">${sv('<path d="M9 6l6 6-6 6"/>',2)}</span></a><a class="dlink" href="../termos.html" target="_blank" rel="noopener">Termos de uso<span class="chev">${sv('<path d="M9 6l6 6-6 6"/>',2)}</span></a><button class="dlink danger tap" data-wipe>Apagar dados deste celular</button></div>
   <button class="btn primary block tap" data-tab="planos">Ver planos e assinatura</button>
   <button class="btn ghost block tap" data-onbshow>Ver a apresentação do app</button>
-  <p class="disclaimer">Dados fictícios de exemplo. No app real eles ficam criptografados e protegidos pela LGPD.</p>`}
+  <p class="disclaimer">Seus dados ficam guardados neste celular. Com conta na Família, a lista também fica salva no servidor, no Brasil.</p>`}
 
 const money=v=>brl(v).replace(',00','');
 function plBtn(P,lbl,cls='primary'){return S.plan===P.id?'<span class="pl-cur">'+IC.check+' Seu plano atual</span>':`<button class="btn ${cls} block tap" data-plan="${P.id}">${lbl}</button>`}
@@ -1955,10 +1968,13 @@ document.addEventListener('click',e=>{if(DRAGGED){e.stopPropagation();e.preventD
   if(ds.report!==undefined)return;
   if(ds.contact)return openSheet(sheetContact(ds.contact));
   if(ds.newcontact!==undefined){openSheet(sheetNewContact());setTimeout(()=>{const i=$('#nc-nome');if(i)i.focus()},350);return}
-  if(ds.savecontact!==undefined){const v=k=>($('#nc-'+k).value||'').trim(),nome=v('nome');if(!nome)return toast('Escreva o nome do profissional.');
-    const id='c'+Date.now(),ini=nome.replace(/^(Dra?\.?\s+)/i,'').split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0].toUpperCase()).join('');
-    const np={id,nome,area:v('area')||'Profissional de saúde',ini,c:['peach','mint','sky','lav'][PROS.length%4],tel:v('tel'),end:v('end'),ig:v('ig').replace(/^@/,'')};PROS.push(np);(S.extraPros=S.extraPros||[]).push(np);save();closeSheet();refresh();return toast(nome+' adicionado aos contatos.')}
-  if(ds.delcontact){const id=ds.delcontact,p=proOf(id);(S.hiddenPros=S.hiddenPros||[]).push(id);save();closeSheet();refresh();return toast(p.nome+' removido dos contatos.')}
+  if(ds.editcontact){const id=ds.editcontact;openSheet(sheetNewContact(id));return}
+  if(ds.savecontact!==undefined){const v=k=>clean(($('#nc-'+k)||{}).value||'').trim(),nome=v('nome');if(!nome)return toast('Escreva o nome do profissional.');
+    const ini=nome.replace(/^(Dra?\.?\s+)/i,'').split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0].toUpperCase()).join('')||'?';
+    const dados={nome,area:v('area')||'Profissional de saúde',ini,clinica:v('clinica'),crm:v('crm'),tel:v('tel'),wa:v('wa'),end:v('end')};
+    if(ds.savecontact){const id=ds.savecontact;[PROS.find(x=>x.id===id),(S.extraPros||[]).find(x=>x.id===id)].forEach(o=>{if(o)Object.assign(o,dados)});save();closeSheet();refresh();return toast(nome+' atualizado.')}
+    const id='c'+Date.now(),np={id,...dados,c:['peach','mint','sky','lav'][(S.extraPros||[]).length%4]};PROS.push(np);(S.extraPros=S.extraPros||[]).push(np);save();closeSheet();refresh();return toast(nome+' adicionado aos seus médicos.')}
+  if(ds.delcontact){const id=ds.delcontact,p=proOf(id),n=p.nome;S.extraPros=(S.extraPros||[]).filter(x=>x.id!==id);const k=PROS.findIndex(x=>x.id===id);if(k>=0&&id.startsWith('c'))PROS.splice(k,1);else (S.hiddenPros=S.hiddenPros||[]).push(id);save();closeSheet();refresh();return toast(n+' removido dos contatos.')}
   if(ds.pro){const id=ds.pro;S.pros[id]=!S.pros[id];save();const p=PROS.find(x=>x.id===id);render();return toast(`${p.nome} ${S.pros[id]?'agora vê sua lista.':'não vê mais sua lista.'}`)}
   if(ds.alarm){const back=sheetCtx?(sheetCtx.item?{k:'item',v:sheetCtx.item}:sheetCtx.period?{k:'period',v:sheetCtx.period}:null):null;return openSheet(sheetAlarm(ds.alarm),{alarm:ds.alarm,back})}
   if(sheetCtx&&sheetCtx.alarm){const A=alarm(sheetCtx.alarm);
