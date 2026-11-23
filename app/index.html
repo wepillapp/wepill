@@ -601,6 +601,8 @@ main{padding-bottom:calc(108px + env(safe-area-inset-bottom,0px))!important}
 .prow{display:grid;grid-template-columns:40% 1fr;gap:10px;align-items:center;padding:11px 0;border-bottom:1px solid var(--hair)}
 .prow:last-child{border-bottom:0}
 .prow label{font-size:13px;color:var(--ink-2)}
+.dlink{display:flex;align-items:center;justify-content:space-between;width:100%;padding:13px 0;border:0;border-bottom:1px solid var(--hair);background:none;font:inherit;font-size:15px;font-weight:600;color:var(--ink);text-decoration:none;text-align:left;cursor:pointer}
+.dlink:last-child{border-bottom:0}.dlink .chev{color:var(--ink-2);display:flex}.dlink .chev svg{width:18px;height:18px}.dlink.danger{color:var(--rose-ink)}
 .inp{border:0;background:transparent;font:inherit;font-weight:600;color:var(--ink);width:100%;min-width:0;text-align:right;padding:4px 6px;border-radius:8px;transition:background .25s}
 .inp:focus{outline:none;background:var(--glass-2)}
 select.inp{appearance:none;cursor:pointer}
@@ -1452,7 +1454,6 @@ function vPerfil(){const p=S.profile,P=PLANS.find(x=>x.id===S.plan);
     <span class="badge-plan ${S.plan==='gratis'?'':'prem'}">${P.nome}</span></div>
   ${idCard()}
   <p class="sub" style="font-size:13px;text-align:center;margin-top:-4px">Toque em qualquer dado para editar. Tudo é salvo na hora.</p>
-  <div class="glass pgroup"><div class="prow"><label>Seus dados</label><div style="display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap"><a class="btn ghost sm" href="../privacidade.html" target="_blank" rel="noopener">Privacidade</a><a class="btn ghost sm" href="../termos.html" target="_blank" rel="noopener">Termos</a><button class="btn ghost sm tap" data-wipe>Apagar dados deste celular</button></div></div></div>
   <h2>Preferências</h2>
   <div class="glass pgroup"><div class="prow"><label>Ficha de emergência ao abrir</label><div style="display:flex;justify-content:flex-end;gap:8px;align-items:center"><button class="btn ghost sm tap" data-sos>Ver</button><button class="switch ${S.lockOn?'on':''}" data-lock role="switch" aria-checked="${S.lockOn}" aria-label="Mostrar ficha de emergência ao abrir"></button></div></div><div class="prow"><label>Tamanho do texto</label><div class="seg"><button class="${S.big?'':'on'}" data-big="0">Normal</button><button class="${S.big?'on':''}" data-big="1">Grande</button></div></div></div>
   <h2>Dados pessoais</h2>
@@ -1465,9 +1466,11 @@ function vPerfil(){const p=S.profile,P=PLANS.find(x=>x.id===S.plan);
   <div class="glass pgroup">${f('plano','Convênio')}${f('carteira','Nº da carteirinha')}</div>
   <h2>Emergência e cuidador</h2>
   <div class="glass pgroup">${f('emerg','Contato de emergência')}${f('emergtel','Telefone','tel')}${f('cuidador','Cuidador com acesso')}</div>
+  <h2>Seus dados</h2>
+  <div class="glass pgroup dlinks"><a class="dlink" href="../privacidade.html" target="_blank" rel="noopener">Política de privacidade<span class="chev">${sv('<path d="M9 6l6 6-6 6"/>',2)}</span></a><a class="dlink" href="../termos.html" target="_blank" rel="noopener">Termos de uso<span class="chev">${sv('<path d="M9 6l6 6-6 6"/>',2)}</span></a><button class="dlink danger tap" data-wipe>Apagar dados deste celular</button></div>
   <button class="btn primary block tap" data-tab="planos">Ver planos e assinatura</button>
   <button class="btn ghost block tap" data-onbshow>Ver a apresentação do app</button>
-  <p class="disclaimer">Dados fictícios de exemplo. No app real eles ficam criptografados e protegidos pela LGPD.</p>`}
+  <p class="disclaimer">Seus dados ficam guardados neste celular. Com conta na Família, a lista também fica salva no servidor, no Brasil.</p>`}
 
 const money=v=>brl(v).replace(',00','');
 function plBtn(P,lbl,cls='primary'){return S.plan===P.id?'<span class="pl-cur">'+IC.check+' Seu plano atual</span>':`<button class="btn ${cls} block tap" data-plan="${P.id}">${lbl}</button>`}
