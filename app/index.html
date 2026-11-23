@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>WePill</title>
 <meta name="theme-color" content="#D0E9DD">
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
@@ -42,6 +42,8 @@
   --shadow:0 1px 1px rgba(0,0,0,.3),0 12px 32px -8px rgba(0,0,0,.5); --aurora-op:0; color-scheme:dark}
 
 html,body{height:100%;margin:0} /* v89: sem a margem padrão de 8px (bordas escuras no iPhone) */
+html,body{overflow-x:hidden;overscroll-behavior:none;-webkit-text-size-adjust:100%;text-size-adjust:100%;touch-action:manipulation} /* v90: sem zoom por toque duplo e sem rolagem lateral */
+@media (max-width:480px){input,select,textarea{font-size:16px!important}} /* v90: iPhone dá zoom sozinho em campos com letra menor que 16px */
 body{background:var(--bg);color:var(--ink);font-family:var(--font-ui);font-size:15px;line-height:1.5;transition:background-color .5s var(--ease),color .5s var(--ease);
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px;box-sizing:border-box}
 *{box-sizing:border-box}
@@ -940,6 +942,8 @@ a.btn{text-decoration:none}
 </div>
 
 <script>
+['gesturestart','gesturechange','gestureend'].forEach(t=>document.addEventListener(t,e=>e.preventDefault(),{passive:false})); /* v90: bloqueia pinça no iPhone */
+
 const sv=(d,w=1.8)=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 const IC={
   speaker:sv('<path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/>'),
