@@ -1,4 +1,4 @@
-const C='wepill-app-v89';const CORE=['./','index.html','manifest.webmanifest','icon-192.png','icon-512.png','icon-180.png','zxing.min.js','abertura.webp'];
+const C='wepill-app-v90';const CORE=['./','index.html','manifest.webmanifest','icon-192.png','icon-512.png','icon-180.png','zxing.min.js','abertura.webp'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(CORE)));self.skipWaiting()});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==C).map(x=>caches.delete(x)))).then(()=>self.clients.claim()))});
 self.addEventListener('fetch',e=>{const q=e.request;if(q.method!=='GET'||new URL(q.url).origin!==location.origin)return;
