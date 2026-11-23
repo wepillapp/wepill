@@ -2149,7 +2149,7 @@ function showSos(){const p=S.profile,n=new Date(),terms=allergyTerms().map(x=>x.
   $('#sos').classList.remove('off')}
 function hideSos(){$('#sos').classList.add('off')}
 if(S.lockOn&&S.registered)showSos();if(!S.onboarded)showOnb(0);else if(!S.registered)showReg(); /* v76: boas-vindas só no primeiro acesso */
-const SPV='b';/* v86: abertura curta com a arte do logo ao reabrir. Estilo: a=desfoque, b=cápsula assenta, c=círculo abre */
+const SPV='c';/* v86: abertura curta com a arte do logo ao reabrir. Estilo: a=desfoque, b=cápsula assenta, c=círculo abre */
 /* ao reabrir (quem já fez o primeiro acesso). Fica abaixo do alarme e da ficha, toque pula. */
 if(S.onboarded&&S.registered&&!location.hash){const sp=document.createElement('div');sp.className='splash';sp.setAttribute('aria-hidden','true');sp.classList.add('v-'+SPV);sp.innerHTML='<div class="sp-art">'+(SPV==='a'?'<img src="abertura.webp" alt="">':'<span class="sp-shadow"></span><span class="sp-iris"><img class="sp-top" src="abertura.webp" alt=""></span><img class="sp-bot" src="abertura.webp" alt="">')+'</div>';
   ($('#onb').parentNode).appendChild(sp);const bye=()=>{if(sp.classList.contains('out'))return;sp.classList.add('out');setTimeout(()=>sp.remove(),450)};sp.addEventListener('click',bye);setTimeout(bye,1700)}
