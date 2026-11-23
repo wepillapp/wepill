@@ -1918,6 +1918,7 @@ document.addEventListener('click',e=>{if(DRAGGED){e.stopPropagation();e.preventD
   if(ds.rate){RATE=+ds.rate;t.parentNode.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b===t));if(speaking){stopSpeak();toggleSpeak()}return}
   if(ds.speakch!==undefined){READTXT=ds.speakch;return toggleSpeak()}
   if(ds.unlock!==undefined){hideSos();return}
+  if(ds.linkgo!==undefined){$('#reg').classList.remove('on');return showOnb(0)}
   if(ds.wipe!==undefined){if(!t.dataset.sure){t.dataset.sure='1';t.textContent='Toque de novo para apagar tudo';return}try{localStorage.removeItem('medlist-v2')}catch(e){}location.reload();return}
   if(ds.sos!==undefined)return showSos();
   if(ds.lock!==undefined){S.lockOn=!S.lockOn;t.classList.toggle('on');t.setAttribute('aria-checked',S.lockOn);save();return}
@@ -2227,7 +2228,7 @@ document.addEventListener('click',e=>{const t=e.target.closest('[data-fam],[data
     if(FAM.step==='nova'&&!(/[a-zA-Z]/.test(pw)&&/\d/.test(pw))){FAM.err='A senha precisa ter letras e números.';return famRefresh()}
     const nova=FAM.step==='nova';
     return famDo(async()=>{const sb=await sbLoad();const r=nova?await sb.auth.signUp({email:FAM.email,password:pw,options:{emailRedirectTo:location.origin+location.pathname}}):await sb.auth.signInWithPassword({email:FAM.email,password:pw},t);
-      if(r.error)throw r.error;S.hadAccount=true;save();if(!r.data.session){FAM.step='email';FAM.info='Quase lá! Enviamos um link de confirmação para '+FAM.email+'. Abra o e-mail (veja também o spam) e toque no link. O app entra sozinho.';return}
+      if(r.error)throw r.error;S.hadAccount=true;save();if(!r.data.session){FAM.step='email';FAM.info='Quase lá! Enviamos um link de confirmação para '+FAM.email+'. Abra o e-mail (veja também o spam) e toque em Confirmar. Depois volte aqui e toque em Entrar, com seu e-mail e senha.';return}
       FAM.user=r.data.user;FAM.step='email';await famLoad();famSync();toast(nova?'Conta criada.':'Pronto, você entrou.')})}
   if(ds.famcreate!==undefined)return famDo(async()=>{await R(SB.rpc('criar_familia',{p_nome:'Família de '+((S.profile&&S.profile.nome)||'').split(' ')[0]}));await famSync();await famLoad();toast('Família criada. Agora convide quem você cuida.')},t);
   if(ds.famforgot!==undefined){FAM.email=((($('#famemail')||{}).value)||'').trim().toLowerCase();FAM.info='';if(!/^\S+@\S+\.\S+$/.test(FAM.email)){FAM.err='Digite seu e-mail acima e toque de novo em "Esqueci minha senha".';return famRefresh()}
@@ -2248,12 +2249,21 @@ document.addEventListener('click',e=>{const t=e.target.closest('[data-fam],[data
 {const _save=save;save=function(){_save.apply(this,arguments);famSyncSoon()}}
 {const _vh=vHoje;vHoje=function(){return famBanner()+_vh.apply(this,arguments)}}
 {const _ve=vEquipe;vEquipe=function(){return famCard()+_ve.apply(this,arguments)}}
+/* v83: link do e-mail aberto num navegador que não é o app da pessoa (ex.: Chrome do celular, com o app instalado à parte). Não cria perfil novo: só avisa e manda voltar ao app. */
+function showLinkDone(ok){const el=$('#reg');$('#onb').classList.remove('on');
+  el.innerHTML=`<div class="rgtop">${$('#onb .brand').outerHTML}</div><div class="rgbody" style="justify-content:center;text-align:center">
+  <h1>${ok?'E-mail confirmado!':'Este link já foi usado'}</h1>
+  <p class="sub">${ok?'Sua conta do WePill está ativa.':'Se você já confirmou o e-mail antes, sua conta está ativa.'} Agora abra o <b>app WePill</b> (o ícone na tela do celular) e entre em <b>Família conectada</b> com seu e-mail e senha.</p>
+  <p class="sub" style="font-size:13px">Você pode fechar esta página.</p>
+  <button class="btn ghost block tap" data-linkgo>Usar o WePill neste navegador</button></div>`;el.classList.add('on')}
 {const H=new URLSearchParams(location.hash.slice(1)),Q=new URLSearchParams(location.search);
+  const viaLink=/^(signup|email|invite|magiclink)$/.test(H.get('type')||'')&&H.get('access_token'),linkErr=H.get('error_description')&&!/recovery/i.test(location.hash);
+  if(!S.onboarded&&(viaLink||linkErr)){try{history.replaceState(null,'',location.pathname)}catch(e){}showLinkDone(!!viaLink)}else
   if(H.get('type')==='recovery'&&H.get('access_token')){FAM.recovery={a:H.get('access_token'),r:H.get('refresh_token')};try{history.replaceState(null,'',location.pathname)}catch(e){}setTimeout(openFam,900)}
   else if(/^(signup|email|invite|magiclink)$/.test(H.get('type')||'')&&H.get('access_token')){const a=H.get('access_token'),r=H.get('refresh_token');try{history.replaceState(null,'',location.pathname)}catch(e){}
     /* v81: link de confirmação do e-mail. Entra sozinho. */setTimeout(async()=>{try{const sb=await sbLoad();await R(sb.auth.setSession({access_token:a,refresh_token:r}));const {data}=await R(sb.auth.getSession());FAM.user=data.session&&data.session.user||null;if(FAM.user){await famLoad();famSync();openFam();toast('E-mail confirmado. Você já está na sua conta.')}}catch(e){FAM.info='Não deu para entrar pelo link. Entre com seu e-mail e senha.';openFam()}},700)}
   else if(Q.get('code')){FAM.recovery={code:Q.get('code')};try{history.replaceState(null,'',location.pathname)}catch(e){}setTimeout(openFam,900)}
-  else if(H.get('error_description')){FAM.info='O link expirou ou já foi usado. Peça outro em "Esqueci minha senha".';try{history.replaceState(null,'',location.pathname)}catch(e){}setTimeout(openFam,900)}}
+  else if(H.get('error_description')){FAM.info='Esse link já foi usado ou venceu. Se você já confirmou o e-mail, é só entrar com seu e-mail e senha. Para trocar a senha, peça outro link em "Esqueci minha senha".';try{history.replaceState(null,'',location.pathname)}catch(e){}setTimeout(openFam,900)}}
 {const q=new URLSearchParams(location.search).get('convite');if(q){S.pendingInvite=q.toUpperCase();try{history.replaceState(null,'',location.pathname)}catch(e){}setTimeout(openFam,900)}}
 setTimeout(famBoot,600);setInterval(()=>{if(FAM.fid&&!document.hidden){famSync().then(()=>{if(S.tab==='hoje')refresh()})}},5*6e4);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&FAM.fid)famLoad().then(famRefresh,()=>{})});
