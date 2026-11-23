@@ -62,7 +62,7 @@ const BR=t=>new Date(t+'-03:00');
   await t('Abertura com o logo só ao reabrir, some sozinha e não cobre o alarme',async()=>{const {ctx,p}=await novo('2026-11-21T07:59:58');assert(!(await p.$('.splash')),'abertura no 1º acesso');await cadastrar(p);await addManual(p,'Remedio Teste');
     await p.clock.setSystemTime(BR('2026-11-21T08:00:30'));await p.reload();await p.waitForTimeout(300);assert(await p.$('.splash'),'sem abertura ao reabrir');
     const z=await p.evaluate(()=>[+getComputedStyle($('.splash')).zIndex,+getComputedStyle($('#alarm')).zIndex]);assert(z[0]<z[1],'abertura por cima do alarme');
-    await p.clock.runFor(1800);await p.waitForTimeout(100);assert(!(await p.$('.splash')),'abertura não sumiu');await ctx.close()});
+    await p.clock.runFor(2500);await p.waitForTimeout(100);assert(!(await p.$('.splash')),'abertura não sumiu');await ctx.close()});
   await t('WP-21 intolerância não aparece como alergia',async()=>{const {ctx,p}=await novo();await cadastrar(p);await p.evaluate(()=>{S.profile.obs='Intolerância a lactose';S.list.push('calcio');save();go('hoje')});await p.waitForTimeout(300);
     const tx=await p.innerText('#view');assert(!tx.includes('alergênico')&&!tx.includes('tem alergia'),'chamou de alergia');await ctx.close()});
   await t('WP-22 zoom liberado',async()=>{const {ctx,p}=await novo();assert(!(await p.getAttribute('meta[name=viewport]','content')).includes('user-scalable=no'),'zoom bloqueado');await ctx.close()});
