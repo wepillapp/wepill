@@ -541,6 +541,24 @@ main{padding-bottom:calc(108px + env(safe-area-inset-bottom,0px))!important}
 .onb{position:absolute;inset:0;z-index:35;background:var(--bg);display:flex;flex-direction:column;padding:28px 24px calc(28px + env(safe-area-inset-bottom,0px));opacity:0;pointer-events:none;transition:opacity .5s var(--ease)}
 .onb.on{opacity:1;pointer-events:auto}
 .onbtop{display:flex;justify-content:space-between;align-items:center;align-self:stretch}
+.splash{position:absolute;inset:0;z-index:29;display:flex;align-items:center;justify-content:center;background:radial-gradient(120% 90% at 50% 40%,#F3FDFA 0%,#D6F6EE 55%,#BFEFE3 100%);transition:opacity .4s var(--ease)}
+.splash.out{opacity:0;pointer-events:none}
+.splash .sp-art{position:relative;width:min(88vw,400px);aspect-ratio:1}
+.splash .sp-art img{position:absolute;inset:0;width:100%;height:100%;display:block;-webkit-mask-image:radial-gradient(closest-side,#000 78%,transparent 100%);mask-image:radial-gradient(closest-side,#000 78%,transparent 100%)}
+.splash .sp-top{clip-path:inset(0 0 42% 0)}.splash .sp-bot{clip-path:inset(58% 0 0 0)}
+.splash .sp-shadow{position:absolute;left:34%;top:55.5%;width:32%;height:3%;border-radius:50%;background:rgba(10,90,60,.22);filter:blur(6px);opacity:0}
+/* A: calma, surge do desfoque */
+.splash.v-a .sp-art{animation:spBlur .8s var(--ease) both}
+/* B: cápsula assenta devagar, sombra acompanha; texto sobe depois */
+.splash.v-b .sp-top{animation:spSettle .9s cubic-bezier(.22,1,.36,1) both}.splash.v-b .sp-shadow{animation:spShadow .9s cubic-bezier(.22,1,.36,1) both}.splash.v-b .sp-bot{animation:spUp .6s .55s var(--ease) both}
+/* C: o círculo se abre do centro e o "Cuidado diário" surge em seguida */
+.splash .sp-iris{position:absolute;inset:0}.splash.v-c .sp-iris{animation:spIris .8s var(--ease) both}.splash.v-c .sp-bot{animation:spUp .6s .6s var(--ease) both}
+@keyframes spBlur{from{opacity:0;filter:blur(10px);transform:scale(.97)}to{opacity:1;filter:none;transform:none}}
+@keyframes spSettle{0%{opacity:0;transform:translateY(-22px)}60%{opacity:1}100%{opacity:1;transform:none}}
+@keyframes spShadow{0%{opacity:0;transform:scaleX(.5)}100%{opacity:1;transform:none}}
+@keyframes spUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes spIris{from{opacity:.2;clip-path:circle(0% at 50% 34%)}to{opacity:1;clip-path:circle(75% at 50% 34%)}}
+@media (prefers-reduced-motion:reduce){.splash *{animation:none!important}}
 .brand{display:flex;align-items:center;gap:10px}.brand .bt{width:40px;height:40px;border-radius:12px;background:#22A07F;display:flex;align-items:center;justify-content:center}
 .brand .bw{display:flex;flex-direction:column;line-height:1.05}.brand b{font-family:'Sora',sans-serif;font-size:21px;font-weight:700;letter-spacing:-.035em;color:var(--ink)}.brand b i{font-style:normal;color:#17805F}.brand small{font-size:11px;color:var(--ink-2);margin-top:3px}
 .onb .skip{align-self:flex-end;font-weight:700;color:var(--ink-2);padding:6px 10px}
@@ -2131,6 +2149,10 @@ function showSos(){const p=S.profile,n=new Date(),terms=allergyTerms().map(x=>x.
   $('#sos').classList.remove('off')}
 function hideSos(){$('#sos').classList.add('off')}
 if(S.lockOn&&S.registered)showSos();if(!S.onboarded)showOnb(0);else if(!S.registered)showReg(); /* v76: boas-vindas só no primeiro acesso */
+const SPV='a';/* v86: abertura curta com a arte do logo ao reabrir. Estilo: a=desfoque, b=cápsula assenta, c=círculo abre */
+/* ao reabrir (quem já fez o primeiro acesso). Fica abaixo do alarme e da ficha, toque pula. */
+if(S.onboarded&&S.registered&&!location.hash){const sp=document.createElement('div');sp.className='splash';sp.setAttribute('aria-hidden','true');sp.classList.add('v-'+SPV);sp.innerHTML='<div class="sp-art">'+(SPV==='a'?'<img src="abertura.webp" alt="">':'<span class="sp-shadow"></span><span class="sp-iris"><img class="sp-top" src="abertura.webp" alt=""></span><img class="sp-bot" src="abertura.webp" alt="">')+'</div>';
+  ($('#onb').parentNode).appendChild(sp);const bye=()=>{if(sp.classList.contains('out'))return;sp.classList.add('out');setTimeout(()=>sp.remove(),450)};sp.addEventListener('click',bye);setTimeout(bye,1700)}
 
 
 /* v69: Família conectada (beta) com Supabase */
