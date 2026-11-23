@@ -1083,6 +1083,10 @@ if(S.takenDay!==TODAY){if(S.takenDay){const od=new Date(S.takenDay);if(!isNaN(od
 const photos={};
 const PROFILE_DEF={nome:'Marta Souza',nasc:'1964-03-14',sexo:'Feminino',cpf:'123.456.789-00',tel:'(44) 99876-5432',email:'marta.souza@exemplo.com',end:'Rua das Palmeiras, 210',cidade:'Maringá - PR',cep:'87020-000',peso:'68',altura:'1,62',sangue:'O+',alergias:'Dipirona',obs:'Intolerância a lactose',condicoes:'Hipertensão, hipotireoidismo, diabetes tipo 2',plano:'Unimed Maringá',carteira:'0 123 456789 00-1',emerg:'Carlos Souza (filho)',emergtel:'(44) 99123-4567',cuidador:'Carlos Souza'};
 if(!S.profile)S.profile=Object.fromEntries(Object.keys(PROFILE_DEF).map(k=>[k,'']));
+/* v78: quem usou versões de teste ainda tinha os dados de exemplo (Marta, 6 remédios, ficha ao abrir). Limpa só o que é exemplo, uma vez. */
+if(!S.demoClean){S.demoClean=1;Object.keys(PROFILE_DEF).forEach(k=>{if(S.profile[k]===PROFILE_DEF[k])S.profile[k]=''});S.profile.cpf='';
+  const DEMO=['losartana','levotiroxina','metformina','omega3','calcio','b12'];if(DEMO.every(id=>S.list.includes(id))){S.list=S.list.filter(id=>!DEMO.includes(id));DEMO.forEach(id=>{delete S.stock[id];delete S.horasOv[id]})}
+  S.lockOn=false;S.changes=[];try{setTimeout(()=>save(),0)}catch(e){}}
 /* v76: sem conversas de demonstração */S.threads=(S.threads||[]).filter(t=>!['t1','t2','t3','t4'].includes(t.id));
 if(!S.changes)S.changes=[];
 (S.extraPros||[]).forEach(p=>{if(!PROS.find(x=>x.id===p.id))PROS.push(p)});
@@ -1101,7 +1105,7 @@ function allergyFor(id){const hay=(DB[id].nome+' '+(COMP[id]||'')).toLowerCase()
 function isAl(t){return (S.profile.alergias||'').toLowerCase().replace(/alergia a/g,',').split(/[,;]| e /).map(x=>x.trim()).includes(t)}
 const alW=t=>isAl(t)?'alergia':'intolerância';
 function allergyHits(list=S.list){return list.map(id=>({id,t:allergyFor(id)})).filter(x=>x.t)}
-function save(){try{localStorage.setItem('medlist-v2',JSON.stringify({list:S.list,taken:S.taken,takenDay:S.takenDay,seedV:S.seedV,pros:S.pros,alarms:S.alarms,theme:S.theme,plan:S.plan,trialStart:S.trialStart,locOk:S.locOk,praio:S.praio,planTab:S.planTab,bill:S.bill,profile:S.profile,stock:S.stock,refillOff:S.refillOff,big:S.big,onboarded:S.onboarded,hist:S.hist,takenAt:S.takenAt,rung:S.rung,notifAsk:S.notifAsk,consent:S.consent,lockOn:S.lockOn,threads:S.threads,extraPros:S.extraPros,hiddenPros:S.hiddenPros,changes:S.changes,custom:S.custom,horasOv:S.horasOv,registered:S.registered}))}catch(e){}}
+function save(){try{localStorage.setItem('medlist-v2',JSON.stringify({list:S.list,taken:S.taken,takenDay:S.takenDay,seedV:S.seedV,pros:S.pros,alarms:S.alarms,theme:S.theme,plan:S.plan,trialStart:S.trialStart,locOk:S.locOk,praio:S.praio,planTab:S.planTab,bill:S.bill,profile:S.profile,stock:S.stock,refillOff:S.refillOff,big:S.big,onboarded:S.onboarded,hist:S.hist,takenAt:S.takenAt,rung:S.rung,notifAsk:S.notifAsk,consent:S.consent,lockOn:S.lockOn,threads:S.threads,extraPros:S.extraPros,hiddenPros:S.hiddenPros,changes:S.changes,custom:S.custom,horasOv:S.horasOv,registered:S.registered,demoClean:S.demoClean}))}catch(e){}}
 
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
