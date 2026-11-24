@@ -1206,9 +1206,9 @@ function vHoje(){
   const diff=next?((mins(next.h)-nm+1440)%1440):0,ago=late?nm-mins(late.h):0;
   const cd=late?`atrasada há ${ago<60?ago+' min':Math.floor(ago/60)+'h '+String(ago%60).padStart(2,'0')+'min'}`:next?(diff<60?`em ${diff} min`:`em ${Math.floor(diff/60)}h ${String(diff%60).padStart(2,'0')}min`):'';
   const atn=alerts().filter(a=>a.sev!=='leve').length,low=S.list.filter(needsAlert).sort((a,b)=>outOf(b)-outOf(a)).length;
-  const askN=isToday&&S.list.length&&('Notification' in window)&&Notification.permission==='default';
-  const pushAsk=isToday&&S.list.length&&!askN&&PUSHOK&&PUSHCHK&&!PUSHON&&('Notification' in window)&&Notification.permission==='granted';
-  const iosAdd=isToday&&S.list.length&&!askN&&/iPad|iPhone|iPod/.test(navigator.userAgent)&&!(navigator.standalone===true||(window.matchMedia&&matchMedia('(display-mode: standalone)').matches));
+  const askN=isToday&&('Notification' in window)&&Notification.permission==='default';
+  const pushAsk=isToday&&!askN&&PUSHOK&&PUSHCHK&&!PUSHON&&('Notification' in window)&&Notification.permission==='granted';
+  const iosAdd=isToday&&!askN&&/iPad|iPhone|iPod/.test(navigator.userAgent)&&!(navigator.standalone===true||(window.matchMedia&&matchMedia('(display-mode: standalone)').matches));
   const giftWarn=isToday&&S.plan==='gratis'&&giftOn()&&giftDays()<=7&&S.list.length>FREE_MAX;
   return `${giftWarn?`<div class="famalert">🎁<span><b>Seu Premium de presente acaba em ${giftDays()===1?'1 dia':giftDays()+' dias'}</b><small>Nada será apagado. Depois de 31/12 o plano Grátis cobre ${FREE_MAX} itens: os que você já tem continuam com alarme, só não dá para adicionar novos.</small></span></div>`:''}${askN?`<button class="famalert tap" data-notif>${IC.bell}<span><b>Ativar os avisos de remédio</b><small>Para o WePill avisar na hora, mesmo com o app fechado</small></span></button>`:''}${pushAsk?`<button class="famalert tap" data-notif>${IC.bell}<span><b>Ligar o alarme com o app fechado</b><small>Toque aqui uma vez para o WePill avisar mesmo com o celular bloqueado</small></span></button>`:''}${iosAdd?`<div class="famalert">${IC.bell}<span><b>Alarme com o app fechado</b><small>No iPhone, abra o WePill pelo ícone da Tela de Início. No Safari: Compartilhar → Adicionar à Tela de Início.</small></span></div>`:''}${isToday?'':`<div class="dayview">${past?'Histórico de':'Planejado para'} ${dname}<button data-wday="${dow}">Voltar para hoje</button></div>`}
   ${idCard()}
