@@ -63,7 +63,11 @@ Deno.serve(async (req) => {
     if (!sql) sql = postgres(Deno.env.get("SUPABASE_DB_URL"), { prepare: false, max: 1 });
     const subs = await sql`select endpoint, p256dh, auth, tz, schedule, taken, sent from public.push_subs`;
     const now = new Date(); let enviados = 0, removidos = 0, falhas = 0;
-    for (const sub of subs) {
+    const J = (v) => { if (typeof v !== "string") return v; try { return JSON.parse(v); } catch (_e) { return null; } };
+    let doses = 0;
+    for (const row of subs) {
+      const sub = { ...row, schedule: J(row.schedule) || [], taken: J(row.taken) || {}, sent: J(row.sent) || {} };
+      doses += Array.isArray(sub.schedule) ? sub.schedule.length : 0;
       const { avisos, sent } = decidir(sub, now);
       if (!avisos.length) continue;
       let morto = false;
@@ -80,8 +84,9 @@ Deno.serve(async (req) => {
       if (morto) { await sql`delete from public.push_subs where endpoint = ${sub.endpoint}`; removidos++; }
       else await sql`update public.push_subs set sent = ${sql.json(sent)} where endpoint = ${sub.endpoint}`;
     }
-    const r = { celulares: subs.length, enviados, removidos, falhas };
-    if (enviados || falhas || removidos) console.log("lembretes", JSON.stringify(r));
+    const L = agoraLocal("America/Sao_Paulo", now);
+    const r = { hora: L.day + " " + String(Math.floor(L.min / 60)).padStart(2, "0") + ":" + String(L.min % 60).padStart(2, "0"), celulares: subs.length, doses, enviados, removidos, falhas };
+    console.log("lembretes", JSON.stringify(r));
     return new Response(JSON.stringify(r), { headers: { "Content-Type": "application/json" } });
   } catch (e) {
     console.error("ERRO lembretes:", e && e.message ? e.message : String(e));
