@@ -2,10 +2,10 @@
 // WePill · função "lembretes" (Supabase Edge Function)
 // Roda a cada minuto (chamada pelo pg_cron do 05-push.sql) e manda o aviso de remédio
 // para os celulares cujo horário chegou, mesmo com o app fechado.
-// Segredos necessários (Edge Functions > Secrets): VAPID_PUBLIC, VAPID_PRIVATE, CRON_SECRET.
+// Segredos necessários (Edge Functions > Secrets): VAPID_PUBLIC, VAPID_PRIVATE, CRON_SECRET. O banco vem de SUPABASE_DB_URL.
 // "Verify JWT" desligado: a proteção é o cabeçalho x-cron-secret.
 import webpush from "npm:web-push@3.6.7";
-import { createClient } from "npm:@supabase/supabase-js@2";
+import postgres from "npm:postgres@3.4.5";
 
 // ---- regras (JS puro, testado em tests/push-regras.js) ----
 const WD = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
@@ -52,32 +52,39 @@ function mensagem(a) {
 }
 // ---- fim das regras ----
 
+// Conexão direta com o banco (SUPABASE_DB_URL vem pronto em toda Edge Function): não depende de chave de API.
+let sql = null;
 Deno.serve(async (req) => {
   if (req.headers.get("x-cron-secret") !== Deno.env.get("CRON_SECRET")) return new Response("não autorizado", { status: 401 });
-  webpush.setVapidDetails("mailto:wepilladm@gmail.com", Deno.env.get("VAPID_PUBLIC")!, Deno.env.get("VAPID_PRIVATE")!);
-  // chave de servidor: a antiga (service_role) ou a nova (sb_secret_...)
-  let KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
-  if (!KEY) { try { const o = JSON.parse(Deno.env.get("SUPABASE_SECRET_KEYS") || "{}"); KEY = o.default || Object.values(o)[0] || ""; } catch (_e) { /* sem chave */ } }
-  const db = createClient(Deno.env.get("SUPABASE_URL")!, KEY, { auth: { persistSession: false } });
-  const { data: subs, error } = await db.from("push_subs").select("*");
-  if (error) return new Response(JSON.stringify({ erro: error.message }), { status: 500 });
-  const now = new Date(); let enviados = 0, removidos = 0, falhas = 0;
-  for (const sub of subs || []) {
-    const { avisos, sent } = decidir(sub, now);
-    if (!avisos.length) continue;
-    let morto = false;
-    for (const a of avisos) {
-      try {
-        await webpush.sendNotification({ endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } }, JSON.stringify(mensagem(a)), { TTL: 1800, urgency: "high" });
-        enviados++;
-      } catch (e) {
-        const st = (e && e.statusCode) || 0;
-        if (st === 404 || st === 410) { morto = true; break; }
-        falhas++;
+  try {
+    const vpub = Deno.env.get("VAPID_PUBLIC"), vpriv = Deno.env.get("VAPID_PRIVATE");
+    if (!vpub || !vpriv) throw new Error("faltam os segredos VAPID_PUBLIC/VAPID_PRIVATE");
+    webpush.setVapidDetails("mailto:wepilladm@gmail.com", vpub.trim(), vpriv.trim());
+    if (!sql) sql = postgres(Deno.env.get("SUPABASE_DB_URL"), { prepare: false, max: 1 });
+    const subs = await sql`select endpoint, p256dh, auth, tz, schedule, taken, sent from public.push_subs`;
+    const now = new Date(); let enviados = 0, removidos = 0, falhas = 0;
+    for (const sub of subs) {
+      const { avisos, sent } = decidir(sub, now);
+      if (!avisos.length) continue;
+      let morto = false;
+      for (const a of avisos) {
+        try {
+          await webpush.sendNotification({ endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } }, JSON.stringify(mensagem(a)), { TTL: 1800, urgency: "high" });
+          enviados++;
+        } catch (e) {
+          const st = (e && e.statusCode) || 0;
+          if (st === 404 || st === 410) { morto = true; break; }
+          falhas++; console.error("falha ao enviar", st, e && e.body ? e.body : String(e));
+        }
       }
+      if (morto) { await sql`delete from public.push_subs where endpoint = ${sub.endpoint}`; removidos++; }
+      else await sql`update public.push_subs set sent = ${sql.json(sent)} where endpoint = ${sub.endpoint}`;
     }
-    if (morto) { await db.from("push_subs").delete().eq("endpoint", sub.endpoint); removidos++; }
-    else await db.from("push_subs").update({ sent }).eq("endpoint", sub.endpoint);
+    const r = { celulares: subs.length, enviados, removidos, falhas };
+    if (enviados || falhas || removidos) console.log("lembretes", JSON.stringify(r));
+    return new Response(JSON.stringify(r), { headers: { "Content-Type": "application/json" } });
+  } catch (e) {
+    console.error("ERRO lembretes:", e && e.message ? e.message : String(e));
+    return new Response(JSON.stringify({ erro: String(e && e.message || e) }), { status: 500, headers: { "Content-Type": "application/json" } });
   }
-  return new Response(JSON.stringify({ celulares: (subs || []).length, enviados, removidos, falhas }), { headers: { "Content-Type": "application/json" } });
 });
