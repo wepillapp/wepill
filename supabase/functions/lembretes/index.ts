@@ -27,12 +27,12 @@ function decidir(sub, now) {
     if (!s || !s.k || !Array.isArray(s.d) || !s.d[L.dow] || taken.has(s.k)) continue;
     const t0 = toMin(s.t); if (t0 < 0) continue;
     const ms = L.min - t0; if (ms < 0) continue;
-    const n = sent.keys[s.k] || 0, gap = Math.max(5, Math.min(60, +s.n || 0));
+    const n = sent.keys[s.k] || 0, gap = 5, MAX = 5;
     const insiste = +s.n > 0;
-    // 1º aviso na hora (até 5 min de atraso); repete até 2 vezes a cada "gap" min se não marcou como tomado
+    // 1º aviso na hora (até 5 min de atraso); se "insistir" e não marcou como tomado, repete de 5 em 5 min até 5 avisos
     let manda = false;
     if (n === 0 && ms <= 5) manda = true;
-    else if (insiste && n >= 1 && n < 3 && ms >= n * gap && ms <= n * gap + 5) manda = true;
+    else if (insiste && n >= 1 && n < MAX && ms >= n * gap && ms <= n * gap + 2) manda = true;
     if (!manda) continue;
     sent.keys[s.k] = n + 1;
     const g = grupos[s.t] || (grupos[s.t] = { t: s.t, keys: [], rep: n > 0 });

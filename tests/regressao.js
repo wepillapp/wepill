@@ -83,7 +83,7 @@ const BR=t=>new Date(t+'-03:00');
       window.__rpc=[];window.addEventListener('DOMContentLoaded',()=>{window.sbLoad=async()=>({rpc:async(n,a)=>{window.__rpc.push([n,JSON.parse(JSON.stringify(a))]);return {error:null}}})})});
     await p.reload();await p.waitForTimeout(600);await cadastrar(p);await addManual(p,'Remedio Secreto');await p.evaluate(()=>go('hoje'));await p.waitForTimeout(3500);
     let r=await p.evaluate(()=>window.__rpc);assert(r.length>=1&&r.at(-1)[0]==='push_save','não enviou ao servidor');let a=r.at(-1)[1];
-    assert(a.p_endpoint.includes('fcm.googleapis.com')&&a.p_schedule.length===1&&a.p_schedule[0].t==='08:00'&&a.p_schedule[0].n===10,'agenda errada '+JSON.stringify(a.p_schedule));
+    assert(a.p_endpoint.includes('fcm.googleapis.com')&&a.p_schedule.length===1&&a.p_schedule[0].t==='08:00'&&a.p_schedule[0].n===5,'agenda errada '+JSON.stringify(a.p_schedule));
     assert(!JSON.stringify(a).includes('Secreto'),'nome do remédio foi para o servidor');
     await p.click('[data-takenext]');await p.waitForTimeout(3200);r=await p.evaluate(()=>window.__rpc);a=r.at(-1)[1];assert(a.p_taken.keys.length===1,'dose tomada não foi avisada');
     const n=r.length;await p.evaluate(()=>save());await p.waitForTimeout(3000);assert((await p.evaluate(()=>window.__rpc.length))===n,'reenviou sem mudança');await ctx.close()});

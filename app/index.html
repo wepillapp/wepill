@@ -1811,7 +1811,7 @@ const IOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='M
 const STANDALONE=(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true;
 var SWREG=null,PUSHON=false,PUSHCHK=false,pushT=null;if('serviceWorker' in navigator)navigator.serviceWorker.ready.then(r=>{SWREG=r;return r.pushManager&&r.pushManager.getSubscription()}).then(x=>{PUSHON=!!x;PUSHCHK=true;if(!PUSHON&&S.tab==='hoje')refresh()}).catch(()=>{});
 const b64u8=b=>{const p='='.repeat((4-b.length%4)%4),r=atob((b+p).replace(/-/g,'+').replace(/_/g,'/'));return Uint8Array.from(r,c=>c.charCodeAt(0))};
-function pushPlan(){const sc=[];S.list.forEach(id=>{if(!DB[id])return;DB[id].horas.forEach((h,i)=>{const k=id+'#'+i,A=alarm(k);if(A.on)sc.push({k,t:A.time,d:A.days.map(x=>x?1:0),n:A.insist?+A.snooze||10:0})})});
+function pushPlan(){const sc=[];S.list.forEach(id=>{if(!DB[id])return;DB[id].horas.forEach((h,i)=>{const k=id+'#'+i,A=alarm(k);if(A.on)sc.push({k,t:A.time,d:A.days.map(x=>x?1:0),n:A.insist?5:0})})});
   const day=dkey(new Date());return {sc,tk:{day,keys:Object.keys(S.taken).filter(k=>S.taken[k])}}}
 async function pushSync(force){try{if(!PUSHOK||Notification.permission!=='granted')return;const reg=SWREG||await navigator.serviceWorker.ready;
   let sub=await reg.pushManager.getSubscription();if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u8(VAPID_PUB)});PUSHON=true;
