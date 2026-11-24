@@ -15,30 +15,30 @@
 /* Layout: celular com aurora pastel ao fundo, cartões de vidro, anel de progresso, faixa da semana, barra de navegação flutuante e folhas que sobem de baixo */
 :root{
   --bg:#D0E9DD; --glass:rgba(255,255,255,.74); --glass-2:rgba(255,255,255,.82); --stroke:rgba(255,255,255,.9); --hair:rgba(40,48,80,.08);
-  --ink:#1E2335; --ink-2:#565C75; --ink-3:#9AA0B8;
+  --ink:#1E2335; --ink-2:#565C75; --ink-3:#6B7189;
   --a1:#4CC29E; --a2:#8FE3CF; --a3:#FFC3A8; --a4:#A9D4FF;
   --mint:#D6F5EC; --mint-ink:#1F8A6E; --lav:#E6E0FF; --lav-ink:#5B48C9; --peach:#FFE5D9; --peach-ink:#C0582F;
-  --sky:#DCEBFF; --sky-ink:#2F6DB5; --butter:#FFF3C9; --butter-ink:#97781A; --rose:#FFDDE4; --rose-ink:#C23A58;
-  --accent:#1F9A78; --accent-2:#5FD3B6; --accent-ink:#FFFFFF; --glow:rgba(31,154,120,.35);
+  --sky:#DCEBFF; --sky-ink:#28609F; --butter:#FFF3C9; --butter-ink:#7A6114; --rose:#FFDDE4; --rose-ink:#C23A58;
+  --accent:#1F9A78; --accent-2:#5FD3B6; --accent-ink:#FFFFFF; --accent-text:#17775C; --glow:rgba(31,154,120,.35);
   --shadow:0 1px 1px rgba(30,35,60,.04),0 12px 32px -8px rgba(30,35,60,.14); --aurora-op:0;
   --font-display:"Sora",system-ui,sans-serif; --font-ui:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif;
   --ease:cubic-bezier(.22,.8,.3,1); --r:24px;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#0D1916; --glass:rgba(30,46,42,.72); --glass-2:rgba(38,58,53,.9); --stroke:rgba(255,255,255,.08); --hair:rgba(255,255,255,.07);
-  --ink:#EDEFFA; --ink-2:#A3A9C6; --ink-3:#6E7494;
+  --ink:#EDEFFA; --ink-2:#A3A9C6; --ink-3:#9096B4;
   --a1:#2FB896; --a2:#1E8F7A; --a3:#B2563A; --a4:#2C5FA8;
   --mint:#173A35; --mint-ink:#8CEBCF; --lav:#29244D; --lav-ink:#C4B9FF; --peach:#40261D; --peach-ink:#FFB894;
   --sky:#1A2F4D; --sky-ink:#9CC8FF; --butter:#3A3218; --butter-ink:#F3D886; --rose:#42202B; --rose-ink:#FF9DB2;
-  --accent:#3CC39C; --accent-2:#9BEBD6; --accent-ink:#06231B; --glow:rgba(60,195,156,.35);
+  --accent:#3CC39C; --accent-2:#9BEBD6; --accent-ink:#06231B; --accent-text:#3CC39C; --glow:rgba(60,195,156,.35);
   --shadow:0 1px 1px rgba(0,0,0,.3),0 12px 32px -8px rgba(0,0,0,.5); --aurora-op:0; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0D1916; --glass:rgba(30,46,42,.72); --glass-2:rgba(38,58,53,.9); --stroke:rgba(255,255,255,.08); --hair:rgba(255,255,255,.07);
-  --ink:#EDEFFA; --ink-2:#A3A9C6; --ink-3:#6E7494;
+  --ink:#EDEFFA; --ink-2:#A3A9C6; --ink-3:#9096B4;
   --a1:#2FB896; --a2:#1E8F7A; --a3:#B2563A; --a4:#2C5FA8;
   --mint:#173A35; --mint-ink:#8CEBCF; --lav:#29244D; --lav-ink:#C4B9FF; --peach:#40261D; --peach-ink:#FFB894;
   --sky:#1A2F4D; --sky-ink:#9CC8FF; --butter:#3A3218; --butter-ink:#F3D886; --rose:#42202B; --rose-ink:#FF9DB2;
-  --accent:#3CC39C; --accent-2:#9BEBD6; --accent-ink:#06231B; --glow:rgba(60,195,156,.35);
+  --accent:#3CC39C; --accent-2:#9BEBD6; --accent-ink:#06231B; --accent-text:#3CC39C; --glow:rgba(60,195,156,.35);
   --shadow:0 1px 1px rgba(0,0,0,.3),0 12px 32px -8px rgba(0,0,0,.5); --aurora-op:0; color-scheme:dark}
 
 html,body{height:100%;margin:0} /* v89: sem a margem padrão de 8px (bordas escuras no iPhone) */
@@ -117,7 +117,7 @@ h2::after{content:"";flex:1;height:1px;background:var(--hair)}
 .eyebrow{font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);font-family:var(--font-display)}
 .next .nm{font-family:var(--font-display);font-weight:600;font-size:17px;line-height:1.25}
 .nmlink{background:none;border:0;padding:0;margin:0;color:inherit;text-align:left;cursor:pointer;display:block}.nmpen{display:inline-flex;vertical-align:-2px;margin-left:6px;color:var(--ink-3);opacity:.8}.nmpen svg{width:15px;height:15px}
-.countdown{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--accent);font-weight:600}
+.countdown{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--accent-text,var(--accent));font-weight:600}
 .countdown::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 0 var(--glow);animation:pulse 2s infinite}
 @keyframes pulse{70%{box-shadow:0 0 0 8px transparent}100%{box-shadow:0 0 0 0 transparent}}
 
@@ -202,7 +202,7 @@ h2::after{content:"";flex:1;height:1px;background:var(--hair)}
 nav.dock{position:absolute;left:14px;right:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:1fr 1fr 64px 1fr 1fr;padding:8px;align-items:center;padding:8px;border-radius:26px;z-index:6}
 .tab{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;letter-spacing:-.01em;white-space:nowrap;font-weight:600;color:var(--ink-3);padding:6px 0;position:relative;transition:color .3s}
 .tab svg{width:22px;height:22px;transition:transform .35s var(--ease)}
-.tab.on{color:var(--accent)} .tab.on svg{transform:translateY(-2px)}
+.tab.on{color:var(--accent-text,var(--accent))} .tab.on svg{transform:translateY(-2px)}
 .tab.on::after{content:"";position:absolute;bottom:-4px;width:4px;height:4px;border-radius:50%;background:var(--accent)}
 .tab .badge{position:absolute;top:0;left:calc(50% + 6px);background:var(--peach-ink);color:#fff;font-size:10px;min-width:16px;height:16px;border-radius:8px;display:grid;place-items:center;padding:0 4px}
 .fab{width:56px;height:56px;border-radius:20px;margin:-26px auto 0;display:grid;place-items:center;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;box-shadow:0 12px 28px -8px var(--glow),0 0 0 6px var(--bg);transition:transform .35s var(--ease)}
@@ -327,7 +327,7 @@ table.rep:not(.bytime) td:last-child{text-align:right;color:var(--ink-2);white-s
 .iconbtn{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:var(--glass-2);border:1px solid var(--stroke);flex:none}
 .iconbtn svg{width:18px;height:18px}
 /* alergia: contorno neon pulsante, sem cor chapada */
-:root{--neon:#E0306F;--neon-soft:rgba(224,48,111,.35)}
+:root{--neon:#C21E5A;--neon-soft:rgba(224,48,111,.35)}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--neon:#FF6FA8;--neon-soft:rgba(255,111,168,.45)}}
 :root[data-theme="dark"]{--neon:#FF6FA8;--neon-soft:rgba(255,111,168,.45)}
 @keyframes neon{0%,100%{box-shadow:0 0 0 1px var(--neon),0 0 6px 0 var(--neon-soft)}50%{box-shadow:0 0 0 1px var(--neon),0 0 18px 3px var(--neon-soft)}}
@@ -618,6 +618,7 @@ main{padding-bottom:calc(108px + env(safe-area-inset-bottom,0px))!important}
 .prof-head{display:flex;flex-direction:column;align-items:center;gap:8px;padding:22px 16px;text-align:center}
 .bigav{width:84px;height:84px;border-radius:28px;display:grid;place-items:center;font-family:var(--font-display);font-weight:600;font-size:28px;color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent-2));box-shadow:0 14px 30px -10px var(--glow)}
 .badge-plan{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:99px;font-size:12px;font-weight:700;background:var(--mint);color:var(--mint-ink)}
+.pgift{display:flex;flex-direction:column;gap:4px;padding:14px 16px;font-size:13.5px;margin-top:10px}.pgift span{color:var(--ink-2);line-height:1.45}
 .badge-plan.prem{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff}
 .pgroup{padding:6px 16px}
 .prow{display:grid;grid-template-columns:40% 1fr;gap:10px;align-items:center;padding:11px 0;border-bottom:1px solid var(--hair)}
@@ -998,8 +999,15 @@ const PLANS=[
   {id:'vitrine',nome:'Vitrine',grupo:'par',preco:49,inclui:'Nome, categoria, telefone, mapa e Instagram na busca'},
   {id:'destaque',nome:'Destaque',grupo:'par',preco:79,feat:true,inclui:'Topo da categoria, foto, selo Parceiro e uma oferta para quem usa o WePill'},
 ];
-const FREE_FEATS=['Até 5 itens na lista','Alarme simples, 1 horário por item','Alertas de alergia e de combinações','Ficha de emergência'];
+const FREE_FEATS=['Até 3 itens na lista','Alarme simples, 1 horário por item','Alertas de alergia e de combinações','Ficha de emergência'];
 const PREM_FEATS=['Itens ilimitados e vários horários por item','Controle da caixa: reposição e aviso de "em falta"','Relatório em PDF para a consulta','Alarme que insiste até você confirmar','Cópia de segurança da lista na sua conta'];
+/* v97: plano Grátis = 3 itens. Lançamento: Premium de presente até 31/12/2026 (nada é apagado depois). */
+const FREE_MAX=3,GIFT_END=new Date('2027-01-01T00:00:00-03:00').getTime();
+function giftOn(){return Date.now()<GIFT_END}
+function isPrem(){return S.plan!=='gratis'||giftOn()}
+function giftDays(){return Math.max(0,Math.ceil((GIFT_END-Date.now())/864e5))}
+function canAdd(){return isPrem()||S.list.length<FREE_MAX}
+function sheetLimit(){return `<h1>Seu plano Grátis cobre ${FREE_MAX} itens</h1><p class="sub">Você já tem ${S.list.length} itens na lista. Eles continuam aqui, com alarme e tudo, e nada será apagado.</p><p class="sub">Quem toma mais remédios precisa de mais cuidado. O <b>WePill Premium</b>, com itens sem limite, abre em breve.</p><button class="btn primary block tap" data-close>Entendi</button>`}
 const FAM_FEATS=['Tudo do Premium para você e mais 3 pessoas','Cada perfil com a sua lista, horários e ficha','O responsável vê quando uma dose fica atrasada','Troque de perfil com um toque'];
 const PRO_FEATS=['Painel com todos os seus pacientes','Alertas de combinações e de doses perdidas','Notas entre profissionais do mesmo paciente','Paciente convidado por você ganha 30 dias de Premium'];
 const brl=v=>'R$ '+v.toFixed(2).replace('.',',');
@@ -1201,7 +1209,8 @@ function vHoje(){
   const askN=isToday&&S.list.length&&('Notification' in window)&&Notification.permission==='default';
   const pushAsk=isToday&&S.list.length&&!askN&&PUSHOK&&PUSHCHK&&!PUSHON&&('Notification' in window)&&Notification.permission==='granted';
   const iosAdd=isToday&&S.list.length&&!askN&&/iPad|iPhone|iPod/.test(navigator.userAgent)&&!(navigator.standalone===true||(window.matchMedia&&matchMedia('(display-mode: standalone)').matches));
-  return `${askN?`<button class="famalert tap" data-notif>${IC.bell}<span><b>Ativar os avisos de remédio</b><small>Para o WePill avisar na hora, mesmo com o app fechado</small></span></button>`:''}${pushAsk?`<button class="famalert tap" data-notif>${IC.bell}<span><b>Ligar o alarme com o app fechado</b><small>Toque aqui uma vez para o WePill avisar mesmo com o celular bloqueado</small></span></button>`:''}${iosAdd?`<div class="famalert">${IC.bell}<span><b>Alarme com o app fechado</b><small>No iPhone, abra o WePill pelo ícone da Tela de Início. No Safari: Compartilhar → Adicionar à Tela de Início.</small></span></div>`:''}${isToday?'':`<div class="dayview">${past?'Histórico de':'Planejado para'} ${dname}<button data-wday="${dow}">Voltar para hoje</button></div>`}
+  const giftWarn=isToday&&S.plan==='gratis'&&giftOn()&&giftDays()<=7&&S.list.length>FREE_MAX;
+  return `${giftWarn?`<div class="famalert">🎁<span><b>Seu Premium de presente acaba em ${giftDays()===1?'1 dia':giftDays()+' dias'}</b><small>Nada será apagado. Depois de 31/12 o plano Grátis cobre ${FREE_MAX} itens: os que você já tem continuam com alarme, só não dá para adicionar novos.</small></span></div>`:''}${askN?`<button class="famalert tap" data-notif>${IC.bell}<span><b>Ativar os avisos de remédio</b><small>Para o WePill avisar na hora, mesmo com o app fechado</small></span></button>`:''}${pushAsk?`<button class="famalert tap" data-notif>${IC.bell}<span><b>Ligar o alarme com o app fechado</b><small>Toque aqui uma vez para o WePill avisar mesmo com o celular bloqueado</small></span></button>`:''}${iosAdd?`<div class="famalert">${IC.bell}<span><b>Alarme com o app fechado</b><small>No iPhone, abra o WePill pelo ícone da Tela de Início. No Safari: Compartilhar → Adicionar à Tela de Início.</small></span></div>`:''}${isToday?'':`<div class="dayview">${past?'Histórico de':'Planejado para'} ${dname}<button data-wday="${dow}">Voltar para hoje</button></div>`}
   ${idCard()}
   <div class="hero glass">
     <div class="ringwrap"><div class="ring"><svg viewBox="0 0 120 120"><circle class="track" cx="60" cy="60" r="50" fill="none" stroke-width="10"/><circle class="bar" id="ringbar" cx="60" cy="60" r="50" fill="none" stroke-width="10" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-pct)}"/></svg>
@@ -1485,7 +1494,8 @@ function vPerfil(){const p=S.profile,P=PLANS.find(x=>x.id===S.plan);
   const f=(k,l,type='text',extra='')=>`<div class="prow"><label for="pf-${k}">${l}</label><input class="inp" id="pf-${k}" data-pf="${k}" type="${type}" value="${esc(p[k]||'')}" ${extra}></div>`;
   const sel=(k,l,opts)=>`<div class="prow"><label for="pf-${k}">${l}</label><select class="inp" id="pf-${k}" data-pf="${k}">${opts.map(o=>`<option ${p[k]===o?'selected':''}>${o}</option>`).join('')}</select></div>`;
   return `<div class="prof-head glass"><div class="bigav">${initials(p.nome)}</div><div class="pinfo"><b>${esc(p.nome)}</b><span class="sub">${age(p.nasc)} anos · ${esc(p.cidade)}</span></div>
-    <span class="badge-plan ${S.plan==='gratis'?'':'prem'}">${P.nome}</span></div>
+    <span class="badge-plan ${isPrem()?'prem':''}">${S.plan==='gratis'&&giftOn()?'Premium de presente':P.nome}</span></div>
+  ${S.plan==='gratis'?`<div class="glass pgift">${giftOn()?`<b>🎁 Premium de presente até 31/12</b><span>Presente de lançamento: itens sem limite. Depois disso o plano Grátis cobre ${FREE_MAX} itens, e nada do que você já cadastrou será apagado.</span>`:`<b>Plano Grátis</b><span>Até ${FREE_MAX} itens na lista. Você tem ${S.list.length}. O Premium com itens sem limite abre em breve.</span>`}</div>`:''}
   ${idCard()}
   <p class="sub" style="font-size:13px;text-align:center;margin-top:-4px">Toque em qualquer dado para editar. Tudo é salvo na hora.</p>
   <h2>Preferências</h2>
@@ -1502,7 +1512,6 @@ function vPerfil(){const p=S.profile,P=PLANS.find(x=>x.id===S.plan);
   <div class="glass pgroup">${f('emerg','Contato de emergência')}${f('emergtel','Telefone','tel')}${f('cuidador','Cuidador com acesso')}</div>
   <h2>Privacidade e dados</h2>
   <div class="glass pgroup dlinks"><a class="dlink" href="../privacidade.html" target="_blank" rel="noopener">Política de privacidade<span class="chev">${sv('<path d="M9 6l6 6-6 6"/>',2)}</span></a><a class="dlink" href="../termos.html" target="_blank" rel="noopener">Termos de uso<span class="chev">${sv('<path d="M9 6l6 6-6 6"/>',2)}</span></a><button class="dlink danger tap" data-wipe>Apagar dados deste celular</button></div>
-  <button class="btn primary block tap" data-tab="planos">Ver planos e assinatura</button>
   <button class="btn ghost block tap" data-onbshow>Ver a apresentação do app</button>
   <p class="disclaimer">Seus dados ficam guardados neste celular. Com conta na Família, a lista também fica salva no servidor, no Brasil.</p>`}
 
@@ -1813,13 +1822,16 @@ var SWREG=null,PUSHON=false,PUSHCHK=false,pushT=null;if('serviceWorker' in navig
 const b64u8=b=>{const p='='.repeat((4-b.length%4)%4),r=atob((b+p).replace(/-/g,'+').replace(/_/g,'/'));return Uint8Array.from(r,c=>c.charCodeAt(0))};
 function pushPlan(){const sc=[];S.list.forEach(id=>{if(!DB[id])return;DB[id].horas.forEach((h,i)=>{const k=id+'#'+i,A=alarm(k);if(A.on)sc.push({k,t:A.time,d:A.days.map(x=>x?1:0),n:A.insist?5:0})})});
   const day=dkey(new Date());return {sc,tk:{day,keys:Object.keys(S.taken).filter(k=>S.taken[k])}}}
-async function pushSync(force){try{if(!PUSHOK||Notification.permission!=='granted')return;const reg=SWREG||await navigator.serviceWorker.ready;
+async function pushSync(force){try{if(S.wiping||!PUSHOK||Notification.permission!=='granted')return;const reg=SWREG||await navigator.serviceWorker.ready;
   let sub=await reg.pushManager.getSubscription();if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u8(VAPID_PUB)});PUSHON=true;
   const j=sub.toJSON(),P=pushPlan(),tz=(Intl.DateTimeFormat().resolvedOptions().timeZone)||'America/Sao_Paulo';
   const h=JSON.stringify([j.endpoint,P,tz]);let last='';try{last=localStorage.getItem('wepill-push-h')||''}catch(e){}if(!force&&h===last)return;
   const sb=await sbLoad();const r=await sb.rpc('push_save',{p_endpoint:j.endpoint,p_p256dh:j.keys.p256dh,p_auth:j.keys.auth,p_tz:tz,p_schedule:P.sc,p_taken:P.tk});
   if(!r.error){try{localStorage.setItem('wepill-push-h',h)}catch(e){}if(force)toast('Pronto! O alarme vai tocar mesmo com o app fechado.')}else if(force)toast('Não deu para salvar no servidor: '+esc(String(r.error.message||'')))}catch(e){if(force)toast('Não deu para ligar o alarme: '+esc(String(e&&e.message||e)))}}
-function pushSoon(){clearTimeout(pushT);pushT=setTimeout(()=>pushSync(false),800)}
+/* v97: apagar os dados deste celular também tira os horários do servidor e desliga os avisos */
+async function pushOff(){try{if(!PUSHOK)return;const reg=SWREG||await navigator.serviceWorker.ready;const sub=await reg.pushManager.getSubscription();if(!sub)return;
+  const ep=sub.toJSON().endpoint;try{const sb=await sbLoad();await sb.rpc('push_remove',{p_endpoint:ep})}catch(e){}await sub.unsubscribe();PUSHON=false}catch(e){}}
+function pushSoon(){if(S.wiping)return;clearTimeout(pushT);pushT=setTimeout(()=>pushSync(false),800)}
 setTimeout(()=>pushSync(false),4000);document.addEventListener('visibilitychange',()=>{if(document.hidden)pushSync(false)});
 
 let toastT;function toast(t){$('#toast').innerHTML=IC.spark+'<span>'+t+'</span>';$('#toast').classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>$('#toast').classList.remove('on'),3200)}
@@ -1831,12 +1843,12 @@ function schPrev(){return schTimes().map(t=>`<span class="stime">${IC.bell}${t}<
 function sheetSched(id){const D=DB[id],n=D.horas.length;SCH={id,n:FREQ.some(f=>f[0]===n)?n:1,first:[...D.horas].sort()[0]||'08:00'};
   return `<h1>Quando tomar?</h1><p class="sub" style="margin:-6px 0 14px">${esc(D.nome)} ${esc(D.dose||'')}</p>
   <p class="slbl">Quantas vezes ao dia</p><div class="sfreq">${FREQ.map(f=>`<button class="sopt tap ${f[0]===SCH.n?'on':''}" data-sfreq="${f[0]}"><b>${f[1]}</b>${f[2]?`<small>${f[2]}</small>`:''}</button>`).join('')}</div>
-  <p class="slbl">Primeiro horário</p><div class="timebox" style="padding:10px"><input type="time" id="sfirst" class="timebig" value="${SCH.first}"></div>
+  <p class="slbl">Primeiro horário</p><div class="timebox" style="padding:10px"><input type="time" id="sfirst" class="timebig" aria-label="Primeiro horário" value="${SCH.first}"></div>
   <p class="slbl">Seus horários</p><div class="sprev" id="sprev">${schPrev()}</div>
   <button class="btn primary block tap" data-sok="1" style="margin-top:18px">${IC.check} Adicionar e programar</button>
   <button class="btn ghost block tap" data-sback="1" style="margin-top:8px">Voltar à busca</button>`}
-function addItem(id){if(S.list.includes(id))return finishAdd(id);openSheet(sheetSched(id))}
-function finishAdd(id){if(CUST[id]&&!S.custom[id])S.custom[id]=CUST[id];const before=alerts().length;if(!S.list.includes(id))S.list.push(id);S.fresh=id;save();closeSheet();const n=alerts().length-before;
+function addItem(id){if(S.list.includes(id))return finishAdd(id);if(!canAdd())return openSheet(sheetLimit());openSheet(sheetSched(id))}
+function finishAdd(id){if(!S.list.includes(id)&&!canAdd())return openSheet(sheetLimit());if(CUST[id]&&!S.custom[id])S.custom[id]=CUST[id];const before=alerts().length;if(!S.list.includes(id))S.list.push(id);S.fresh=id;save();closeSheet();const n=alerts().length-before;
   if(allergyFor(id)){go('hoje');toast(`Atenção: você informou ${alW(allergyFor(id))} a ${esc(allergyFor(id))}. Veja o destaque no painel.`)}else if(n>0){toast(`${DB[id].nome} adicionado. Encontrei ${n===1?'1 combinação':n+' combinações'} que merece${n===1?'':'m'} cuidado.`);go('alertas')}else{toast(`${DB[id].nome} adicionado. Nenhuma combinação de risco encontrada na nossa base, o que não garante que a combinação seja segura.`);go('lista')}
   setTimeout(()=>{S.fresh=null},1200)}
 
@@ -1974,7 +1986,7 @@ document.addEventListener('click',e=>{if(DRAGGED){e.stopPropagation();e.preventD
   if(t.id==='scrim'||ds.close!==undefined)return closeSheet();
   if(t.id==='theme'){S.theme=curDark()?'light':'dark';save();applyTheme();return toast(S.theme==='dark'?'Modo noturno ligado.':'Modo normal ligado.')}
   if(t.id==='avatar')return go('perfil');
-  if(t.id==='fab'){loadCmed().catch(()=>{});return openSheet(sheetAdd())}
+  if(t.id==='fab'){if(!canAdd())return openSheet(sheetLimit());loadCmed().catch(()=>{});return openSheet(sheetAdd())}
   if(ds.home!==undefined||ds.tab==='hoje'){S.day=null;return go('hoje')}
   if(ds.tab)return go(ds.tab);
   if(ds.go)return go(ds.go);
@@ -1990,7 +2002,7 @@ document.addEventListener('click',e=>{if(DRAGGED){e.stopPropagation();e.preventD
   if(ds.speakch!==undefined){READTXT=ds.speakch;return toggleSpeak()}
   if(ds.unlock!==undefined){hideSos();return}
   if(ds.linkgo!==undefined){$('#reg').classList.remove('on');return showOnb(0)}
-  if(ds.wipe!==undefined){if(!t.dataset.sure){t.dataset.sure='1';t.textContent='Toque de novo para apagar tudo';return}try{localStorage.removeItem('medlist-v2')}catch(e){}location.reload();return}
+  if(ds.wipe!==undefined){if(!t.dataset.sure){t.dataset.sure='1';t.textContent='Toque de novo para apagar tudo';return}S.wiping=1;pushOff().finally(()=>{try{localStorage.removeItem('medlist-v2');localStorage.removeItem('wepill-push-h')}catch(e){}location.reload()});return}
   if(ds.sos!==undefined)return showSos();
   if(ds.lock!==undefined){S.lockOn=!S.lockOn;t.classList.toggle('on');t.setAttribute('aria-checked',S.lockOn);save();return}
   if(ds.onbnext!==undefined){return onbI<ONB.length-1?moveOnb(onbI+1):endOnb()}
@@ -2190,7 +2202,7 @@ function regHtml(){
   <h2>Emergência e cuidador</h2><div class="glass pgroup">${f('emerg','Contato de emergência','Nome')}${f('emergtel','Telefone','(44) 90000-0000','tel')}${f('cuidador','Cuidador com acesso','Nome')}</div>
   <label class="consent" style="display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:1.45;margin:4px 2px"><input type="checkbox" id="rg-ok" style="width:22px;height:22px;flex:none;margin-top:1px;accent-color:var(--accent)"><span>Li e aceito os <a href="../termos.html" target="_blank" rel="noopener">Termos de Uso</a> e a <a href="../privacidade.html" target="_blank" rel="noopener">Política de Privacidade</a>, e autorizo o WePill a guardar os dados de saúde que eu informar para organizar meus remédios.</span></label>
   <button class="btn primary block tap" data-regsave>Salvar e começar</button>
-  <p class="disclaimer">Seus dados ficam guardados neste celular. Só vão para o servidor do WePill se você criar uma conta (Família conectada ou cópia de segurança). Você pode apagar tudo no Perfil.</p></div>`}
+  <p class="disclaimer">Seus dados ficam guardados neste celular. Vão para o servidor do WePill só se você criar uma conta (Família conectada ou cópia de segurança) ou ligar os avisos com o app fechado (neste caso, só os horários, sem o nome dos remédios). Você pode apagar tudo no Perfil.</p></div>`}
 function showReg(){const el=$('#reg');el.innerHTML=regHtml();el.classList.add('on')}
 $('#qrbtn').innerHTML=`<span class="pdfic">${sv('<path d="M6 2.5h8l4.5 4.5v14.5H6z"/><path d="M14 2.5V7h4.5M9 11h6M9 14h4"/>',1.8)}<b>PDF</b></span>`;
 function fitPhone(){const ph=$('#phone'),mob=innerWidth<=480;let h;
