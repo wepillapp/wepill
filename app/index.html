@@ -1826,13 +1826,16 @@ async function pushSync(force){try{if(S.wiping||!PUSHOK||Notification.permission
   let sub=await reg.pushManager.getSubscription();if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u8(VAPID_PUB)});PUSHON=true;
   const j=sub.toJSON(),P=pushPlan(),tz=(Intl.DateTimeFormat().resolvedOptions().timeZone)||'America/Sao_Paulo';
   const h=JSON.stringify([j.endpoint,P,tz]);let last='';try{last=localStorage.getItem('wepill-push-h')||''}catch(e){}if(!force&&h===last)return;
-  const sb=await sbLoad();const r=await sb.rpc('push_save',{p_endpoint:j.endpoint,p_p256dh:j.keys.p256dh,p_auth:j.keys.auth,p_tz:tz,p_schedule:P.sc,p_taken:P.tk});
+  /* v98: envio direto e com keepalive: chega ao servidor mesmo se o app for fechado logo depois da mudança (antes dependia de carregar a biblioteca do Supabase) */
+  const args={p_endpoint:j.endpoint,p_p256dh:j.keys.p256dh,p_auth:j.keys.auth,p_tz:tz,p_schedule:P.sc,p_taken:P.tk};let r;
+  try{const res=await fetch(SBURL+'/rest/v1/rpc/push_save',{method:'POST',keepalive:true,headers:{apikey:SBKEY,Authorization:'Bearer '+SBKEY,'Content-Type':'application/json'},body:JSON.stringify(args)});if(!res.ok)throw new Error('erro '+res.status);r={error:null}}
+  catch(e){const sb=await sbLoad();r=await sb.rpc('push_save',args)} /* reserva: o caminho antigo */
   if(!r.error){try{localStorage.setItem('wepill-push-h',h)}catch(e){}if(force)toast('Pronto! O alarme vai tocar mesmo com o app fechado.')}else if(force)toast('Não deu para salvar no servidor: '+esc(String(r.error.message||'')))}catch(e){if(force)toast('Não deu para ligar o alarme: '+esc(String(e&&e.message||e)))}}
-/* v97: apagar os dados deste celular também tira os horários do servidor e desliga os avisos */
+/* v96: apagar os dados deste celular também tira os horários do servidor e desliga os avisos */
 async function pushOff(){try{if(!PUSHOK)return;const reg=SWREG||await navigator.serviceWorker.ready;const sub=await reg.pushManager.getSubscription();if(!sub)return;
   const ep=sub.toJSON().endpoint;try{const sb=await sbLoad();await sb.rpc('push_remove',{p_endpoint:ep})}catch(e){}await sub.unsubscribe();PUSHON=false}catch(e){}}
-function pushSoon(){if(S.wiping)return;clearTimeout(pushT);pushT=setTimeout(()=>pushSync(false),800)}
-setTimeout(()=>pushSync(false),4000);document.addEventListener('visibilitychange',()=>{if(document.hidden)pushSync(false)});
+function pushSoon(){if(S.wiping)return;clearTimeout(pushT);pushT=setTimeout(()=>pushSync(false),250)}
+setTimeout(()=>pushSync(false),1200);document.addEventListener('visibilitychange',()=>pushSync(false));
 
 let toastT;function toast(t){$('#toast').innerHTML=IC.spark+'<span>'+t+'</span>';$('#toast').classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>$('#toast').classList.remove('on'),3200)}
 
