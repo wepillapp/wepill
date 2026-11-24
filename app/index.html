@@ -1819,7 +1819,7 @@ async function pushSync(force){try{if(!PUSHOK||Notification.permission!=='grante
   const h=JSON.stringify([j.endpoint,P,tz]);let last='';try{last=localStorage.getItem('wepill-push-h')||''}catch(e){}if(!force&&h===last)return;
   const sb=await sbLoad();const r=await sb.rpc('push_save',{p_endpoint:j.endpoint,p_p256dh:j.keys.p256dh,p_auth:j.keys.auth,p_tz:tz,p_schedule:P.sc,p_taken:P.tk});
   if(!r.error){try{localStorage.setItem('wepill-push-h',h)}catch(e){}if(force)toast('Pronto! O alarme vai tocar mesmo com o app fechado.')}else if(force)toast('Não deu para salvar no servidor: '+esc(String(r.error.message||'')))}catch(e){if(force)toast('Não deu para ligar o alarme: '+esc(String(e&&e.message||e)))}}
-function pushSoon(){clearTimeout(pushT);pushT=setTimeout(()=>pushSync(false),2500)}
+function pushSoon(){clearTimeout(pushT);pushT=setTimeout(()=>pushSync(false),800)}
 setTimeout(()=>pushSync(false),4000);document.addEventListener('visibilitychange',()=>{if(document.hidden)pushSync(false)});
 
 let toastT;function toast(t){$('#toast').innerHTML=IC.spark+'<span>'+t+'</span>';$('#toast').classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>$('#toast').classList.remove('on'),3200)}
