@@ -2301,7 +2301,7 @@ async function famSync(){if(!FAM.user||!SB)return;if(!S.list.length&&!FAM.restor
   famPushLink()}
 /* v100: liga este celular à conta da Família, para receber o aviso quando alguém da família passa 30 min sem marcar a dose */
 let famLinked='';async function famPushLink(){try{if(!FAM.user||!FAM.fid||!SB||!PUSHOK||Notification.permission!=='granted')return;const reg=SWREG||await navigator.serviceWorker.ready;const sub=await reg.pushManager.getSubscription();if(!sub)return;const ep=sub.toJSON().endpoint;if(famLinked===FAM.user.id+ep)return;
-  const {data,error}=await SB.rpc('push_vincular',{p_endpoint:ep});if(!error&&data===true)famLinked=FAM.user.id+ep}catch(e){}}
+  const {data,error}=await SB.rpc('push_vincular',{p_endpoint:ep});if(!error&&data===true){famLinked=FAM.user.id+ep;famLinkTry=0}else if(famLinkTry++<4)setTimeout(famPushLink,6000)}catch(e){}}let famLinkTry=0;
 function famLate(uid){const lim=Date.now()-30*6e4;return (FAM.doses[uid]||[]).filter(d=>d.status!=='tomada'&&d.status!=='pulada'&&+new Date(d.previsto_para)<lim)}
 function famName(uid){const it=FAM.itens[uid]||[];return id=>{const r=it.find(x=>x.item_id===id);return r?r.dados.nome:id}}
 function famBanner(){if(!FAM.fid||!FAM.user)return '';const L=FAM.membros.filter(m=>m.user_id!==FAM.user.id).map(m=>({m,late:famLate(m.user_id)})).filter(x=>x.late.length);if(!L.length)return '';
@@ -2314,7 +2314,7 @@ function famInput(id,ph,type,val){const a=type==='email'?'type="email" autocompl
 const FAMMAX=3;
 function famFmt(c){c=String(c||'');return /^\d{6}$/.test(c)?c.slice(0,3)+' '+c.slice(3):c}
 function famIsAnon(){return !!(FAM.user&&(FAM.user.is_anonymous||!FAM.user.email))}
-function famInviteMsg(c){return `Oi! Quero acompanhar seus remédios pelo WePill.\n\n1. Toque no link para abrir o app: https://wepill.com.br/app/?convite=${c}\n2. Se você já tem o WePill instalado, abra o app, toque em Família conectada > Recebi um convite e digite o código: ${famFmt(c)}\n\nNão precisa criar conta nem senha. O código vale por 48 horas.`}
+function famInviteMsg(c){return `Oi! Venha fazer parte do nosso grupo de cuidados no WePill 💚\nAssim a gente cuida um do outro: cada um recebe o lembrete na hora do remédio, e a família fica sabendo se alguém esquecer.\n\n1. Abra o link: https://wepill.com.br/app/?convite=${c}\n2. No iPhone, coloque o WePill na Tela de Início (Compartilhar > Adicionar à Tela de Início) e abra pelo ícone.\n3. Toque em Família conectada > Recebi um convite e digite o código: ${famFmt(c)}\n\nNão precisa criar conta nem senha. O código vale por 48 horas.`}
 function famJoinBox(primeiro){return `<div class="fact"${primeiro?' style="border-color:var(--accent)"':''}><b>Recebi um convite</b><p class="sub" style="margin:4px 0 0">Digite o código que chegou pelo WhatsApp. Não precisa de cadastro nem senha.</p>${famInput('faminv','Código do convite','code',famFmt(S.pendingInvite||''))}<button class="btn ${primeiro?'primary':'ghost'} block tap" data-famjoin${FAM.busy?' disabled':''}>Entrar na família</button></div>`}
 function famSheetBody(){const E=FAM.err?`<p class="famerr">${esc(FAM.err)}</p>`:'',B=FAM.busy?' disabled':'';let h='';
   if(FAM.recovery){h=`<p class="sub">Crie uma senha nova para a sua conta (mínimo 8 caracteres).</p>${famInput('famnewpw','Senha nova','password','')}${E}<button class="btn primary block tap" data-famnewpw${B}>${FAM.busy?'Aguarde…':'Salvar senha nova'}</button>`}
