@@ -2005,6 +2005,8 @@ document.addEventListener('click',e=>{if(DRAGGED){e.stopPropagation();e.preventD
   if(ds.speakch!==undefined){READTXT=ds.speakch;return toggleSpeak()}
   if(ds.unlock!==undefined){hideSos();return}
   if(ds.linkgo!==undefined){$('#reg').classList.remove('on');return showOnb(0)}
+  if(ds.copyinv){const c=ds.copyinv;(navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(c):Promise.reject()).then(()=>{t.textContent='Código copiado ✓'},()=>{t.textContent='Anote o código: '+famFmt(c)});return}
+  if(ds.pasteinv!==undefined){navigator.clipboard.readText().then(x=>{const c=String(x||'').replace(/[^0-9]/g,'').slice(0,6);const i=$('#faminv');if(i&&c.length===6){i.value=famFmt(c);toast('Código colado.')}else toast('Não achei um código de 6 números copiado.')}).catch(()=>toast('Não deu para colar. Digite o código.'));return}
   if(ds.wipe!==undefined){if(!t.dataset.sure){t.dataset.sure='1';t.textContent='Toque de novo para apagar tudo';return}S.wiping=1;pushOff().finally(()=>{try{localStorage.removeItem('medlist-v2');localStorage.removeItem('wepill-push-h')}catch(e){}location.reload()});return}
   if(ds.sos!==undefined)return showSos();
   if(ds.lock!==undefined){S.lockOn=!S.lockOn;t.classList.toggle('on');t.setAttribute('aria-checked',S.lockOn);save();return}
@@ -2301,7 +2303,7 @@ async function famSync(){if(!FAM.user||!SB)return;if(!S.list.length&&!FAM.restor
   famPushLink()}
 /* v100: liga este celular à conta da Família, para receber o aviso quando alguém da família passa 30 min sem marcar a dose */
 let famLinked='';async function famPushLink(){try{if(!FAM.user||!FAM.fid||!SB||!PUSHOK||Notification.permission!=='granted')return;const reg=SWREG||await navigator.serviceWorker.ready;const sub=await reg.pushManager.getSubscription();if(!sub)return;const ep=sub.toJSON().endpoint;if(famLinked===FAM.user.id+ep)return;
-  const {data,error}=await SB.rpc('push_vincular',{p_endpoint:ep});if(!error&&data===true)famLinked=FAM.user.id+ep}catch(e){}}
+  const {data,error}=await SB.rpc('push_vincular',{p_endpoint:ep});if(!error&&data===true){famLinked=FAM.user.id+ep;famLinkTry=0}else if(famLinkTry++<4)setTimeout(famPushLink,6000)}catch(e){}}let famLinkTry=0;
 function famLate(uid){const lim=Date.now()-30*6e4;return (FAM.doses[uid]||[]).filter(d=>d.status!=='tomada'&&d.status!=='pulada'&&+new Date(d.previsto_para)<lim)}
 function famName(uid){const it=FAM.itens[uid]||[];return id=>{const r=it.find(x=>x.item_id===id);return r?r.dados.nome:id}}
 function famBanner(){if(!FAM.fid||!FAM.user)return '';const L=FAM.membros.filter(m=>m.user_id!==FAM.user.id).map(m=>({m,late:famLate(m.user_id)})).filter(x=>x.late.length);if(!L.length)return '';
@@ -2314,8 +2316,8 @@ function famInput(id,ph,type,val){const a=type==='email'?'type="email" autocompl
 const FAMMAX=3;
 function famFmt(c){c=String(c||'');return /^\d{6}$/.test(c)?c.slice(0,3)+' '+c.slice(3):c}
 function famIsAnon(){return !!(FAM.user&&(FAM.user.is_anonymous||!FAM.user.email))}
-function famInviteMsg(c){return `Oi! Quero acompanhar seus remédios pelo WePill.\n\n1. Toque no link para abrir o app: https://wepill.com.br/app/?convite=${c}\n2. Se você já tem o WePill instalado, abra o app, toque em Família conectada > Recebi um convite e digite o código: ${famFmt(c)}\n\nNão precisa criar conta nem senha. O código vale por 48 horas.`}
-function famJoinBox(primeiro){return `<div class="fact"${primeiro?' style="border-color:var(--accent)"':''}><b>Recebi um convite</b><p class="sub" style="margin:4px 0 0">Digite o código que chegou pelo WhatsApp. Não precisa de cadastro nem senha.</p>${famInput('faminv','Código do convite','code',famFmt(S.pendingInvite||''))}<button class="btn ${primeiro?'primary':'ghost'} block tap" data-famjoin${FAM.busy?' disabled':''}>Entrar na família</button></div>`}
+function famInviteMsg(c){return `Oi! Venha fazer parte do nosso grupo de cuidados no WePill 💚\nAssim a gente cuida um do outro: cada um recebe o lembrete na hora do remédio, e a família fica sabendo se alguém esquecer.\n\n1. Abra o link: https://wepill.com.br/app/?convite=${c}\n2. No iPhone, coloque o WePill na Tela de Início (Compartilhar > Adicionar à Tela de Início) e abra pelo ícone.\n3. Toque em Família conectada > Recebi um convite e digite o código: ${famFmt(c)}\n\nNão precisa criar conta nem senha. O código vale por 48 horas.`}
+function famJoinBox(primeiro){return `<div class="fact"${primeiro?' style="border-color:var(--accent)"':''}><b>Recebi um convite</b><p class="sub" style="margin:4px 0 0">Digite o código que chegou pelo WhatsApp. Não precisa de cadastro nem senha.</p>${famInput('faminv','Código do convite','code',famFmt(S.pendingInvite||''))}${navigator.clipboard&&navigator.clipboard.readText?'<button class="linkbtn tap" data-pasteinv style="display:block;margin:2px 0 8px">Colar código copiado</button>':''}<button class="btn ${primeiro?'primary':'ghost'} block tap" data-famjoin${FAM.busy?' disabled':''}>Entrar na família</button></div>`}
 function famSheetBody(){const E=FAM.err?`<p class="famerr">${esc(FAM.err)}</p>`:'',B=FAM.busy?' disabled':'';let h='';
   if(FAM.recovery){h=`<p class="sub">Crie uma senha nova para a sua conta (mínimo 8 caracteres).</p>${famInput('famnewpw','Senha nova','password','')}${E}<button class="btn primary block tap" data-famnewpw${B}>${FAM.busy?'Aguarde…':'Salvar senha nova'}</button>`}
   else if(!FAM.user&&FAM.step==='codigo'){h=`<p class="sub">Enviamos um código para <b>${esc(FAM.email)}</b>. Abra o e-mail (veja também o spam) e digite o código aqui.</p>${famInput('famotp','Código do e-mail','otp','')}${E}
@@ -2398,7 +2400,16 @@ function showLinkDone(ok){const el=$('#reg');$('#onb').classList.remove('on');
     /* v81: link de confirmação do e-mail. Entra sozinho. */setTimeout(async()=>{try{const sb=await sbLoad();await R(sb.auth.setSession({access_token:a,refresh_token:r}));const {data}=await R(sb.auth.getSession());FAM.user=data.session&&data.session.user||null;if(FAM.user){await famLoad();famSync();openFam();toast('E-mail confirmado. Você já está na sua conta.')}}catch(e){FAM.info='Não deu para entrar pelo link. Digite seu e-mail para receber um código.';openFam()}},700)}
   else if(Q.get('code')){FAM.recovery={code:Q.get('code')};try{history.replaceState(null,'',location.pathname)}catch(e){}setTimeout(openFam,900)}
   else if(H.get('error_description')){FAM.info='Esse link já foi usado ou venceu. Digite seu e-mail para receber um código e entrar.';try{history.replaceState(null,'',location.pathname)}catch(e){}setTimeout(openFam,900)}}
-{const q=new URLSearchParams(location.search).get('convite');if(q){S.pendingInvite=q.replace(/[^0-9a-z]/gi,'').toUpperCase().slice(0,12);save();try{history.replaceState(null,'',location.pathname)}catch(e){}setTimeout(openFam,900)}}
+{const q=new URLSearchParams(location.search).get('convite');if(q){const c=q.replace(/[^0-9a-z]/gi,'').toUpperCase().slice(0,12);try{history.replaceState(null,'',location.pathname)}catch(e){}
+  /* v103: no iPhone o link sempre abre no Safari, que tem memória separada do app da Tela de Início. Ali só mostramos como entrar pelo ícone. */
+  if(/iPad|iPhone|iPod/.test(navigator.userAgent)&&!(navigator.standalone===true||(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)))setTimeout(()=>{['#onb','#reg'].forEach(x=>{const e=$(x);if(e)e.classList.remove('on')});openSheet(sheetConviteIOS(c))},700);
+  else{S.pendingInvite=c;save();setTimeout(openFam,900)}}}
+function sheetConviteIOS(c){return `<h1>Você foi convidado para o grupo de cuidados 💚</h1>
+  <p class="sub">No iPhone, a Família funciona pelo WePill da Tela de Início. Leva 1 minuto:</p>
+  <div class="fact"><b>1. Copie o código</b><div style="font:700 28px/1.2 var(--font-display);letter-spacing:.12em;margin:8px 0">${esc(famFmt(c))}</div><button class="btn primary block tap" data-copyinv="${esc(c)}">Copiar código</button></div>
+  <div class="fact"><b>2. Coloque o WePill na Tela de Início</b><p class="sub" style="margin:4px 0 0">Toque em Compartilhar (o quadrado com a seta, embaixo) e depois em <b>Adicionar à Tela de Início</b>.</p></div>
+  <div class="fact"><b>3. Abra pelo ícone novo</b><p class="sub" style="margin:4px 0 0">Faça o cadastro rápido, vá em <b>Equipe › Família conectada › Recebi um convite</b>, toque em <b>Colar</b> e em <b>Entrar na família</b>.</p></div>
+  <button class="btn ghost block tap" data-close>Entendi</button>`}
 setTimeout(famBoot,600);setInterval(()=>{if(FAM.fid&&!document.hidden){famSync().then(()=>{if(S.tab==='hoje')refresh()})}},5*6e4);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&FAM.fid)famLoad().then(famRefresh,()=>{})});
 
