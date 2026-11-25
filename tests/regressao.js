@@ -71,7 +71,7 @@ const BR=t=>new Date(t+'-03:00');
   await t('Floral em gotas: tocar na dose abre o item, editar unidade/quantidade e o estoque desconta por dose',async()=>{const {ctx,p}=await novo();await cadastrar(p);await addManual(p,'Floral de Bach','fito');
     await p.evaluate(()=>go('hoje'));await p.waitForTimeout(400);await p.click('.next .nmlink');await p.waitForTimeout(450);
     assert(await p.isVisible('[data-editem]'),'sem botão Editar');let tx=await p.textContent('#sheet');assert(/gotas/.test(tx),'fitoterápico não veio em gotas');
-    await p.click('[data-editem] >> nth=0');await p.waitForTimeout(450);await p.fill('#ie-n','4');await p.fill('#ie-box','600');await p.fill('#ie-nome','Floral de Bach Rescue');await p.click('[data-saveitem]');await p.waitForTimeout(450);
+    await p.click('[data-editem] >> nth=0');await p.waitForTimeout(450);await p.fill('#ie-n','4');await p.fill('#ie-ml','30');await p.fill('#ie-nome','Floral de Bach Rescue');await p.click('[data-saveitem]');await p.waitForTimeout(450);
     tx=await p.textContent('#sheet');assert(tx.includes('Floral de Bach Rescue')&&tx.includes('4 gotas por dose'),'edição não aplicada');
     await p.evaluate(()=>closeSheet());await p.waitForTimeout(300);await p.click('[data-takenext]');await p.waitForTimeout(300);
     const st=await p.evaluate(()=>{const id=S.list[0];return [stock(id),JSON.parse(localStorage.getItem('medlist-v2')).itemEd[id].n]});assert(st[0]===596&&st[1]===4,'estoque/salvo errado '+st);
