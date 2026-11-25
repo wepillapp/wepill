@@ -63,6 +63,17 @@ button{font:inherit;color:inherit;cursor:pointer;background:none;border:0}
 .aurora i:nth-child(2){width:55%;height:38%;right:0;top:22%;background:var(--a2);animation-duration:22s}
 .aurora i:nth-child(3){width:50%;height:35%;left:10%;bottom:8%;background:var(--a3);animation-duration:26s;opacity:.7}
 .aurora i:nth-child(4){width:45%;height:30%;right:5%;bottom:0;background:var(--a4);animation-duration:20s}
+/* v104: guia de instalação no iPhone */
+.ig-art{display:block;width:100%;height:auto;border-radius:18px;background:var(--surface-2,#f2f4f7);margin:6px 0 10px}
+.ig-dots{display:flex;gap:6px;justify-content:center;margin:4px 0 10px}.ig-dots i{width:8px;height:8px;border-radius:9px;background:var(--line,#d6dbe3)}.ig-dots i.on{background:var(--accent);width:22px}
+.ig-nav{display:flex;gap:10px}.ig-nav .btn{flex:1}
+.ig-code{font:700 26px/1.2 var(--font-display);letter-spacing:.12em;margin:6px 0}
+.ig-arrow{position:fixed;left:50%;bottom:calc(6px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:9999;display:none;flex-direction:column;align-items:center;gap:2px;pointer-events:none;color:#fff;font-weight:700;font-size:13px;text-shadow:0 1px 3px rgba(0,0,0,.4)}
+.ig-arrow.on{display:flex}.ig-arrow.dir{left:auto;right:18px;transform:none}
+.ig-arrow span{background:var(--accent);padding:5px 12px;border-radius:99px;text-shadow:none;white-space:nowrap}
+.ig-arrow svg{width:46px;height:46px;animation:igb 1s ease-in-out infinite;filter:drop-shadow(0 2px 4px rgba(0,0,0,.35))}
+@keyframes igb{50%{transform:translateY(8px)}}
+@media (prefers-reduced-motion:reduce){.ig-arrow svg{animation:none}}
 @keyframes drift{to{transform:translate(6%,4%) scale(1.08)}}
 
 .glass{background:var(--glass);border:1px solid var(--stroke);-webkit-backdrop-filter:blur(22px) saturate(160%);backdrop-filter:blur(22px) saturate(160%);box-shadow:var(--shadow);border-radius:var(--r)}
@@ -1210,7 +1221,7 @@ function vHoje(){
   const pushAsk=isToday&&!askN&&PUSHOK&&PUSHCHK&&!PUSHON&&('Notification' in window)&&Notification.permission==='granted';
   const iosAdd=isToday&&!askN&&/iPad|iPhone|iPod/.test(navigator.userAgent)&&!(navigator.standalone===true||(window.matchMedia&&matchMedia('(display-mode: standalone)').matches));
   const giftWarn=isToday&&S.plan==='gratis'&&giftOn()&&giftDays()<=7&&S.list.length>FREE_MAX;
-  return `${giftWarn?`<div class="famalert">🎁<span><b>Seu Premium de presente acaba em ${giftDays()===1?'1 dia':giftDays()+' dias'}</b><small>Nada será apagado. Depois de 31/12 o plano Grátis cobre ${FREE_MAX} itens: os que você já tem continuam com alarme, só não dá para adicionar novos.</small></span></div>`:''}${askN?`<button class="famalert tap" data-notif>${IC.bell}<span><b>Ativar os avisos de remédio</b><small>Para o WePill avisar na hora, mesmo com o app fechado</small></span></button>`:''}${pushAsk?`<button class="famalert tap" data-notif>${IC.bell}<span><b>Ligar o alarme com o app fechado</b><small>Toque aqui uma vez para o WePill avisar mesmo com o celular bloqueado</small></span></button>`:''}${iosAdd?`<div class="famalert">${IC.bell}<span><b>Alarme com o app fechado</b><small>No iPhone, abra o WePill pelo ícone da Tela de Início. No Safari: Compartilhar → Adicionar à Tela de Início.</small></span></div>`:''}${isToday?'':`<div class="dayview">${past?'Histórico de':'Planejado para'} ${dname}<button data-wday="${dow}">Voltar para hoje</button></div>`}
+  return `${giftWarn?`<div class="famalert">🎁<span><b>Seu Premium de presente acaba em ${giftDays()===1?'1 dia':giftDays()+' dias'}</b><small>Nada será apagado. Depois de 31/12 o plano Grátis cobre ${FREE_MAX} itens: os que você já tem continuam com alarme, só não dá para adicionar novos.</small></span></div>`:''}${askN?`<button class="famalert tap" data-notif>${IC.bell}<span><b>Ativar os avisos de remédio</b><small>Para o WePill avisar na hora, mesmo com o app fechado</small></span></button>`:''}${pushAsk?`<button class="famalert tap" data-notif>${IC.bell}<span><b>Ligar o alarme com o app fechado</b><small>Toque aqui uma vez para o WePill avisar mesmo com o celular bloqueado</small></span></button>`:''}${iosAdd?`<button class="famalert tap" data-igopen>${IC.bell}<span><b>Instale o WePill no iPhone</b><small>Para o alarme tocar com o celular bloqueado. Toque aqui e veja o passo a passo.</small></span></button>`:''}${isToday?'':`<div class="dayview">${past?'Histórico de':'Planejado para'} ${dname}<button data-wday="${dow}">Voltar para hoje</button></div>`}
   ${idCard()}
   <div class="hero glass">
     <div class="ringwrap"><div class="ring"><svg viewBox="0 0 120 120"><circle class="track" cx="60" cy="60" r="50" fill="none" stroke-width="10"/><circle class="bar" id="ringbar" cx="60" cy="60" r="50" fill="none" stroke-width="10" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-pct)}"/></svg>
@@ -1588,8 +1599,8 @@ function coDone(){const {nome,dias}=coPlan();
 
 /* folhas */
 let sheetCtx=null;
-function openSheet(html,ctx=null){sheetCtx=ctx;$('#sheetBody').innerHTML=html;$('#scrim').classList.add('on');$('#sheet').classList.add('on');$('#sheetBody').scrollTop=0}
-function closeSheet(){$('#scrim').classList.remove('on');$('#sheet').classList.remove('on');sheetCtx=null}
+function openSheet(html,ctx=null){if(!(ctx&&ctx.ig))try{igArrow(false)}catch(e){}sheetCtx=ctx;$('#sheetBody').innerHTML=html;$('#scrim').classList.add('on');$('#sheet').classList.add('on');$('#sheetBody').scrollTop=0}
+function closeSheet(){try{igArrow(false)}catch(e){}$('#scrim').classList.remove('on');$('#sheet').classList.remove('on');sheetCtx=null}
 
 function filterDB(q){const ql=q.trim().toLowerCase();return Object.keys(DB).filter(id=>!ql||DB[id].nome.toLowerCase().includes(ql)||CAT[DB[id].cat].label.toLowerCase().includes(ql))}
 function sheetAdd(){return `<h1>Adicionar à lista</h1>
@@ -2005,6 +2016,8 @@ document.addEventListener('click',e=>{if(DRAGGED){e.stopPropagation();e.preventD
   if(ds.speakch!==undefined){READTXT=ds.speakch;return toggleSpeak()}
   if(ds.unlock!==undefined){hideSos();return}
   if(ds.linkgo!==undefined){$('#reg').classList.remove('on');return showOnb(0)}
+  if(ds.igopen!==undefined)return openInstalarIOS('');
+  if(ds.igstep){IG.step=Math.max(0,Math.min(IG_STEPS.length-1,IG.step+(+ds.igstep)));$('#sheetBody').innerHTML=sheetInstalarIOS();$('#sheetBody').scrollTop=0;igArrow(IG.step===0);return}
   if(ds.copyinv){const c=ds.copyinv;(navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(c):Promise.reject()).then(()=>{t.textContent='Código copiado ✓'},()=>{t.textContent='Anote o código: '+famFmt(c)});return}
   if(ds.pasteinv!==undefined){navigator.clipboard.readText().then(x=>{const c=String(x||'').replace(/[^0-9]/g,'').slice(0,6);const i=$('#faminv');if(i&&c.length===6){i.value=famFmt(c);toast('Código colado.')}else toast('Não achei um código de 6 números copiado.')}).catch(()=>toast('Não deu para colar. Digite o código.'));return}
   if(ds.wipe!==undefined){if(!t.dataset.sure){t.dataset.sure='1';t.textContent='Toque de novo para apagar tudo';return}S.wiping=1;pushOff().finally(()=>{try{localStorage.removeItem('medlist-v2');localStorage.removeItem('wepill-push-h')}catch(e){}location.reload()});return}
@@ -2402,8 +2415,28 @@ function showLinkDone(ok){const el=$('#reg');$('#onb').classList.remove('on');
   else if(H.get('error_description')){FAM.info='Esse link já foi usado ou venceu. Digite seu e-mail para receber um código e entrar.';try{history.replaceState(null,'',location.pathname)}catch(e){}setTimeout(openFam,900)}}
 {const q=new URLSearchParams(location.search).get('convite');if(q){const c=q.replace(/[^0-9a-z]/gi,'').toUpperCase().slice(0,12);try{history.replaceState(null,'',location.pathname)}catch(e){}
   /* v103: no iPhone o link sempre abre no Safari, que tem memória separada do app da Tela de Início. Ali só mostramos como entrar pelo ícone. */
-  if(/iPad|iPhone|iPod/.test(navigator.userAgent)&&!(navigator.standalone===true||(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)))setTimeout(()=>{['#onb','#reg'].forEach(x=>{const e=$(x);if(e)e.classList.remove('on')});openSheet(sheetConviteIOS(c))},700);
+  if(/iPad|iPhone|iPod/.test(navigator.userAgent)&&!(navigator.standalone===true||(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)))setTimeout(()=>openInstalarIOS(c),700);
   else{S.pendingInvite=c;save();setTimeout(openFam,900)}}}
+let IG={step:0,code:''};
+function igArt(n){const A='var(--accent)',G='#8a93a6',W='#fff';
+  if(n===0)return `<svg class="ig-art" viewBox="0 0 320 170" role="img" aria-label="Barra de baixo do Safari com o botão Compartilhar em destaque"><rect x="20" y="10" width="280" height="96" rx="12" fill="${W}" stroke="#e3e7ee"/><text x="160" y="62" text-anchor="middle" font-size="15" fill="${G}">wepill.com.br/app</text><rect x="0" y="112" width="320" height="58" fill="#f7f8fa"/><g stroke="${G}" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M38 141l-8-8 8-8"/><path d="M86 125l8 8-8 8"/><rect x="236" y="128" width="16" height="16" rx="3"/><rect x="241" y="123" width="16" height="16" rx="3"/><path d="M284 133h12M290 127v12"/></g><circle cx="160" cy="137" r="24" fill="${A}" opacity=".18"/><g stroke="${A}" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M152 134v12h16v-12"/><path d="M160 140v-17M154 128l6-6 6 6"/></g></svg>`;
+  if(n===1)return `<svg class="ig-art" viewBox="0 0 320 170" role="img" aria-label="Lista do Compartilhar com Adicionar à Tela de Início em destaque"><rect x="20" y="8" width="280" height="154" rx="14" fill="${W}" stroke="#e3e7ee"/><g font-size="14" fill="#4a5163"><text x="40" y="40">Copiar</text><text x="40" y="76">Adicionar aos Favoritos</text></g><line x1="34" y1="54" x2="286" y2="54" stroke="#eef0f4"/><line x1="34" y1="90" x2="286" y2="90" stroke="#eef0f4"/><rect x="28" y="96" width="264" height="40" rx="10" fill="${A}" opacity=".16"/><text x="40" y="121" font-size="15" font-weight="700" fill="#1f2433">Adicionar à Tela de Início</text><g stroke="${A}" stroke-width="2.6" fill="none"><rect x="258" y="105" width="22" height="22" rx="5"/><path d="M269 110v12M263 116h12"/></g><line x1="34" y1="142" x2="286" y2="142" stroke="#eef0f4"/><text x="40" y="158" font-size="14" fill="${G}">…</text></svg>`;
+  if(n===2)return `<svg class="ig-art" viewBox="0 0 320 170" role="img" aria-label="Tela Adicionar à Tela de Início com o botão Adicionar em destaque"><rect x="20" y="8" width="280" height="154" rx="14" fill="${W}" stroke="#e3e7ee"/><text x="40" y="40" font-size="14" fill="${A}">Cancelar</text><text x="160" y="40" text-anchor="middle" font-size="14" font-weight="700" fill="#1f2433">Tela de Início</text><rect x="232" y="20" width="58" height="30" rx="9" fill="${A}" opacity=".18"/><text x="261" y="40" text-anchor="middle" font-size="15" font-weight="700" fill="${A}">Adicionar</text><rect x="40" y="70" width="56" height="56" rx="13" fill="${A}"/><path d="M58 98l8 8 14-16" stroke="${W}" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><text x="112" y="104" font-size="16" fill="#1f2433">WePill</text></svg>`;
+  return `<svg class="ig-art" viewBox="0 0 320 170" role="img" aria-label="Tela de Início do iPhone com o ícone do WePill"><rect x="0" y="0" width="320" height="170" rx="16" fill="#cfe9df"/><g fill="#ffffffaa"><rect x="34" y="26" width="52" height="52" rx="12"/><rect x="104" y="26" width="52" height="52" rx="12"/><rect x="174" y="26" width="52" height="52" rx="12"/><rect x="34" y="96" width="52" height="52" rx="12"/><rect x="104" y="96" width="52" height="52" rx="12"/></g><rect x="236" y="22" width="60" height="60" rx="14" fill="${A}" stroke="${W}" stroke-width="3"/><path d="M254 52l9 9 16-18" stroke="${W}" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><text x="266" y="100" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2433">WePill</text></svg>`}
+const IG_STEPS=[
+  ['Toque em Compartilhar','É o quadrado com uma seta para cima, na barra de baixo do Safari (a seta verde mostra onde). <b>Não achou?</b> Toque nos três pontinhos <b>···</b> no canto de baixo e depois em <b>Compartilhar</b>.'],
+  ['Toque em “Adicionar à Tela de Início”','Role a lista para baixo até achar. Se não aparecer, toque em <b>Ver mais</b> ou <b>Editar ações</b>.'],
+  ['Toque em “Adicionar”','Fica no canto de cima, à direita. O ícone do WePill vai para a tela do seu iPhone.'],
+  ['Abra o WePill pelo ícone novo','Feche o Safari e toque no ícone verde do WePill. A partir de agora, use sempre por ele: é assim que o alarme funciona com o celular bloqueado.']];
+function sheetInstalarIOS(){const n=IG.step,L=IG_STEPS.length,st=IG_STEPS[n];
+  return `<h1>${IG.code?'Você foi convidado para o grupo de cuidados 💚':'Instale o WePill no seu iPhone'}</h1>
+  ${IG.code?`<div class="fact" style="display:flex;align-items:center;gap:12px"><div><b style="font-size:13px">Seu código de convite</b><div class="ig-code">${esc(famFmt(IG.code))}</div></div><button class="btn primary tap" style="margin-left:auto" data-copyinv="${esc(IG.code)}">Copiar</button></div><p class="sub" style="margin:0 0 4px">Primeiro instale o WePill (1 minuto, só uma vez):</p>`:'<p class="sub">Leva 1 minuto e só precisa fazer uma vez.</p>'}
+  <div class="ig-dots">${IG_STEPS.map((x,i)=>`<i class="${i===n?'on':''}"></i>`).join('')}</div>
+  <h2 style="margin:0">${n+1}. ${st[0]}</h2>${igArt(n)}<p class="sub" style="margin:0 0 12px">${st[1]}${IG.code&&n===L-1?' Depois vá em <b>Equipe › Família conectada › Recebi um convite</b> e toque em <b>Colar código copiado</b>.':''}</p>
+  <div class="ig-nav">${n?'<button class="btn ghost tap" data-igstep="-1">Voltar</button>':''}${n<L-1?'<button class="btn primary tap" data-igstep="1">Próximo</button>':'<button class="btn primary tap" data-close>Entendi</button>'}</div>
+  <a class="btn ghost block tap" style="margin-top:10px" href="https://wa.me/?text=${encodeURIComponent('Oi! Me ajuda a instalar o WePill no meu iPhone? '+location.origin+'/app/')}" target="_blank" rel="noopener">Pedir ajuda pelo WhatsApp</a>`}
+function igArrow(on){const sb=$('#sheetBody');if(sb)sb.style.paddingBottom=on?'92px':'';let a=$('#igarrow');if(!a){a=document.createElement('div');a.id='igarrow';a.className='ig-arrow';a.setAttribute('aria-hidden','true');a.innerHTML='<span>O botão fica aqui embaixo</span><svg viewBox="0 0 24 24" fill="none" stroke="#22A07F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v15M5 12l7 7 7-7"/></svg>';document.body.appendChild(a)}a.classList.toggle('on',!!on)}
+function openInstalarIOS(code){IG={step:0,code:code||''};['#onb','#reg'].forEach(x=>{const e=$(x);if(e)e.classList.remove('on')});openSheet(sheetInstalarIOS(),{ig:1});igArrow(true)}
 function sheetConviteIOS(c){return `<h1>Você foi convidado para o grupo de cuidados 💚</h1>
   <p class="sub">No iPhone, a Família funciona pelo WePill da Tela de Início. Leva 1 minuto:</p>
   <div class="fact"><b>1. Copie o código</b><div style="font:700 28px/1.2 var(--font-display);letter-spacing:.12em;margin:8px 0">${esc(famFmt(c))}</div><button class="btn primary block tap" data-copyinv="${esc(c)}">Copiar código</button></div>
