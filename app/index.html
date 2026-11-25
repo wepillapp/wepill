@@ -1687,6 +1687,8 @@ function resultsHtml(res){return res.map(id=>{const has=S.list.includes(id);
   const would=has?[]:interWith(id);
   return `<button class="result tap" data-add="${id}" ${has?'disabled':''}>${pillic(id)}<div class="info"><b>${DB[id].nome} ${DB[id].dose}</b><br><span>${CAT[DB[id].cat].label}${allergyFor(id)?` · <span style="color:var(--rose-ink);font-weight:700">você informou ${alW(allergyFor(id))} a ${esc(allergyFor(id))}</span>`:''}${would.length?` · <span style="color:var(--peach-ink);font-weight:600">${would.length===1?'1 alerta com sua lista':would.length+' alertas com sua lista'}</span>`:''}</span></div>${has?'<span class="src">Na lista</span>':''}</button>`}).join('')||'<p class="sub">Não encontrei. Tente outro nome, escaneie a caixa ou anexe uma foto.</p>'}
 
+function boxHead(id){const u=UNIT[id]||'comprimidos',e=S.itemEd[id]||{};if(u==='gotas'&&e.ml){const r=stock(id)/GPM;return `Frasco de ${String(e.ml).replace('.',',')} ml · restam ${r>=10?Math.round(r):String(Math.round(r*10)/10).replace('.',',')} ml`}return `${stock(id)} de ${BOX[id]} ${u}`}
+function boxSum(id){const u=UNIT[id]||'comprimidos',n=PER(id),x=DB[id].horas.length||1;return `${String(n).replace('.',',')} ${uName(u,n)} por vez${x>1?', '+x+'x ao dia':''} · dura cerca de ${daysLeft(id)} dia${daysLeft(id)===1?'':'s'}. Avisamos ao usar 80%.`}
 function sheetItem(id){const D=DB[id],al=alerts().filter(i=>i.a===id||i.b===id);
   return `<div style="display:flex;gap:14px;align-items:center">${pillic(id)}<div style="flex:1;min-width:0"><h1>${D.nome}</h1><span class="chip ${cls(id)}">${CAT[D.cat].label}${D.dose?' · '+D.dose:''}</span></div><button class="btn ghost sm tap" data-editem="${id}" aria-label="Editar ${esc(D.nome)}">${IC.pen} Editar</button></div>
   ${UNIT[id]==='gotas'&&!(S.itemEd[id]&&S.itemEd[id].n)?`<button class="todo tap" data-editem="${id}" style="text-align:left">${IC.pen}<span>Quantas gotas você toma por vez? Toque aqui para ajustar.</span></button>`:''}
@@ -1695,11 +1697,11 @@ function sheetItem(id){const D=DB[id],al=alerts().filter(i=>i.a===id||i.b===id);
     <button class="btn ghost sm tap" data-photo="${id}">${IC.cam} ${photos[id]?'Trocar':'Anexar'}</button></div>
   ${allergyFor(id)?allergyCard({id,t:allergyFor(id)}):''}
   <h2>Caixa e reposição</h2>
-  <div class="box"><div class="lineh"><b>${stock(id)} de ${BOX[id]} ${UNIT[id]||'comprimidos'}</b><span class="sub" style="font-size:13px">${Math.round(used(id)*100)}% usado</span></div>
+  <div class="box"><div class="lineh"><b>${boxHead(id)}</b><span class="sub" style="font-size:13px">${Math.round(used(id)*100)}% usado</span></div>
     <div class="meter ${used(id)>=.8?'low':''}"><i style="width:${(1-used(id))*100}%"></i></div>
-    <span class="sub" style="font-size:12.5px">Embalagem com ${BOX[id]} ${UNIT[id]||'comprimidos'}${S.itemEd[id]&&S.itemEd[id].box?', como você informou':' conforme a bula'}${PER(id)>1?`, usando ${String(PER(id)).replace('.',',')} por dose`:''}. A linha marca 80%: ao passar dela, o WePill avisa para repor. Dá para cerca de ${daysLeft(id)} dias.</span>
+    <span class="sub" style="font-size:13px">${boxSum(id)}</span>
     <div class="field" style="padding:10px 0;background:none;border:0"><span class="lbl">Avisar ao usar 80%<small>Lembrete na tela inicial e notificação</small></span><button class="switch ${S.refillOff[id]?'':'on'}" data-refill="${id}" role="switch" aria-checked="${!S.refillOff[id]}" aria-label="Avisar ao usar 80% da caixa"></button></div>
-    <button class="btn ghost sm tap" data-newbox="${id}">${IC.box} Comprei uma caixa nova</button></div>
+    <button class="btn ghost sm tap" data-newbox="${id}">${IC.box} Comprei ${['gotas','ml'].includes(UNIT[id])?'um frasco novo':'uma caixa nova'}</button></div>
   <h2>Alarmes</h2>
   <div class="list">${D.horas.map((h,i)=>{const k=id+'#'+i,A=alarm(k);return `<div class="field"><span class="lbl">${A.time}<small>${A.on?'Alarme ligado · '+daysLabel(A.days):'Alarme desligado'}</small></span><button class="btn ghost sm tap" data-alarm="${k}">${IC.bell} Ajustar</button></div>`}).join('')}</div>
   <h2>Bula</h2>${bulaBox(id)}
@@ -1723,12 +1725,22 @@ function sheetEditItem(id){const D=DB[id],e=S.itemEd[id]||{},u=UNIT[id]||'compri
   <div class="facts">${f('nome','Nome',D.nome,'Ex.: Floral de Bach')}${f('dose','Dose ou concentração (opcional)',D.dose,'Ex.: 50 mg')}
   ${sel('cat','Tipo',Object.keys(CAT).map(c=>[c,CAT[c].label]),D.cat)}
   ${sel('unit','Como vem',Object.keys(UNITS).map(x=>[x,x[0].toUpperCase()+x.slice(1)]),u)}
+  ${f('ml','Tamanho do frasco (ml)',e.ml||(u==='gotas'?(BOX[id]<=100?BOX[id]:Math.round(BOX[id]/GPM)):''),'Ex.: 30','inputmode="decimal"')}
   ${f('n','Quanto você toma por vez',e.n||1,'Ex.: 4','inputmode="decimal"')}
   ${f('box','Quanto vem na embalagem',BOX[id],'Ex.: 30','inputmode="numeric"')}
   ${f('como','Como usar (opcional)',D.como,'Ex.: Embaixo da língua, 4 vezes ao dia')}</div>
-  <p class="sub" style="font-size:12.5px;margin:0">Dica: um frasco de 30 ml tem cerca de 600 gotas.</p>
+  <p class="sub" id="ie-hint" style="font-size:13px;margin:0"></p>
   <button class="btn primary block tap" data-saveitem="${id}">${IC.check} Salvar</button>
   <button class="btn ghost block tap" data-item="${id}">Cancelar</button>`}
+const GPM=20;/* v107: gotas por ml (média usada nas bulas) */
+function edUnitUI(){const U=$('#ie-unit');if(!U)return;const u=U.value,g=u==='gotas',m=u==='ml',lb=k=>$('#ie-'+k).closest('label');
+  lb('ml').style.display=g?'block':'none';lb('box').style.display=g?'none':'block';
+  lb('n').querySelector('small').textContent=g?'Gotas por vez':m?'ml por vez':'Quanto você toma por vez';
+  lb('box').querySelector('small').textContent=m?'Tamanho do frasco (ml)':'Quanto vem na embalagem';
+  const H=$('#ie-hint');if(!H)return;const ml=parseFloat(($('#ie-ml').value||'').replace(',','.')),n=parseFloat(($('#ie-n').value||'').replace(',','.')),id=$('[data-saveitem]').dataset.saveitem,x=(DB[id].horas.length||1);
+  H.textContent=g&&ml>0?`Frasco de ${String(ml).replace('.',',')} ml ≈ ${Math.round(ml*GPM)} gotas`+(n>0?` · dura cerca de ${Math.floor(ml*GPM/(n*x))} dias`:'')+'.':''}
+document.addEventListener('input',e=>{if(e.target.id&&/^ie-(unit|ml|n)$/.test(e.target.id))edUnitUI()});
+document.addEventListener('change',e=>{if(e.target.id==='ie-unit')edUnitUI()});
 function sheetDel(id){const D=DB[id];return `<div style="display:flex;gap:14px;align-items:center">${pillic(id)}<div><h1>Tirar da lista?</h1><span class="sub">${esc(D.nome)} ${esc(D.dose)}</span></div></div>
   <p class="sub">O item sai da sua lista, dos alarmes e dos alertas. Isso não muda nenhuma receita: converse com quem receitou antes de parar um remédio.</p>
   <div style="display:flex;gap:10px"><button class="btn ghost tap" style="flex:1" data-close>Cancelar</button><button class="btn danger tap" style="flex:1" data-remove="${id}">Tirar da lista</button></div>`}
@@ -2048,16 +2060,16 @@ document.addEventListener('click',e=>{if(DRAGGED){e.stopPropagation();e.preventD
   if(ds.big!==undefined){S.big=+ds.big;save();renderWeek();return refresh()}
   if(ds.refill){const id=ds.refill;S.refillOff[id]=!S.refillOff[id];t.classList.toggle('on');t.setAttribute('aria-checked',!S.refillOff[id]);save();refresh();return}
   if(ds.newbox){const id=ds.newbox;S.stock[id]=BOX[id];save();if(sheetCtx&&sheetCtx.item)openSheet(sheetItem(id),{item:id});renderDock();refresh();return toast(`Caixa nova de ${DB[id].nome} registrada: ${BOX[id]} ${UNIT[id]||'comprimidos'}.`)}
-  if(ds.editem)return openSheet(sheetEditItem(ds.editem),{edit:ds.editem});
+  if(ds.editem){openSheet(sheetEditItem(ds.editem),{edit:ds.editem});return edUnitUI()}
   if(ds.saveitem!==undefined){const id=ds.saveitem,v=k=>clean(($('#ie-'+k)||{}).value||'').trim(),num=k=>parseFloat(v(k).replace(',','.'));
-    const nome=v('nome'),n=num('n'),box=Math.round(num('box'));
+    const nome=v('nome'),n=num('n'),gt=v('unit')==='gotas',ml=gt?num('ml'):0;if(gt&&!(ml>0&&ml<=1000)){$('#ie-ml').focus();return toast('Confira o tamanho do frasco em ml.')}const box=gt?Math.round(ml*GPM):Math.round(num('box'));
     if(!nome){$('#ie-nome').focus();return toast('Escreva o nome.')}
     if(!(n>0&&n<=200)){$('#ie-n').focus();return toast('Confira quanto você toma por vez.')}
     if(!(box>=1&&box<=5000)){$('#ie-box').focus();return toast('Confira quanto vem na embalagem.')}
-    const oldU=UNIT[id]||'comprimidos',unit=UNITS[v('unit')]?v('unit'):oldU;
-    S.itemEd[id]={nome,dose:v('dose'),cat:CAT[v('cat')]?v('cat'):DB[id].cat,unit,n,box,como:v('como')};
+    const BOX0=BOX[id],oldU=UNIT[id]||'comprimidos',unit=UNITS[v('unit')]?v('unit'):oldU;
+    S.itemEd[id]={nome,dose:v('dose'),cat:CAT[v('cat')]?v('cat'):DB[id].cat,unit,n,box,ml:gt?ml:0,como:v('como')};
     if(!v('dose'))DB[id].dose='';if(!v('como'))S.itemEd[id].como='';
-    applyEd(id);if(unit!==oldU)S.stock[id]=box;else if(stock(id)>box)S.stock[id]=box;
+    applyEd(id);if(unit!==oldU||(gt&&box!==BOX0))S.stock[id]=box;else if(stock(id)>box)S.stock[id]=box;
     save();renderDock();render();openSheet(sheetItem(id),{item:id});return toast(`${nome} atualizado.`)}
   if(ds.item){if(HELD)return;return openSheet(sheetItem(ds.item),{item:ds.item})}
   if(ds.add)return addItem(ds.add);
