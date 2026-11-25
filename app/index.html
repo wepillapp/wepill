@@ -606,7 +606,12 @@ main{padding-bottom:calc(108px + env(safe-area-inset-bottom,0px))!important}
 .dots i{width:8px;height:8px;border-radius:8px;background:var(--hair);transition:all .4s var(--ease)}
 .dots i.on{width:26px;background:var(--accent)}
 /* texto maior */
-.phone.big .view{zoom:1.12}
+.phone.big .view{zoom:1.25}.phone.big header.top{zoom:1.12} /* v105: Grande bem maior (era 1.12, quase igual ao Padrão) */
+.nextacts{flex-wrap:wrap}
+.tsize{display:flex;flex-direction:column;gap:10px;padding:12px 0}
+.tsize .row{display:flex;align-items:center;gap:8px}.tsize .row b{font-family:var(--font-display);color:var(--ink-2)}
+.tsize .seg{flex:1;display:grid;grid-template-columns:1fr 1fr}
+.tsize .prev{border-radius:12px;background:var(--surface-2,rgba(0,0,0,.04));padding:10px 12px;color:var(--ink)}
 
 /* turnos */
 .periods{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
@@ -1187,7 +1192,7 @@ function renderWeek(){const today=new Date(),dow=today.getDay(),L=['D','S','T','
     return `<button class="day ${S.tab==='hoje'&&i===sel?'on':''} ${i===dow?'today':''}" data-wday="${i}" aria-label="${i===dow?'Hoje':'Ver '+dt.toLocaleDateString('pt-BR',{weekday:'long'})}">
     <small>${l}</small><b>${dt.getDate()}</b><i class="${st}"></i></button>`}).join('')}</div>`;
   $('#week').style.display=S.tab==='equipe'?'none':''; /* v52: sem semana na Equipe */
-  $('#phone').classList.toggle('big',!!S.big)}
+  $('#phone').classList.toggle('big',S.big===true||+S.big>0)}
 function alertCount(){return alerts().filter(a=>a.sev!=='leve').length+S.list.filter(needsAlert).sort((a,b)=>outOf(b)-outOf(a)).length}
 function renderDock(){renderWeek();
   const n=alertCount();
@@ -1510,7 +1515,7 @@ function vPerfil(){const p=S.profile,P=PLANS.find(x=>x.id===S.plan);
   ${idCard()}
   <p class="sub" style="font-size:13px;text-align:center;margin-top:-4px">Toque em qualquer dado para editar. Tudo é salvo na hora.</p>
   <h2>Preferências</h2>
-  <div class="glass pgroup"><div class="prow"><label>Ficha de emergência ao abrir</label><div style="display:flex;justify-content:flex-end;gap:8px;align-items:center"><button class="btn ghost sm tap" data-sos>Ver</button><button class="switch ${S.lockOn?'on':''}" data-lock role="switch" aria-checked="${S.lockOn}" aria-label="Mostrar ficha de emergência ao abrir"></button></div></div><div class="prow"><label>Tamanho do texto</label><div class="seg"><button class="${S.big?'':'on'}" data-big="0">Normal</button><button class="${S.big?'on':''}" data-big="1">Grande</button></div></div></div>
+  <div class="glass pgroup"><div class="prow"><label>Ficha de emergência ao abrir</label><div style="display:flex;justify-content:flex-end;gap:8px;align-items:center"><button class="btn ghost sm tap" data-sos>Ver</button><button class="switch ${S.lockOn?'on':''}" data-lock role="switch" aria-checked="${S.lockOn}" aria-label="Mostrar ficha de emergência ao abrir"></button></div></div><div class="tsize"><label>Tamanho do texto</label><div class="row"><b style="font-size:13px">A</b><div class="seg">${[[0,'Padrão'],[1,'Grande']].map(([v,l])=>`<button class="${(S.big===true||+S.big>0?1:0)===v?'on':''}" data-big="${v}">${l}</button>`).join('')}</div><b style="font-size:21px">A</b></div><p class="prev" style="font-size:15px;margin:0">Exemplo: Losartana 50 mg, 1 comprimido às 08:00.</p></div></div>
   <h2>Dados pessoais</h2>
   <div class="glass pgroup">${f('nome','Nome completo')}${f('nasc','Nascimento','date','min="1900-01-01" max="'+dkey(new Date())+'"')}${sel('sexo','Sexo',['Feminino','Masculino','Outro','Prefiro não dizer'])}</div>
   <h2>Contato</h2>
@@ -2039,7 +2044,7 @@ document.addEventListener('click',e=>{if(DRAGGED){e.stopPropagation();e.preventD
   if(ds.goalert){S.afilter=ds.goalert==='repor'?'repor':'todos';return go('alertas')}
   if(ds.takenext){const k=ds.takenext;S.taken[k]=true;S.takenAt[k]=new Date().toISOString();const iid=k.split('#')[0],was=needsRefill(iid);S.stock[iid]=Math.max(0,stock(iid)-PER(iid));save();renderDock();refresh();
     toast(`${DB[iid].nome} registrado às ${new Date().toTimeString().slice(0,5)}.`);if(outOf(iid))setTimeout(()=>toast(`Essa foi a última dose de ${DB[iid].nome}. O remédio está em falta: veja em Alertas.`),2600);else if(!was&&needsRefill(iid))setTimeout(()=>toast(`Você já usou 80% da caixa de ${DB[iid].nome}. Veja em Alertas.`),2600);return}
-  if(ds.big){S.big=ds.big==='1';save();renderWeek();return refresh()}
+  if(ds.big!==undefined){S.big=+ds.big;save();renderWeek();return refresh()}
   if(ds.refill){const id=ds.refill;S.refillOff[id]=!S.refillOff[id];t.classList.toggle('on');t.setAttribute('aria-checked',!S.refillOff[id]);save();refresh();return}
   if(ds.newbox){const id=ds.newbox;S.stock[id]=BOX[id];save();if(sheetCtx&&sheetCtx.item)openSheet(sheetItem(id),{item:id});renderDock();refresh();return toast(`Caixa nova de ${DB[id].nome} registrada: ${BOX[id]} ${UNIT[id]||'comprimidos'}.`)}
   if(ds.editem)return openSheet(sheetEditItem(ds.editem),{edit:ds.editem});
