@@ -1830,7 +1830,7 @@ async function pushSync(force){try{if(S.wiping||!PUSHOK||Notification.permission
   const args={p_endpoint:j.endpoint,p_p256dh:j.keys.p256dh,p_auth:j.keys.auth,p_tz:tz,p_schedule:P.sc,p_taken:P.tk};let r;
   try{const res=await fetch(SBURL+'/rest/v1/rpc/push_save',{method:'POST',keepalive:true,headers:{apikey:SBKEY,Authorization:'Bearer '+SBKEY,'Content-Type':'application/json'},body:JSON.stringify(args)});if(!res.ok)throw new Error('erro '+res.status);r={error:null}}
   catch(e){const sb=await sbLoad();r=await sb.rpc('push_save',args)} /* reserva: o caminho antigo */
-  if(!r.error){try{localStorage.setItem('wepill-push-h',h)}catch(e){}if(force)toast('Pronto! O alarme vai tocar mesmo com o app fechado.')}else if(force)toast('Não deu para salvar no servidor: '+esc(String(r.error.message||'')))}catch(e){if(force)toast('Não deu para ligar o alarme: '+esc(String(e&&e.message||e)))}}
+  if(!r.error){try{localStorage.setItem('wepill-push-h',h)}catch(e){}try{if(typeof famPushLink==='function')famPushLink()}catch(e){}if(force)toast('Pronto! O alarme vai tocar mesmo com o app fechado.')}else if(force)toast('Não deu para salvar no servidor: '+esc(String(r.error.message||'')))}catch(e){if(force)toast('Não deu para ligar o alarme: '+esc(String(e&&e.message||e)))}}
 /* v96: apagar os dados deste celular também tira os horários do servidor e desliga os avisos */
 async function pushOff(){try{if(!PUSHOK)return;const reg=SWREG||await navigator.serviceWorker.ready;const sub=await reg.pushManager.getSubscription();if(!sub)return;
   const ep=sub.toJSON().endpoint;try{const sb=await sbLoad();await sb.rpc('push_remove',{p_endpoint:ep})}catch(e){}await sub.unsubscribe();PUSHON=false}catch(e){}}
@@ -2270,7 +2270,7 @@ async function famLoad(){if(!FAM.user)return;const sb=SB;
   const d0=new Date();d0.setHours(0,0,0,0);const d1=new Date(d0.getTime()+864e5);
   const {data:it}=await R(sb.from('itens').select('user_id,item_id,dados').in('user_id',ids).eq('ativo',true));FAM.itens={};(it||[]).forEach(r=>{if(r.dados){r.dados.nome=clean(r.dados.nome);r.dados.dose=clean(r.dados.dose)}});famRestore((it||[]).filter(r=>r.user_id===FAM.user.id));(it||[]).forEach(r=>(FAM.itens[r.user_id]=FAM.itens[r.user_id]||[]).push(r));
   const {data:ds}=await R(sb.from('doses').select('user_id,item_id,previsto_para,status,tomado_em').in('user_id',ids).gte('previsto_para',d0.toISOString()).lt('previsto_para',d1.toISOString()).order('previsto_para'));FAM.doses={};(ds||[]).forEach(r=>(FAM.doses[r.user_id]=FAM.doses[r.user_id]||[]).push(r));
-  FAM.membros.forEach(m=>famExpand(m.user_id));famSub()}
+  FAM.membros.forEach(m=>famExpand(m.user_id));famSub();famPushLink()}
 /* v76: cópia de segurança. Celular novo (lista vazia) recebe a lista salva na conta. */
 function famRestore(mine){FAM.restoreChecked=true;if(S.list.length||!mine.length)return;let n=0;
   mine.forEach(r=>{const dd=r.dados||{},id=String(r.item_id).replace(/[^\w-]/g,'').slice(0,64);if(!id)return;const horas=(Array.isArray(dd.horas)?dd.horas:[]).filter(h=>/^\d{2}:\d{2}$/.test(h));
@@ -2297,7 +2297,11 @@ async function famSync(){if(!FAM.user||!SB)return;if(!S.list.length&&!FAM.restor
     const now=new Date(),day=new Date();day.setHours(0,0,0,0);
     const ds=doses().map(x=>{const [h,m]=x.h.split(':').map(Number),t=new Date(day);t.setHours(h,m,0,0);const tk=!!S.taken[x.key];return {user_id:uid,item_id:x.id,previsto_para:t.toISOString(),status:tk?'tomada':(t<new Date(now-30*6e4)?'esquecida':'pendente'),tomado_em:tk?(S.takenAt&&S.takenAt[x.key])||now.toISOString():null}});
     if(ds.length)await SB.from('doses').upsert(ds,{onConflict:'user_id,item_id,previsto_para'});
-    FAM.itens[uid]=rows.map(r=>({user_id:uid,item_id:r.item_id,dados:r.dados}));FAM.doses[uid]=ds}catch(e){}}
+    FAM.itens[uid]=rows.map(r=>({user_id:uid,item_id:r.item_id,dados:r.dados}));FAM.doses[uid]=ds}catch(e){}
+  famPushLink()}
+/* v100: liga este celular à conta da Família, para receber o aviso quando alguém da família passa 30 min sem marcar a dose */
+let famLinked='';async function famPushLink(){try{if(!FAM.user||!FAM.fid||!SB||!PUSHOK||Notification.permission!=='granted')return;const reg=SWREG||await navigator.serviceWorker.ready;const sub=await reg.pushManager.getSubscription();if(!sub)return;const ep=sub.toJSON().endpoint;if(famLinked===FAM.user.id+ep)return;
+  const {data,error}=await SB.rpc('push_vincular',{p_endpoint:ep});if(!error&&data===true)famLinked=FAM.user.id+ep}catch(e){}}
 function famLate(uid){const lim=Date.now()-30*6e4;return (FAM.doses[uid]||[]).filter(d=>d.status!=='tomada'&&d.status!=='pulada'&&+new Date(d.previsto_para)<lim)}
 function famName(uid){const it=FAM.itens[uid]||[];return id=>{const r=it.find(x=>x.item_id===id);return r?r.dados.nome:id}}
 function famBanner(){if(!FAM.fid||!FAM.user)return '';const L=FAM.membros.filter(m=>m.user_id!==FAM.user.id).map(m=>({m,late:famLate(m.user_id)})).filter(x=>x.late.length);if(!L.length)return '';

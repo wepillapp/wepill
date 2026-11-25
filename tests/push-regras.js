@@ -1,7 +1,7 @@
 // Testa as regras da função lembretes (supabase/functions/lembretes/index.ts) sem servidor.
 const fs=require('fs'),src=fs.readFileSync(__dirname+'/../supabase/functions/lembretes/index.ts','utf8');
 const bloco=src.split('// ---- regras')[1].split('// ---- fim das regras')[0].replace(/^[^\n]*\n/,'');
-const R=new Function(bloco+';return {agoraLocal,decidir,mensagem}')();
+const R=new Function(bloco+';return {agoraLocal,decidir,mensagem,atrasadas,msgFamilia}')();
 let ok=0,fail=0;const t=(n,f)=>{try{f();ok++;console.log('  ✓ '+n)}catch(e){fail++;console.log('  ✗ '+n+'\n      '+e.message)}};const eq=(a,b,m)=>{if(JSON.stringify(a)!==JSON.stringify(b))throw new Error((m||'')+' esperado '+JSON.stringify(b)+' veio '+JSON.stringify(a))};
 const at=s=>new Date(s);const all=[1,1,1,1,1,1,1];
 const sub=(o={})=>({tz:'America/Sao_Paulo',schedule:[{k:'a#0',t:'08:00',d:all,n:10},{k:'b#0',t:'08:00',d:all,n:0},{k:'c#0',t:'21:30',d:all,n:10}],taken:{},sent:{},...o});
@@ -15,4 +15,12 @@ t('respeita os dias da semana',()=>{const s=sub({schedule:[{k:'x#0',t:'08:00',d:
 t('dia novo zera o que foi enviado ontem',()=>{const s=sub({sent:{day:'2026-11-23',keys:{'a#0':3,'b#0':3}}});eq(R.decidir(s,at('2026-11-24T11:01:00Z')).avisos[0].keys,['a#0','b#0'])});
 t('fuso inválido cai em São Paulo; agenda estragada não quebra',()=>{eq(R.decidir(sub({tz:'Lua/Base'}),at('2026-11-24T11:00:00Z')).avisos.length,1);eq(R.decidir({schedule:[null,{k:'z'},{k:'y',t:'xx',d:all}]},at('2026-11-24T11:00:00Z')).avisos,[])});
 t('texto do aviso',()=>{const m=R.mensagem({t:'08:00',keys:['a','b'],rep:false});eq(m.title,'Hora do remédio');eq(m.body,'2 doses das 08:00 para tomar agora. Toque para abrir o WePill.')});
+t('Família: avisa 30 min depois se não marcou, só uma janela de 2 h',()=>{const m={tz:'America/Sao_Paulo',schedule:[{k:'a#0',t:'18:45',d:all}],takenKeys:new Set(),takenDoses:[]};
+  eq(R.atrasadas(m,at('2026-11-24T22:14:00Z')),[]);eq(R.atrasadas(m,at('2026-11-24T22:15:00Z')),[{k:'a#0',t:'18:45',day:'2026-11-24'}]);eq(R.atrasadas(m,at('2026-11-25T00:46:00Z')),[])});
+t('Família: não avisa se marcou Tomei (no celular ou na Família) nem em dia desligado',()=>{const base={tz:'America/Sao_Paulo',schedule:[{k:'a#0',t:'18:45',d:all}],takenKeys:new Set(),takenDoses:[]};
+  eq(R.atrasadas({...base,takenKeys:new Set(['a#0'])},at('2026-11-24T22:20:00Z')),[]);
+  eq(R.atrasadas({...base,takenDoses:[{item_id:'a',quando:at('2026-11-24T21:45:00Z')}]},at('2026-11-24T22:20:00Z')),[]);
+  eq(R.atrasadas({...base,takenDoses:[{item_id:'a',quando:at('2026-11-23T21:45:00Z')}]},at('2026-11-24T22:20:00Z')).length,1,'dose de ontem não conta');
+  eq(R.atrasadas({...base,schedule:[{k:'a#0',t:'18:45',d:[1,0,0,0,0,0,0]}]},at('2026-11-24T22:20:00Z')),[])});
+t('Família: texto com o primeiro nome, sem nome de remédio',()=>{const m=R.msgFamilia('Lorenzo Alcântara','18:45',1);eq(m.title,'WePill · Família');eq(m.body,'Lorenzo ainda não marcou a dose das 18:45. Que tal dar uma olhada?');eq(R.msgFamilia('','08:00',2).body.startsWith('Alguém da família ainda não marcou 2 doses'),true)});
 console.log(`\n${ok} passaram, ${fail} falharam`);process.exit(fail?1:0);
