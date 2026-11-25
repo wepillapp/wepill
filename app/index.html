@@ -814,7 +814,7 @@ a.btn{text-decoration:none;display:flex;align-items:center;justify-content:cente
 @media (prefers-reduced-motion:reduce){.afilter .ping{animation:none}}
 .dym{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:12px 2px}.dym span{font-size:14px;color:var(--ink-2)}
 .manual{margin:14px 0 4px;padding:14px;border-radius:16px;border:1.5px dashed var(--line,#cfd8d3);display:flex;flex-direction:column;gap:6px}.manual b{font-size:15px}.manual .sub{font-size:13px;margin:0}.mcats{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
-.slbl{font-size:13px;font-weight:700;color:var(--ink-2);margin:14px 2px 8px;text-transform:uppercase;letter-spacing:.04em}.sfreq{display:grid;grid-template-columns:1fr 1fr;gap:8px}.sopt{padding:12px;border-radius:14px;border:1.5px solid var(--stroke);background:var(--glass);text-align:left;color:var(--ink);display:flex;flex-direction:column;gap:2px}.sopt b{font-size:15px}.sopt small{font-size:12px;color:var(--ink-2)}.sopt.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,transparent)}.sopt.on small{color:var(--accent)}.sprev{display:flex;flex-wrap:wrap;gap:8px}.stime{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:12px;background:color-mix(in srgb,var(--accent) 12%,transparent);font-weight:700;font-size:15px}.stime svg{width:15px;height:15px;color:var(--accent)}
+.slbl{font-size:13px;font-weight:700;color:var(--ink-2);margin:14px 2px 8px;text-transform:uppercase;letter-spacing:.04em}.sfreq{display:grid;grid-template-columns:1fr 1fr;gap:8px}.sopt{padding:12px;border-radius:14px;border:1.5px solid var(--stroke);background:var(--glass);text-align:left;color:var(--ink);display:flex;flex-direction:column;gap:2px}.sopt b{font-size:15px}.sopt small{font-size:12px;color:var(--ink-2)}.sopt.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,transparent)}.sopt.on small{color:var(--accent)}.sprev{display:flex;flex-wrap:wrap;gap:8px}.stime{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:12px;background:color-mix(in srgb,var(--accent) 12%,transparent);font-weight:700;font-size:15px}.stime svg{width:15px;height:15px;color:var(--accent)}.stime input{border:0;background:transparent;font:inherit;color:inherit;width:auto;min-width:4.2em;padding:0;outline:none;-webkit-appearance:none;appearance:none;min-height:24px}.stime input::-webkit-calendar-picker-indicator{display:none}.stime:focus-within{outline:2px solid var(--accent);outline-offset:1px}
 .qchip{border:1.5px solid var(--accent);background:transparent;color:var(--accent);font:600 14px/1 inherit;padding:9px 14px;border-radius:99px;cursor:pointer}
 .result.hit{box-shadow:inset 3px 0 0 var(--accent)}
 .cmh{font-size:13px!important;margin:10px 2px 2px!important;color:var(--ink-2)}
@@ -1870,13 +1870,14 @@ let toastT;function toast(t){$('#toast').innerHTML=IC.spark+'<span>'+t+'</span>'
 
 /* v59: ao adicionar, janela para programar os horários */
 const FREQ=[[1,'1x ao dia','todo dia'],[2,'2x ao dia','de 12 em 12 h'],[3,'3x ao dia','de 8 em 8 h'],[4,'4x ao dia','de 6 em 6 h'],[6,'6x ao dia','de 4 em 4 h']];let SCH=null;
-const schTimes=()=>{const [h,m]=SCH.first.split(':').map(Number),st=24/SCH.n;return Array.from({length:SCH.n},(_,i)=>{const t=(h*60+m+i*st*60)%1440;return String(Math.floor(t/60)).padStart(2,'0')+':'+String(t%60).padStart(2,'0')})};
-function schPrev(){return schTimes().map(t=>`<span class="stime">${IC.bell}${t}</span>`).join('')}
+const schTimes=()=>{const [h,m]=SCH.first.split(':').map(Number),st=24/SCH.n;return Array.from({length:SCH.n},(_,i)=>{const t=(h*60+m+i*st*60)%1440;const v=String(Math.floor(t/60)).padStart(2,'0')+':'+String(t%60).padStart(2,'0');return (SCH.ov&&SCH.ov[i])||v})};
+/* v108: horários padrão, mas cada um pode ser trocado (ex.: 07:30 e 19:15) */
+function schPrev(){return schTimes().map((t,i)=>`<label class="stime">${IC.bell}<input type="time" data-sti="${i}" value="${t}" aria-label="Horário ${i+1}"></label>`).join('')}
 function sheetSched(id){const D=DB[id],n=D.horas.length;SCH={id,n:FREQ.some(f=>f[0]===n)?n:1,first:[...D.horas].sort()[0]||'08:00'};
   return `<h1>Quando tomar?</h1><p class="sub" style="margin:-6px 0 14px">${esc(D.nome)} ${esc(D.dose||'')}</p>
   <p class="slbl">Quantas vezes ao dia</p><div class="sfreq">${FREQ.map(f=>`<button class="sopt tap ${f[0]===SCH.n?'on':''}" data-sfreq="${f[0]}"><b>${f[1]}</b>${f[2]?`<small>${f[2]}</small>`:''}</button>`).join('')}</div>
   <p class="slbl">Primeiro horário</p><div class="timebox" style="padding:10px"><input type="time" id="sfirst" class="timebig" aria-label="Primeiro horário" value="${SCH.first}"></div>
-  <p class="slbl">Seus horários</p><div class="sprev" id="sprev">${schPrev()}</div>
+  <p class="slbl">Seus horários</p><p class="sub" style="font-size:13px;margin:-4px 2px 8px">Toque num horário para mudar, se não for hora exata.</p><div class="sprev" id="sprev">${schPrev()}</div>
   <button class="btn primary block tap" data-sok="1" style="margin-top:18px">${IC.check} Adicionar e programar</button>
   <button class="btn ghost block tap" data-sback="1" style="margin-top:8px">Voltar à busca</button>`}
 function addItem(id){if(S.list.includes(id))return finishAdd(id);if(!canAdd())return openSheet(sheetLimit());openSheet(sheetSched(id))}
@@ -2075,9 +2076,9 @@ document.addEventListener('click',e=>{if(DRAGGED){e.stopPropagation();e.preventD
   if(ds.add)return addItem(ds.add);
   if(ds.cmp){$('#results').innerHTML=cmedPres(+ds.cmp);$('#sheetBody').scrollTop=0;return}
   if(ds.cmback!==undefined)return renderAddResults();
-  if(ds.sfreq){SCH.n=+ds.sfreq;document.querySelectorAll('[data-sfreq]').forEach(b=>b.classList.toggle('on',b===t));$('#sprev').innerHTML=schPrev();return}
+  if(ds.sfreq){SCH.n=+ds.sfreq;SCH.ov={};document.querySelectorAll('[data-sfreq]').forEach(b=>b.classList.toggle('on',b===t));$('#sprev').innerHTML=schPrev();return}
   if(ds.sback){openSheet(sheetAdd());return}
-  if(ds.sok){const id=SCH.id,T=schTimes();Object.keys(S.alarms).forEach(k=>{if(k.split('#')[0]===id)delete S.alarms[k]});DB[id].horas=[...T];S.horasOv[id]=[...T];if(CUST[id])CUST[id].db.horas=[...T];T.forEach((x,i)=>alarm(id+'#'+i));SCH=null;return finishAdd(id)}
+  if(ds.sok){const id=SCH.id,T=[...new Set(schTimes())].sort();Object.keys(S.alarms).forEach(k=>{if(k.split('#')[0]===id)delete S.alarms[k]});DB[id].horas=[...T];S.horasOv[id]=[...T];if(CUST[id])CUST[id].db.horas=[...T];T.forEach((x,i)=>alarm(id+'#'+i));SCH=null;return finishAdd(id)}
   if(ds.supl!==undefined)return addItem(suplItem(+ds.supl));
   if(ds.qset){const q=$('#q');q.value=ds.qset;return renderAddResults()}
   if(ds.manual){const q=$('#q');if(q&&q.value.trim()){const nn=nrm(clean(q.value).replace(/\s*\d.*$/,'').trim()||q.value);const dup=S.list.find(id=>DB[id]&&nrm(DB[id].nome)===nn);if(dup)return toast(`${DB[dup].nome} já está na sua lista.`);return addItem(manualItem(q.value,ds.manual))}return}
@@ -2165,7 +2166,7 @@ document.addEventListener('click',e=>{if(DRAGGED){e.stopPropagation();e.preventD
     if(ok){const ch={id:iid,from:m.sug.from,to:m.sug.time,by:m.de,appr:m.sug.approvedBy||null,quando:hhmm()};S.changes.unshift(ch);save();renderDock();refresh();return openSheet(sheetChanged(ch),{changed:1})}
     save();reopenThread(tid);return toast('Sugestão recusada.')}
 });
-document.addEventListener('input',e=>{maskIt(e.target);if(e.target.id==='pq'){PQ=e.target.value;const L=$('#parclist');L.innerHTML=(S.parea&&S.parea!=='todas')||PQ.trim()?parcResults():'<p class="pick">Escolha uma opção acima para ver quem está perto de você.</p>';return}if(e.target.id==='q')renderAddResults();if(e.target.id==='sfirst'&&SCH&&e.target.value){SCH.first=e.target.value;$('#sprev').innerHTML=schPrev()}if(e.target.dataset.pf){S.profile[e.target.dataset.pf]=e.target.value;save()}});
+document.addEventListener('input',e=>{maskIt(e.target);if(e.target.id==='pq'){PQ=e.target.value;const L=$('#parclist');L.innerHTML=(S.parea&&S.parea!=='todas')||PQ.trim()?parcResults():'<p class="pick">Escolha uma opção acima para ver quem está perto de você.</p>';return}if(e.target.id==='q')renderAddResults();if(e.target.id==='sfirst'&&SCH&&e.target.value){SCH.first=e.target.value;SCH.ov={};$('#sprev').innerHTML=schPrev()}if(e.target.dataset.sti!==undefined&&SCH&&e.target.value){SCH.ov=SCH.ov||{};SCH.ov[+e.target.dataset.sti]=e.target.value;if(+e.target.dataset.sti===0){SCH.first=e.target.value;const f=$('#sfirst');if(f)f.value=e.target.value}}if(e.target.dataset.pf){S.profile[e.target.dataset.pf]=e.target.value;save()}});
 document.addEventListener('change',e=>{if(e.target.dataset.pf){if(e.target.dataset.pf==='nasc'&&(e.target.value>dkey(new Date())||e.target.value<'1900-01-01')){e.target.value=S.profile.nasc||'';return toast('Confira a data de nascimento.')}S.profile[e.target.dataset.pf]=e.target.value;save();if(['nome','nasc'].includes(e.target.dataset.pf))refresh()}});
 document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.dataset&&e.target.dataset.read){e.preventDefault();e.target.click()}if(e.key==='Escape'){stopRing();closeReader();closeSheet();closeCam()}if(e.key==='Enter'&&e.target.id==='cmsg'){const b=document.querySelector('[data-send]');if(b)b.click()}});
 matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',applyTheme);
