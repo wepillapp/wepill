@@ -102,6 +102,8 @@ const BR=t=>new Date(t+'-03:00');
     await addManual(p,'Remedio Teste');await p.evaluate(()=>{window.pushOff=async()=>{sessionStorage.setItem('rm','1')}});await p.evaluate(()=>go('perfil'));await p.waitForTimeout(300);
     await p.click('[data-wipe]');await p.click('[data-wipe]');await p.waitForTimeout(1200);const s=await st(p);
     assert(await p.evaluate(()=>sessionStorage.getItem('rm')==='1'),'não tirou do servidor');assert(!s||!s.list.length,'não apagou a lista');await ctx.close()});
+  await t('Faixa "Ativar os avisos" aparece já na 1ª abertura, com a lista vazia',async()=>{const {ctx,p}=await novo();await p.addInitScript(()=>{Object.defineProperty(Notification,'permission',{get:()=>'default'})});await p.reload();await p.waitForTimeout(600);await cadastrar(p);
+    await p.evaluate(()=>go('hoje'));await p.waitForTimeout(300);assert((await p.innerText('#view')).includes('Ativar os avisos'),'sem a faixa com lista vazia');await ctx.close()});
   await t('Sem erros de JavaScript no fluxo principal',async()=>{const {ctx,p}=await novo();await cadastrar(p);await addManual(p,'Remedio Teste');for(const tab of ['lista','alertas','equipe','planos','perfil','hoje'])await p.evaluate(t=>go(t),tab);
     assert(!p.errs.length,p.errs.join(' | '));await ctx.close()});
   await b.close();srv.close();console.log(`\n${ok} passaram, ${fail} falharam`);process.exit(fail?1:0)})();
