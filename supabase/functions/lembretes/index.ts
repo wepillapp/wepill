@@ -50,9 +50,9 @@ function mensagem(a) {
     tag: "wepill-" + a.t, url: "/app/", keys: a.keys,
   };
 }
-// Família: doses de uma pessoa que passaram 30 min sem "Tomei" (até 2 h depois).
+// Família: doses de uma pessoa que passaram 10 min sem "Tomei" (até 2 h depois).
 // m = {tz, schedule:[{k,t,d}], takenKeys:Set (de hoje), takenDoses:[{item_id, quando: Date}]}
-function atrasadas(m, now, LIM = 30, JAN = 120) {
+function atrasadas(m, now, LIM = 10, JAN = 120) {
   const L = agoraLocal(m.tz || "America/Sao_Paulo", now), out = [];
   const tomadas = new Set();
   for (const d of m.takenDoses || []) {

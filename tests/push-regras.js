@@ -15,8 +15,8 @@ t('respeita os dias da semana',()=>{const s=sub({schedule:[{k:'x#0',t:'08:00',d:
 t('dia novo zera o que foi enviado ontem',()=>{const s=sub({sent:{day:'2026-11-23',keys:{'a#0':3,'b#0':3}}});eq(R.decidir(s,at('2026-11-24T11:01:00Z')).avisos[0].keys,['a#0','b#0'])});
 t('fuso inválido cai em São Paulo; agenda estragada não quebra',()=>{eq(R.decidir(sub({tz:'Lua/Base'}),at('2026-11-24T11:00:00Z')).avisos.length,1);eq(R.decidir({schedule:[null,{k:'z'},{k:'y',t:'xx',d:all}]},at('2026-11-24T11:00:00Z')).avisos,[])});
 t('texto do aviso',()=>{const m=R.mensagem({t:'08:00',keys:['a','b'],rep:false});eq(m.title,'Hora do remédio');eq(m.body,'2 doses das 08:00 para tomar agora. Toque para abrir o WePill.')});
-t('Família: avisa 30 min depois se não marcou, só uma janela de 2 h',()=>{const m={tz:'America/Sao_Paulo',schedule:[{k:'a#0',t:'18:45',d:all}],takenKeys:new Set(),takenDoses:[]};
-  eq(R.atrasadas(m,at('2026-11-24T22:14:00Z')),[]);eq(R.atrasadas(m,at('2026-11-24T22:15:00Z')),[{k:'a#0',t:'18:45',day:'2026-11-24'}]);eq(R.atrasadas(m,at('2026-11-25T00:46:00Z')),[])});
+t('Família: avisa 10 min depois se não marcou, só uma janela de 2 h',()=>{const m={tz:'America/Sao_Paulo',schedule:[{k:'a#0',t:'18:45',d:all}],takenKeys:new Set(),takenDoses:[]};
+  eq(R.atrasadas(m,at('2026-11-24T21:54:00Z')),[]);eq(R.atrasadas(m,at('2026-11-24T21:55:00Z')),[{k:'a#0',t:'18:45',day:'2026-11-24'}]);eq(R.atrasadas(m,at('2026-11-25T00:46:00Z')),[])});
 t('Família: não avisa se marcou Tomei (no celular ou na Família) nem em dia desligado',()=>{const base={tz:'America/Sao_Paulo',schedule:[{k:'a#0',t:'18:45',d:all}],takenKeys:new Set(),takenDoses:[]};
   eq(R.atrasadas({...base,takenKeys:new Set(['a#0'])},at('2026-11-24T22:20:00Z')),[]);
   eq(R.atrasadas({...base,takenDoses:[{item_id:'a',quando:at('2026-11-24T21:45:00Z')}]},at('2026-11-24T22:20:00Z')),[]);
