@@ -1015,16 +1015,20 @@ const PLANS=[
   {id:'vitrine',nome:'Vitrine',grupo:'par',preco:49,inclui:'Nome, categoria, telefone, mapa e Instagram na busca'},
   {id:'destaque',nome:'Destaque',grupo:'par',preco:79,feat:true,inclui:'Topo da categoria, foto, selo Parceiro e uma oferta para quem usa o WePill'},
 ];
-const FREE_FEATS=['Até 3 itens na lista','Alarme simples, 1 horário por item','Alertas de alergia e de combinações','Ficha de emergência'];
+const FREE_FEATS=['Até 3 itens na lista','Alarme na hora, mesmo com o app fechado','Alertas de alergia e de combinações','Ficha de emergência'];
 const PREM_FEATS=['Itens ilimitados e vários horários por item','Controle da caixa: reposição e aviso de "em falta"','Relatório em PDF para a consulta','Alarme que insiste até você confirmar','Cópia de segurança da lista na sua conta'];
 /* v97: plano Grátis = 3 itens. Lançamento: Premium de presente até 31/12/2026 (nada é apagado depois). */
 const FREE_MAX=3,GIFT_END=new Date('2027-01-01T00:00:00-03:00').getTime();
-function giftOn(){return Date.now()<GIFT_END}
-function isPrem(){return S.plan!=='gratis'||giftOn()}
+function giftOn(){return false} /* v109: presente de lançamento cancelado (venda começa em 26/11) */
+function srvPlan(){const v=S.srv;if(!v||!v.plano||v.plano==='gratis')return 'gratis';if(v.ate&&v.ate<dkey(new Date()))return 'gratis';return v.plano}
+function isPrem(){return srvPlan()!=='gratis'}
+/* v109: links de pagamento da Cakto. Vazio = botão avisa que abre em instantes. */
+const CK={premium:'',familia:''};
+async function planSync(){try{if(!FAM.user)return;const sb=await sbLoad();const {data}=await R(sb.rpc('meu_plano'));const old=JSON.stringify(S.srv||{});S.srv=data&&data.plano?data:{plano:'gratis'};if(JSON.stringify(S.srv)!==old){save();refresh()}}catch(e){}}
 function giftDays(){return Math.max(0,Math.ceil((GIFT_END-Date.now())/864e5))}
 function canAdd(){return isPrem()||S.list.length<FREE_MAX}
-function sheetLimit(){return `<h1>Seu plano Grátis cobre ${FREE_MAX} itens</h1><p class="sub">Você já tem ${S.list.length} itens na lista. Eles continuam aqui, com alarme e tudo, e nada será apagado.</p><p class="sub">Quem toma mais remédios precisa de mais cuidado. O <b>WePill Premium</b>, com itens sem limite, abre em breve.</p><button class="btn primary block tap" data-close>Entendi</button>`}
-const FAM_FEATS=['Tudo do Premium para você e mais 3 pessoas','Cada perfil com a sua lista, horários e ficha','O responsável vê quando uma dose fica atrasada','Troque de perfil com um toque'];
+function sheetLimit(){return `<h1>Seu plano Grátis cobre ${FREE_MAX} itens</h1><p class="sub">Você já tem ${S.list.length} itens na lista. Eles continuam aqui, com alarme e tudo, e nada será apagado.</p><p class="sub">Quem toma mais remédios precisa de mais cuidado. Com o <b>WePill Premium</b> (${money(12.9)} por mês) a lista não tem limite.</p><button class="btn primary block tap" data-goplanos>Ver o Premium</button><button class="btn ghost block tap" data-close>Agora não</button>`}
+const FAM_FEATS=['Tudo do Premium para você e mais 2 pessoas','Cada um no próprio celular, com a sua lista e horários','Você vê quando uma dose fica atrasada','Convite pelo WhatsApp com um código'];
 const PRO_FEATS=['Painel com todos os seus pacientes','Alertas de combinações e de doses perdidas','Notas entre profissionais do mesmo paciente','Paciente convidado por você ganha 30 dias de Premium'];
 const brl=v=>'R$ '+v.toFixed(2).replace('.',',');
 const CAT={remedio:{label:'Remédio',icon:'tablet'},suplemento:{label:'Suplemento',icon:'capsule'},vitamina:{label:'Vitamina',icon:'drop'},fito:{label:'Fitoterápico',icon:'leaf'}};
@@ -1163,7 +1167,7 @@ function allergyFor(id){const hay=(DB[id].nome+' '+(COMP[id]||'')).toLowerCase()
 function isAl(t){return (S.profile.alergias||'').toLowerCase().replace(/alergia a/g,',').split(/[,;]| e /).map(x=>x.trim()).includes(t)}
 const alW=t=>isAl(t)?'alergia':'intolerância';
 function allergyHits(list=S.list){return list.map(id=>({id,t:allergyFor(id)})).filter(x=>x.t)}
-function save(){try{pushSoon()}catch(e){}try{localStorage.setItem('medlist-v2',JSON.stringify({list:S.list,taken:S.taken,takenDay:S.takenDay,seedV:S.seedV,pros:S.pros,alarms:S.alarms,theme:S.theme,plan:S.plan,trialStart:S.trialStart,locOk:S.locOk,praio:S.praio,planTab:S.planTab,bill:S.bill,profile:S.profile,stock:S.stock,refillOff:S.refillOff,big:S.big,onboarded:S.onboarded,hist:S.hist,takenAt:S.takenAt,rung:S.rung,notifAsk:S.notifAsk,consent:S.consent,lockOn:S.lockOn,threads:S.threads,extraPros:S.extraPros,hiddenPros:S.hiddenPros,changes:S.changes,custom:S.custom,horasOv:S.horasOv,registered:S.registered,hadAccount:S.hadAccount,pendingInvite:S.pendingInvite||"",demoClean:S.demoClean,itemEd:S.itemEd}))}catch(e){}}
+function save(){try{pushSoon()}catch(e){}try{localStorage.setItem('medlist-v2',JSON.stringify({list:S.list,taken:S.taken,takenDay:S.takenDay,seedV:S.seedV,pros:S.pros,alarms:S.alarms,theme:S.theme,plan:S.plan,trialStart:S.trialStart,locOk:S.locOk,praio:S.praio,planTab:S.planTab,bill:S.bill,profile:S.profile,stock:S.stock,refillOff:S.refillOff,big:S.big,onboarded:S.onboarded,hist:S.hist,takenAt:S.takenAt,rung:S.rung,notifAsk:S.notifAsk,consent:S.consent,lockOn:S.lockOn,threads:S.threads,extraPros:S.extraPros,hiddenPros:S.hiddenPros,changes:S.changes,custom:S.custom,horasOv:S.horasOv,registered:S.registered,hadAccount:S.hadAccount,pendingInvite:S.pendingInvite||"",demoClean:S.demoClean,itemEd:S.itemEd,srv:S.srv||null}))}catch(e){}}
 
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -1510,8 +1514,9 @@ function vPerfil(){const p=S.profile,P=PLANS.find(x=>x.id===S.plan);
   const f=(k,l,type='text',extra='')=>`<div class="prow"><label for="pf-${k}">${l}</label><input class="inp" id="pf-${k}" data-pf="${k}" type="${type}" value="${esc(p[k]||'')}" ${extra}></div>`;
   const sel=(k,l,opts)=>`<div class="prow"><label for="pf-${k}">${l}</label><select class="inp" id="pf-${k}" data-pf="${k}">${opts.map(o=>`<option ${p[k]===o?'selected':''}>${o}</option>`).join('')}</select></div>`;
   return `<div class="prof-head glass"><div class="bigav">${initials(p.nome)}</div><div class="pinfo"><b>${esc(p.nome)}</b><span class="sub">${age(p.nasc)} anos · ${esc(p.cidade)}</span></div>
-    <span class="badge-plan ${isPrem()?'prem':''}">${S.plan==='gratis'&&giftOn()?'Premium de presente':P.nome}</span></div>
-  ${S.plan==='gratis'?`<div class="glass pgift">${giftOn()?`<b>🎁 Premium de presente até 31/12</b><span>Presente de lançamento: itens sem limite. Depois disso o plano Grátis cobre ${FREE_MAX} itens, e nada do que você já cadastrou será apagado.</span>`:`<b>Plano Grátis</b><span>Até ${FREE_MAX} itens na lista. Você tem ${S.list.length}. O Premium com itens sem limite abre em breve.</span>`}</div>`:''}
+    <span class="badge-plan ${isPrem()?'prem':''}">${srvPlan()==='familia'?'Família':srvPlan()==='premium'?'Premium':'Grátis'}</span></div>
+  ${isPrem()?`<div class="glass pgift"><b>${srvPlan()==='familia'?'Plano Família':'Premium'} ativo</b><span>${S.srv&&S.srv.ate?'Válido até '+S.srv.ate.split('-').reverse().join('/')+'. ':''}Itens sem limite na lista.</span></div>`:''}
+  ${!isPrem()?`<div class="glass pgift">${giftOn()?`<b>🎁 Premium de presente até 31/12</b><span>Presente de lançamento: itens sem limite. Depois disso o plano Grátis cobre ${FREE_MAX} itens, e nada do que você já cadastrou será apagado.</span>`:`<b>Plano Grátis</b><span>Até ${FREE_MAX} itens na lista. Você tem ${S.list.length}.</span><button class="btn ghost sm tap" data-goplanos style="align-self:flex-start;margin-top:6px">Ver planos</button>`}</div>`:''}
   ${idCard()}
   <p class="sub" style="font-size:13px;text-align:center;margin-top:-4px">Toque em qualquer dado para editar. Tudo é salvo na hora.</p>
   <h2>Preferências</h2>
@@ -1532,7 +1537,7 @@ function vPerfil(){const p=S.profile,P=PLANS.find(x=>x.id===S.plan);
   <p class="disclaimer">Seus dados ficam guardados neste celular. Com conta na Família, a lista também fica salva no servidor, no Brasil.</p>`}
 
 const money=v=>brl(v).replace(',00','');
-function plBtn(P,lbl,cls='primary'){return S.plan===P.id?'<span class="pl-cur">'+IC.check+' Seu plano atual</span>':`<button class="btn ${cls} block tap" data-plan="${P.id}">${lbl}</button>`}
+function plBtn(P,lbl,cls='primary'){const cur=srvPlan()===P.id||(P.id==='premium'&&srvPlan()==='familia');return cur?'<span class="pl-cur">'+IC.check+' '+(srvPlan()===P.id?'Seu plano atual':'Incluído no seu Família')+'</span>':`<button class="btn ${cls} block tap" data-buy="${P.id}">${lbl}</button>`;return S.plan===P.id?'<span class="pl-cur">'+IC.check+' Seu plano atual</span>':`<button class="btn ${cls} block tap" data-plan="${P.id}">${lbl}</button>`}
 function plFeats(arr){return `<ul class="feats">${arr.map(x=>`<li>${IC.check}<span>${x}</span></li>`).join('')}</ul>`}
 function plAsk(t,who,feats,id){return `<div class="plan glass"><div class="top"><div><h3>${t}</h3><span class="who">${who}</span></div><div class="price sm">Sob consulta</div></div>${plFeats(feats)}<button class="btn primary block tap" data-plancontact="${id}">Falar com a equipe</button></div>`}
 function vPlanos(){const T='pac',G=id=>PLANS.find(p=>p.id===id);
@@ -1542,8 +1547,8 @@ function vPlanos(){const T='pac',G=id=>PLANS.find(p=>p.id===id);
     body=`<div class="plan glass pl-free">
       <div class="top"><div><h3>Grátis</h3><span class="who">O essencial para começar</span></div><div class="price">R$ 0</div></div>
       ${plFeats(FREE_FEATS)}
-      <span class="pl-note">Segurança não tem limite: alertas e ficha de emergência são sempre grátis.</span>
-      ${S.plan==='gratis'?'<span class="pl-cur">'+IC.check+' Seu plano atual</span>':`<button class="btn ghost block tap" data-plan="gratis">Voltar para o Grátis</button>`}
+      <span class="pl-note">Segurança vem primeiro: alertas e ficha de emergência estão no plano Grátis.</span>
+      ${srvPlan()==='gratis'?'<span class="pl-cur">'+IC.check+' Seu plano atual</span>':''}
     </div>
     <div class="plan glass pl-prem ${ano?'feat':''}" ${ano?'data-badge="Mais escolhido"':''}>
       
@@ -1556,7 +1561,7 @@ function vPlanos(){const T='pac',G=id=>PLANS.find(p=>p.id===id);
     <div class="plan glass">
       <div class="top"><div><h3>Família</h3><span class="who">Para quem cuida dos pais ou dos filhos</span></div>
         <div class="price">${money(F.preco)}<small>por mês</small></div></div>
-      <div class="pl-people"><span class="pl-av" style="--c:var(--mint);--ci:var(--mint-ink)">Você</span><span class="pl-plus">+</span><span class="pl-av" style="--c:var(--lav);--ci:var(--lav-ink)">3 perfis conectados</span></div>
+      <div class="pl-people"><span class="pl-av" style="--c:var(--mint);--ci:var(--mint-ink)">Você</span><span class="pl-plus">+</span><span class="pl-av" style="--c:var(--lav);--ci:var(--lav-ink)">2 pessoas</span></div>
       ${plFeats(FAM_FEATS)}
       ${plBtn(F,'Assinar o Família','ghost')}
     </div>
@@ -1576,7 +1581,14 @@ function vPlanos(){const T='pac',G=id=>PLANS.find(p=>p.id===id);
   return `<p class="sub" style="margin:0">Comece grátis. Assine quando quiser mais.</p>
   <div class="pl-tabs" role="tablist">${tabs.map(([k,l])=>`<button role="tab" aria-selected="${T===k}" class="${T===k?'on':''}" data-pltab="${k}">${l}</button>`).join('')}</div>
   <div class="list stagger pl-body" style="gap:16px">${body}</div>
-  <p class="disclaimer">Valores em teste. Os pagamentos nesta tela são simulados e nenhuma cobrança é feita.</p>`}
+  <p class="disclaimer">Pagamento seguro pela Cakto (Pix ou cartão). Assinatura mensal: cancele quando quiser. 7 dias de garantia.</p>`}
+function sheetBuy(id){const P=PLANS.find(x=>x.id===id),nome=id==='familia'?'Família':'Premium';
+  if(!FAM.user||famIsAnon())return `<h1>Assinar o ${nome}</h1><p class="sub">Para assinar, entre com o seu e-mail. É por ele que o ${nome} é liberado neste celular e em qualquer outro.</p><button class="btn primary block tap" data-buylogin>Entrar com meu e-mail</button><button class="btn ghost block tap" data-close>Agora não</button>`;
+  return `<h1>Assinar o ${nome}</h1><p class="sub">${money(P.preco)} por mês. Cancele quando quiser.</p>
+  <div class="todo warnnote" style="text-align:left">${IC.shield}<span>No pagamento, use <b>este mesmo e-mail</b>:<br><b style="font-size:16px">${esc(FAM.user.email)}</b><br>É por ele que liberamos o ${nome}.</span></div>
+  ${CK[id]?`<a class="btn primary block tap" href="${CK[id]}" target="_blank" rel="noopener">Ir para o pagamento</a>`:`<button class="btn primary block tap" data-close>Pagamento abre em instantes</button>`}
+  <button class="btn ghost block tap" data-buycheck>Já paguei, atualizar</button>
+  <p class="sub" style="font-size:12.5px;margin:0">Depois do pagamento, a liberação pode levar algumas horas. Dúvidas: wepilladm@gmail.com</p>`}
 
 let CO=null;
 function coPlan(){const P=PLANS.find(x=>x.id===CO.plan);return {P,v:P.preco,nome:P.nome,per:P.per||'mês',dias:P.trial||0}}
@@ -2076,6 +2088,10 @@ document.addEventListener('click',e=>{if(DRAGGED){e.stopPropagation();e.preventD
   if(ds.add)return addItem(ds.add);
   if(ds.cmp){$('#results').innerHTML=cmedPres(+ds.cmp);$('#sheetBody').scrollTop=0;return}
   if(ds.cmback!==undefined)return renderAddResults();
+  if(ds.goplanos!==undefined){closeSheet();return go('planos')}
+  if(ds.buy){return openSheet(sheetBuy(ds.buy))}
+  if(ds.buylogin!==undefined){closeSheet();return setTimeout(openFam,300)}
+  if(ds.buycheck!==undefined){t.textContent='Conferindo…';return planSync().then(()=>{if(isPrem()){closeSheet();toast('Pronto! Seu plano está ativo.')}else{t.textContent='Já paguei, atualizar';toast('Ainda não apareceu. A liberação pode levar algumas horas.')}})}
   if(ds.sfreq){SCH.n=+ds.sfreq;SCH.ov={};document.querySelectorAll('[data-sfreq]').forEach(b=>b.classList.toggle('on',b===t));$('#sprev').innerHTML=schPrev();return}
   if(ds.sback){openSheet(sheetAdd());return}
   if(ds.sok){const id=SCH.id,T=[...new Set(schTimes())].sort();Object.keys(S.alarms).forEach(k=>{if(k.split('#')[0]===id)delete S.alarms[k]});DB[id].horas=[...T];S.horasOv[id]=[...T];if(CUST[id])CUST[id].db.horas=[...T];T.forEach((x,i)=>alarm(id+'#'+i));SCH=null;return finishAdd(id)}
@@ -2280,6 +2296,7 @@ async function R(pr){const r=await Promise.race([pr,new Promise((_,no)=>setTimeo
 function famErr(e){const m=(e&&(e.message||e.error_description))||String(e||'');
   if(/Failed to fetch|NetworkError|network/i.test(m))return 'Sem conexão agora. Tente de novo.';
   if(/CONVITE_INVALIDO/.test(m))return 'Código não encontrado ou vencido. Confira os números ou peça um convite novo para quem te convidou.';
+  if(/plano Família/i.test(m))return 'O convite faz parte do plano Família.';
   if(/muitas tentativas/i.test(m))return 'Muitas tentativas com código errado. Espere 1 hora ou peça um convite novo.';
   if(/já tem [34] pessoas/i.test(m))return 'Essa família já está completa (3 pessoas). Peça para o responsável remover alguém.';
   if(/já está em uma família/i.test(m))return 'Você já está em uma família. Para entrar em outra, saia da atual primeiro.';
@@ -2293,7 +2310,7 @@ function famErr(e){const m=(e&&(e.message||e.error_description))||String(e||'');
   if(/Password should|weak.?password|characters/i.test(m))return 'A senha precisa ter pelo menos 8 caracteres, com letras e números.';
   const c=e&&e.code?` (código ${e.code})`:'';return (m.replace(/^.*?:\s*/,'')||'Algo deu errado. Tente de novo.')+c}
 async function famBoot(){try{const sb=await sbLoad();const {data}=await R(sb.auth.getSession());FAM.user=data.session&&data.session.user||null;if(FAM.user)await famLoad()}catch(e){}}
-async function famLoad(){if(!FAM.user)return;const sb=SB;
+async function famLoad(){if(!FAM.user)return;const sb=SB;planSync();
   try{await R(sb.from('perfis').upsert({id:FAM.user.id,nome:((S.profile&&S.profile.nome)||(FAM.user.email||'').split('@')[0]||'Convidado').slice(0,80)}))}catch(e){console.warn('perfil',e)}
   const {data:f}=await R(sb.rpc('minha_familia'));FAM.fid=f||null;FAM.loaded=true;
   if(!FAM.fid){FAM.membros=[];famUnsub();return}
@@ -2368,7 +2385,7 @@ function famSheetBody(){const E=FAM.err?`<p class="famerr">${esc(FAM.err)}</p>`:
     h=`${FAM.membros.map(m=>{const ds=FAM.doses[m.user_id]||[],tk=ds.filter(d=>d.status==='tomada').length,late=famLate(m.user_id),nm=famName(m.user_id),me=m.user_id===FAM.user.id;
       return `<div class="fammem${late.length?' late':''}"><div class="fmh">${avatarTxt(m.nome)}<div style="flex:1"><b>${esc(m.nome)}${me?' (você)':''}</b><span>${m.papel==='responsavel'?'Responsável':'Membro'} · ${ds.length?`${tk} de ${ds.length} doses hoje`:'nenhuma dose hoje'}</span></div>${resp&&!me?`<button class="linkbtn tap" data-famrm="${esc(m.user_id)}" style="color:var(--rose-ink);font-size:13px">Remover</button>`:''}</div>
         ${ds.length?`<div class="fmd">${ds.map(d=>{const st=d.status==='tomada'?'ok':famLate(m.user_id).includes(d)?'late':'';return `<span class="${st}">${new Date(d.previsto_para).toTimeString().slice(0,5)} ${esc(nm(d.item_id))}</span>`}).join('')}</div>`:''}</div>`}).join('')}
-      ${resp&&vagas>0&&!FAM.code?`<button class="btn primary block tap" data-faminvite${B}>${IC.plus} Convidar pessoa (${vagas} ${vagas>1?'vagas':'vaga'})</button>`:''}
+      ${resp&&vagas>0&&!FAM.code&&srvPlan()!=='familia'?`<div class="todo" style="text-align:left">${IC.shield}<span>O convite faz parte do <b>plano Família</b> (${money(34.9)} por mês): você e mais 2 pessoas com o Premium.</span></div><button class="btn primary block tap" data-goplanos>Ver o plano Família</button>`:''}${resp&&vagas>0&&!FAM.code&&srvPlan()==='familia'?`<button class="btn primary block tap" data-faminvite${B}>${IC.plus} Convidar pessoa (${vagas} ${vagas>1?'vagas':'vaga'})</button>`:''}
       ${resp&&FAM.code&&vagas>0?`<div class="faminv"><small>Código do convite (vale 48 horas)</small><b>${famFmt(FAM.code)}</b><a class="btn primary block tap" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(famInviteMsg(FAM.code))}">Enviar pelo WhatsApp</a><button class="btn ghost block tap" data-famshare style="margin-top:8px">Compartilhar de outro jeito</button><p class="sub" style="font-size:12.5px;margin:10px 0 0">A pessoa baixa o WePill, toca em Família conectada > Recebi um convite e digita o código. Ela não precisa criar conta.</p></div>`:''}${E}
       <div class="row" style="margin-top:12px"><button class="btn ghost sm tap" data-famreload>Atualizar</button><button class="btn ghost sm tap" data-famleave>${resp?'Desfazer família':'Sair da família'}</button>${anon?'':'<button class="btn ghost sm tap" data-famout>Sair da conta</button>'}</div>${anon?'':famDelBtn()}`}
   return `<div id="famsheet"><h1>Família conectada <span class="sim">beta</span></h1>${h}<p class="disclaimer">Cada pessoa vê só a lista e as doses da própria família. Seus dados ficam guardados com segurança no servidor do WePill.</p></div>`}
