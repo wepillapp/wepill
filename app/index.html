@@ -1023,7 +1023,7 @@ function giftOn(){return false} /* v109: presente de lançamento cancelado (vend
 function srvPlan(){const v=S.srv;if(!v||!v.plano||v.plano==='gratis')return 'gratis';if(v.ate&&v.ate<dkey(new Date()))return 'gratis';return v.plano}
 function isPrem(){return srvPlan()!=='gratis'}
 /* v109: links de pagamento da Cakto. Vazio = botão avisa que abre em instantes. */
-const CK={premium:'',familia:''};
+const CK={premium:'https://pay.cakto.com.br/jhbavao_1342558','premium-ano':'https://pay.cakto.com.br/jso88rc_1340597',familia:''};
 async function planSync(){try{if(!FAM.user)return;const sb=await sbLoad();const {data}=await R(sb.rpc('meu_plano'));const old=JSON.stringify(S.srv||{});S.srv=data&&data.plano?data:{plano:'gratis'};if(JSON.stringify(S.srv)!==old){save();refresh()}}catch(e){}}
 function giftDays(){return Math.max(0,Math.ceil((GIFT_END-Date.now())/864e5))}
 function canAdd(){return isPrem()||S.list.length<FREE_MAX}
@@ -1556,7 +1556,7 @@ function vPlanos(){const T='pac',G=id=>PLANS.find(p=>p.id===id);
         <div class="price">${ano?'R$ 8,25<small>por mês</small><span class="pl-yr">R$ 99 cobrado 1x por ano</span>':money(P.preco)+'<small>por mês</small>'}</div></div>
       
       ${plFeats(['Tudo do plano Grátis',...PREM_FEATS])}
-      ${plBtn(P,ano?'Assinar o anual':'Assinar o mensal')}
+      ${plBtn(P,'Assinar o mensal')}${isPrem()?'':`<button class="btn ghost block tap" data-buy="premium-ano" style="margin-top:8px">Anual: R$ 8,25/mês <small style="font-weight:600;opacity:.75">&nbsp;(R$ 99 1x por ano)</small></button>`}
     </div>
     <div class="plan glass">
       <div class="top"><div><h3>Família</h3><span class="who">Para quem cuida dos pais ou dos filhos</span></div>
@@ -1582,9 +1582,9 @@ function vPlanos(){const T='pac',G=id=>PLANS.find(p=>p.id===id);
   <div class="pl-tabs" role="tablist">${tabs.map(([k,l])=>`<button role="tab" aria-selected="${T===k}" class="${T===k?'on':''}" data-pltab="${k}">${l}</button>`).join('')}</div>
   <div class="list stagger pl-body" style="gap:16px">${body}</div>
   <p class="disclaimer">Pagamento seguro pela Cakto (Pix ou cartão). Assinatura mensal: cancele quando quiser. 7 dias de garantia.</p>`}
-function sheetBuy(id){const P=PLANS.find(x=>x.id===id),nome=id==='familia'?'Família':'Premium';
+function sheetBuy(id){const P=PLANS.find(x=>x.id===id),nome=id==='familia'?'Família':id==='premium-ano'?'Premium Anual':'Premium';
   if(!FAM.user||famIsAnon())return `<h1>Assinar o ${nome}</h1><p class="sub">Para assinar, entre com o seu e-mail. É por ele que o ${nome} é liberado neste celular e em qualquer outro.</p><button class="btn primary block tap" data-buylogin>Entrar com meu e-mail</button><button class="btn ghost block tap" data-close>Agora não</button>`;
-  return `<h1>Assinar o ${nome}</h1><p class="sub">${money(P.preco)} por mês. Cancele quando quiser.</p>
+  return `<h1>Assinar o ${nome}</h1><p class="sub">${id==='premium-ano'?'R$ 99 cobrado 1 vez, vale por 1 ano (R$ 8,25 por mês). Pix ou cartão.':money(P.preco)+' por mês. Cancele quando quiser.'}</p>
   <div class="todo warnnote" style="text-align:left">${IC.shield}<span>No pagamento, use <b>este mesmo e-mail</b>:<br><b style="font-size:16px">${esc(FAM.user.email)}</b><br>É por ele que liberamos o ${nome}.</span></div>
   ${CK[id]?`<a class="btn primary block tap" href="${CK[id]}" target="_blank" rel="noopener">Ir para o pagamento</a>`:`<button class="btn primary block tap" data-close>Pagamento abre em instantes</button>`}
   <button class="btn ghost block tap" data-buycheck>Já paguei, atualizar</button>
