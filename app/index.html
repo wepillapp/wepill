@@ -1023,7 +1023,7 @@ function giftOn(){return false} /* v109: presente de lançamento cancelado (vend
 function srvPlan(){const v=S.srv;if(!v||!v.plano||v.plano==='gratis')return 'gratis';if(v.ate&&v.ate<dkey(new Date()))return 'gratis';return v.plano}
 function isPrem(){return srvPlan()!=='gratis'}
 /* v109: links de pagamento da Cakto. Vazio = botão avisa que abre em instantes. */
-const CK={premium:'https://pay.cakto.com.br/jhbavao_1342558','premium-ano':'https://pay.cakto.com.br/jso88rc_1340597',familia:''};
+const CK={premium:'https://pay.cakto.com.br/jhbavao_1342558','premium-ano':'https://pay.cakto.com.br/jso88rc_1340597',familia:'https://pay.cakto.com.br/waxxkgx'};
 async function planSync(){try{if(!FAM.user)return;const sb=await sbLoad();const {data}=await R(sb.rpc('meu_plano'));const old=JSON.stringify(S.srv||{});S.srv=data&&data.plano?data:{plano:'gratis'};if(JSON.stringify(S.srv)!==old){save();refresh()}}catch(e){}}
 function giftDays(){return Math.max(0,Math.ceil((GIFT_END-Date.now())/864e5))}
 function canAdd(){return isPrem()||S.list.length<FREE_MAX}
