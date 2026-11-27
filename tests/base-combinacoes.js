@@ -8,7 +8,7 @@ let ok=0,fail=0;const t=async(n,fn)=>{try{await fn();ok++;console.log('  ✓',n)
   const ctx=await b.newContext({viewport:{width:390,height:844},locale:'pt-BR',serviceWorkers:'block'});const p=await ctx.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));
   await p.route(/supabase|jsdelivr|googleapis|gstatic/,r=>r.abort());await p.goto(URL);await p.waitForTimeout(600);await p.evaluate(()=>loadCmed());
   /* acha na CMED o primeiro produto cuja substância contém o texto e devolve o id do item */
-  const item=sub=>p.evaluate(s=>{for(let i=0;i<CMED.p.length;i++){if(nrm(CMED.p[i][1]).includes(s))return cmedItem(i,0)}return null},sub);
+  const item=sub=>p.evaluate(s=>{for(const so of [true,false])for(let i=0;i<CMED.p.length;i++){const x=CMED.p[i][1];if(nrm(x).includes(s)&&(!so||!x.includes('+')))return cmedItem(i,0)}return null},sub); // prefere remédio de uma substância só
   const par=(x,y)=>p.evaluate(([a,b])=>alerts([a,b]).map(o=>o.sev+': '+o.t),[x,y]);
   console.log('WePill · base de combinações');
   await t('Fostair (formoterol + beclometasona) agora é checado',async()=>{const id=await p.evaluate(()=>{const h=CMED.ean['7896672201257'];return cmedItem(h[0],h[1])});assert(!(await p.evaluate(i=>unkOf(i),id)),'ainda não checado')});
