@@ -804,6 +804,12 @@ a.btn{text-decoration:none;display:flex;align-items:center;justify-content:cente
 .linkbtn{background:none;border:0;color:var(--accent);font-weight:700;font-size:14px;padding:6px;align-self:center}
 .btn.danger{background:var(--rose-ink);color:#fff;border:0}
 .holdhint{font-size:12.5px;color:var(--ink-3);text-align:center;margin:4px 0 0}
+.unk{border-radius:14px;padding:11px 12px;background:color-mix(in srgb,var(--sky) 55%,transparent);border:1px solid color-mix(in srgb,var(--sky-ink) 30%,transparent);font-size:14px;line-height:1.45;margin:10px 0;color:var(--ink)}
+.unk.incam{font-size:13.5px;margin:0;background:var(--glass);border-color:color-mix(in srgb,var(--sky-ink) 45%,transparent)}
+.unk-h{display:flex;gap:9px;align-items:flex-start}.unk-h svg{flex:none;width:18px;height:18px;margin-top:1px;color:var(--sky-ink)}
+.unk-a{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 0}.unk-a a{display:inline-flex;align-items:center;gap:6px;padding:7px 11px;border-radius:99px;background:var(--glass-2);border:1px solid var(--stroke);font-size:13px;font-weight:700;color:var(--sky-ink);text-decoration:none}.unk-a svg{width:15px;height:15px}
+.flag.unkflag{background:color-mix(in srgb,var(--sky) 70%,transparent);color:var(--sky-ink)}
+.alert.sev-unk{--sev:var(--sky-ink);--sevbg:color-mix(in srgb,var(--sky) 70%,transparent)}.alert.sev-unk .sevpill svg{width:13px;height:13px;vertical-align:-2px}
 .todo.warnnote{background:color-mix(in srgb,var(--peach) 60%,transparent);color:var(--ink)}.todo.warnnote svg{color:var(--peach-ink)}
 #swlist .item{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 #swlist .item.pressing{transform:scale(.965);box-shadow:0 0 0 2px color-mix(in srgb,var(--rose-ink) 45%,transparent);transition:transform .6s var(--ease),box-shadow .6s}
@@ -1178,7 +1184,21 @@ function alerts(list=S.list){const out=[],seen=new Set();
       if(o){const k=o.a+'|'+o.b+'|'+o.t;if(!seen.has(k)){seen.add(k);out.push(o)}}})))}
   return out.sort((x,y)=>SEVORD[x.sev]-SEVORD[y.sev])}
 function interWith(id){return alerts([...S.list.filter(x=>x!==id),id]).filter(a=>a.a===id||a.b===id)}
-const unkOf=id=>DB[id]&&(DB[id].src==='manual'||DB[id].src==='backup'||(DB[id].src==='cmed'&&!DB[id].base));
+const unkOf=id=>DB[id]&&(DB[id].src==='manual'||DB[id].src==='backup'||((DB[id].src==='cmed'||DB[id].src==='wepill')&&!DB[id].base));
+/* itens fora da base revisada: dizer o que falta e dar caminhos (bula, farmacêutico) */
+const subOf=id=>{const D=DB[id];return D&&D.sub?D.sub.replace(/\b(fumarato|dipropionato|cloridrato|maleato|succinato|besilato|sódic[oa]|potássic[oa]|di-hidratad[oa]|mono-hidratad[oa]|de)\b/gi,' ').replace(/\s+/g,' ').replace(/ ?\+ ?/g,' + ').trim():''};
+function pharmaText(){const L=S.list.map(id=>{const D=DB[id],sb=subOf(id);return '• '+D.nome+(D.dose?' '+D.dose:'')+(sb&&!nrm(D.nome).startsWith(nrm(sb))?' ('+sb+')':'')+(unkOf(id)?' *':'')});
+  return 'Olá! Pode olhar minha lista de remédios e me dizer se posso usar todos juntos?\n\n'+L.join('\n')+(S.list.some(unkOf)?'\n\n* o app WePill ainda não conseguiu checar as combinações destes.':'')+'\n\nObrigado!'}
+const pharmaHref=()=>'https://wa.me/?text='+encodeURIComponent(pharmaText());
+const IC_INFO=sv('<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',2.2),IC_WA=sv('<path d="M4 20l1.4-4A8 8 0 1 1 8 18.6z"/><path d="M9 9.5c0 3 2.5 5.5 5.5 5.5l1-1.5-2-1-1 .8a4 4 0 0 1-1.8-1.8l.8-1-1-2z"/>',1.8),IC_DOC=sv('<path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 15.5h5"/>',2);
+function unkNote(id,mode){const sb=subOf(id),u=bulaUrl(id),nm=sb?esc(sb):'este item';
+  return `<div class="unk ${mode||''}"><div class="unk-h">${IC_INFO}<span><b>Combinações ainda não checadas</b><br> Nossa base revisada ainda não tem ${nm}. Antes de começar, peça ao farmacêutico para olhar junto com o resto da sua lista.</span></div>
+  <div class="unk-a">${u?`<a class="tap" href="${u}" target="_blank" rel="noopener">${IC_DOC} Ver bula</a>`:''}<a class="tap" href="${pharmaHref()}" target="_blank" rel="noopener">${IC_WA} Enviar ao farmacêutico</a></div></div>`}
+function unkCard(){const u=S.list.filter(unkOf);if(!u.length)return '';
+  return `<div class="alert glass sev-unk"><span class="sevpill">${IC_INFO} Para conferir</span><h3>${u.length===1?'1 item ainda sem checagem':u.length+' itens ainda sem checagem'} de combinações</h3>
+  <p>${u.map(id=>`<b style="color:var(--ink)">${esc(DB[id].nome)}</b>`).join(', ')} ${u.length===1?'ainda não está':'ainda não estão'} na nossa base revisada. Não quer dizer que haja risco: só que ninguém conferiu ainda.</p>
+  <div class="todo">${IC.ok}<span>Mande sua lista ao farmacêutico ou leve o relatório na próxima consulta. Leva 1 minuto.</span></div>
+  <div class="acts"><a class="btn primary sm tap" href="${pharmaHref()}" target="_blank" rel="noopener">${IC_WA} Enviar ao farmacêutico</a><button class="btn ghost sm tap" data-report="1">${IC_DOC} Relatório</button></div></div>`}
 function flagFor(id){if(allergyFor(id))return 'alergia';const a=alerts().filter(i=>i.a===id||i.b===id);return a.length?a[0].sev:null}
 function alarm(key){const [id,i]=key.split('#');if(!S.alarms[key])S.alarms[key]={on:true,time:DB[id].horas[+i],days:[1,1,1,1,1,1,1],sound:'suave',snooze:10,insist:true};return S.alarms[key]}
 function doses(){const d=[];S.list.forEach(id=>DB[id].horas.forEach((h,i)=>{const key=id+'#'+i;d.push({id,key,h:alarm(key).time})}));return d.sort((a,b)=>a.h.localeCompare(b.h))}
@@ -1287,7 +1307,7 @@ function vLista(){
   <div class="filters" id="filters">${F.map(([k,l])=>`<button class="filter ${S.filter===k?'on':''}" data-filter="${k}">${l}</button>`).join('')}</div>
   <div class="list ${SWIPE?'swin-'+SWIPE:'stagger'}" id="swlist">${items.map(id=>{const f=flagFor(id),D=DB[id];return `<button class="item glass tap ${S.fresh===id?'new':''}" data-item="${id}">${pillic(id)}
     <div class="info"><b>${D.nome} <span style="font-weight:500;color:var(--ink-2)">${D.dose}</span></b><span>${D.horas.map((h,i)=>alarm(id+'#'+i).time).join(' e ')} · ${outOf(id)?`<span style="color:var(--rose-ink);font-weight:700">em falta: acabou a caixa</span>`:needsRefill(id)?`<span style="color:var(--peach-ink);font-weight:700">repor: restam ${stock(id)}</span>`:`${stock(id)} de ${BOX[id]} na caixa`}</span><div class="mbar ${needsRefill(id)?'low':''}"><i style="width:${(1-used(id))*100}%"></i></div></div>
-    ${f&&f!=='leve'?`<span class="flag sev-${f}">${SEVLBL[f]}</span>`:''}</button>`}).join('')||'<p class="sub">Nada nesta categoria ainda.</p>'}</div><div class="swdots">${F.map(([k])=>`<i class="${S.filter===k?'on':''}"></i>`).join('')}</div><p class="swhint">Deslize para trocar a categoria · segure um item para tirar da lista</p>`;
+    ${f&&f!=='leve'?`<span class="flag sev-${f}">${SEVLBL[f]}</span>`:unkOf(id)?`<span class="flag unkflag">Conferir</span>`:''}</button>`}).join('')||'<p class="sub">Nada nesta categoria ainda.</p>'}</div><div class="swdots">${F.map(([k])=>`<i class="${S.filter===k?'on':''}"></i>`).join('')}</div><p class="swhint">Deslize para trocar a categoria · segure um item para tirar da lista</p>`;
 }
 function alertCard(a,isNew){return `<div class="alert glass sev-${a.sev} ${isNew?'new':''}"><span class="sevpill">${SEVLBL[a.sev]}</span>
   <h3>${DB[a.a].nome} + ${DB[a.b].nome}</h3><p><b style="font-weight:700;color:var(--ink)">${a.t}.</b> ${a.p}</p>
@@ -1306,8 +1326,8 @@ function outCard(id){const D=DB[id],nx=D.horas.map((h,i)=>alarm(id+'#'+i).time).
   <div class="meter low"><i style="width:0%"></i></div>
   <div class="acts"><button class="btn primary sm tap" data-newbox="${id}">${IC.box} Comprei outra caixa</button><button class="btn ghost sm tap" data-item="${id}">Ver item</button></div></div>`}
 function vAlertas(){const al=alerts(),ah=allergyHits(),rf=S.list.filter(needsAlert).sort((a,b)=>outOf(b)-outOf(a)),f=S.afilter;
-  const chs=[];const F=[['todos','Todos',al.length+rf.length],['interacao',al.length===1?'Combinação':'Combinações',al.length],['repor','Reposição',rf.length]];
-  const cards=[...(f==='todos'||f==='interacao'?al.map(a=>alertCard(a,S.fresh&&(a.a===S.fresh||a.b===S.fresh))):[]),...(f==='todos'||f==='repor'?rf.map(refillCard):[]),...(f==='todos'||f==='alterada'?chs.map(changeCard):[])];
+  const chs=[];const nu=S.list.some(unkOf)?1:0;const F=[['todos','Todos',al.length+rf.length+nu],['interacao',al.length===1?'Combinação':'Combinações',al.length+nu],['repor','Reposição',rf.length]];
+  const cards=[...(f==='todos'||f==='interacao'?[unkCard()].filter(Boolean):[]),...(f==='todos'||f==='interacao'?al.map(a=>alertCard(a,S.fresh&&(a.a===S.fresh||a.b===S.fresh))):[]),...(f==='todos'||f==='repor'?rf.map(refillCard):[]),...(f==='todos'||f==='alterada'?chs.map(changeCard):[])];
   return `<div><h1>Alertas</h1><p class="sub">Combinações e reposições da sua lista. Os alertas informam, não substituem a orientação de quem receitou.</p></div>
   <div class="afilter glass">${F.map(([k,l,n])=>`<button class="${f===k?'on':''}" data-afilter="${k}"><b class="num">${n}</b>${l}${k==='repor'&&n?`<i class="ping" aria-hidden="true">${sv('<path d="M12 3.5l9 16H3z"/><path d="M12 10v4M12 17h.01"/>',2.2)}</i>`:''}</button>`).join('')}</div>
   <div class="list stagger">${cards.join('')||`<div class="glass" style="padding:20px;text-align:center">Nada por aqui. Tudo certo nesta categoria.</div>`}</div>
@@ -1634,7 +1654,9 @@ function loadCmed(){if(CMED)return Promise.resolve(CMED);if(CMEDP)return CMEDP;
   CMEDP=fetch('cmed.json').then(r=>{if(!r.ok)throw new Error('http');return r.json()}).then(d=>{d.ean={};d.p.forEach((p,i)=>{p.k=nrm(p[0]);p.s=nrm(p[1]);p[2].forEach((a,j)=>{if(a[1])d.ean[a[1]]=[i,j]})});CMED=d;CMEDERR=false;return d})
     .catch(e=>{CMEDP=null;CMEDERR=true;throw e});return CMEDP}
 const BASEMAP=[[/LOSARTANA/,'losartana'],[/LEVOTIROXINA/,'levotiroxina'],[/METFORMINA/,'metformina'],[/SINVASTATINA/,'sinvastatina'],[/VARFARINA/,'varfarina'],[/SERTRALINA/,'sertralina'],[/DIPIRONA|METAMIZOL/,'dipirona'],[/ACETILSALICILICO/,'aas'],[/IBUPROFENO/,'ibuprofeno'],[/OMEPRAZOL/,'omeprazol'],[/PARACETAMOL/,'paracetamol'],[/ENALAPRIL/,'enalapril'],[/ANLODIPINO/,'anlodipino'],[/HIDROCLOROTIAZIDA/,'hidroclorotiazida'],[/FLUOXETINA/,'fluoxetina'],[/COLECALCIFEROL/,'vitd'],[/CLORETO DE POTASSIO/,'potassio'],[/CIANOCOBALAMINA/,'b12'],[/GINKGO/,'ginkgo'],[/HYPERICUM/,'saojoao']];
-function doseOf(ap){const m=[...ap.matchAll(/(\d+(?:[.,]\d+)?)\s*(MCG|MG|UI|G|%)(?:\s*\/\s*(ML|G))?/gi)].slice(0,2).map(x=>x[1]+' '+x[2].toLowerCase()+(x[3]?'/'+x[3].toLowerCase():''));return m.join(' + ')}
+/* "100 + 6 MCG" vira "100 mcg + 6 mcg"; números com milhar (5.000.000 UI) inteiros; GR/GRAMAS = g */
+function doseOf(ap){let s=ap;for(let k=0;k<3;k++)s=s.replace(/(?<![\d.,])(?<!(?:\bX|\bC\/|\+)\s*)(\d+(?:[.,]\d+)*)\s*\+\s*(\d+(?:[.,]\d+)*)\s*((?:MCG|MG|UI)(?![A-Z])(?:\s*\/\s*ML\b)?)/gi,'$1 $3 + $2 $3');
+  const m=[...s.matchAll(/(\d+(?:[.,]\d+)*)\s*(MCG|MG|UI|GRAMAS?|GRS?|G|%)(?![A-Z])(?:\s*\/\s*(ML|G)(?![A-Z]))?/gi)].slice(0,2).map(x=>x[1]+' '+x[2].toLowerCase().replace(/^gr.*/,'g')+(x[3]?'/'+x[3].toLowerCase():''));return m.join(' + ')}
 function qtyOf(ap){const m=[...ap.matchAll(/(?:\bX|\bCOM|\bC\/)\s*(\d+)(?!\s*(?:MG|MCG|ML|G|UI|%|\d))/gi)];const n=m.length?+m[m.length-1][1]:0;return n>0&&n<=500?n:0}
 function unitOf(ap){const A=nrm(ap);if(/\bCAP|CAPS/.test(A))return 'cápsulas';if(/\bCOMP|\bCOM\b|\bDRG|COM REV|COM EFERV/.test(A))return '';if(/SOL|SUSP|XPE|GOT|\bML\b|FR\b|AMP/.test(A))return 'doses';return ''}
 function catOf(H){if(/VITAMINA|COLECALCIFEROL|CIANOCOBALAMINA|ASCORBICO|RETINOL|TIAMINA|PIRIDOXINA|FOLICO/.test(H))return 'vitamina';if(/EXTRATO|GINKGO|HYPERICUM|PASSIFLORA|VALERIANA|HEDERA|MIKANIA|AESCULUS|CIMICIFUGA/.test(H))return 'fito';return 'remedio'}
@@ -1666,6 +1688,24 @@ function cmedSearch(q){if(!CMED)return [];const P=qParse(q);LASTN=P.n;if(!P.w.le
   if(P.n.length){const re=P.n.map(numRe),f=r.filter(i=>re.every(x=>x.test(apOf(CMED.p[i]))));const pa=r.partial;if(f.length){r=f;r.partial=pa}else{r=r.slice(0,40);r.numMiss=true;r.partial=pa;return r}}
   const out=r.slice(0,40);out.partial=r.partial;return out}
 function suplSearch(q){const P=qParse(q);if(!P.w.length||P.Q.length<2)return [];return SUPL.map((x,i)=>i).filter(i=>P.w.every(t=>SUPL[i].k.split(' ').some(k=>t.length<=2?k===t:k.startsWith(t)||(t.length>4&&k.startsWith(t.replace(/S$/,''))))))}
+/* v110: base própria do WePill (remédios que a equipe cadastrou a pedido dos clientes) + "Não achei, avisar a equipe" */
+let EXTRA=null,EXTRAP=null,PEND=null;
+function loadExtra(){if(EXTRA)return Promise.resolve(EXTRA);if(EXTRAP)return EXTRAP;let c=null;try{c=JSON.parse(localStorage.getItem('wepill-extra')||'null')}catch(e){}
+  if(c&&Array.isArray(c.r)&&c.t>Date.now()-6*3600e3){EXTRA=c.r;return Promise.resolve(EXTRA)}
+  EXTRAP=sbLoad().then(sb=>R(sb.rpc('remedios_extra_lista'))).then(({data})=>{EXTRA=(data||[]).map(r=>({codigo:r.codigo||'',nome:clean(r.nome||''),dose:clean(r.dose||''),substancia:clean(r.substancia||''),cat:CAT[r.cat]?r.cat:'remedio',k:nrm((r.nome||'')+' '+(r.substancia||''))})).filter(r=>r.nome);
+    try{localStorage.setItem('wepill-extra',JSON.stringify({t:Date.now(),r:EXTRA}))}catch(e){}return EXTRA}).catch(()=>{EXTRA=c&&Array.isArray(c.r)?c.r:[];return EXTRA}).finally(()=>{EXTRAP=null});return EXTRAP}
+function extraSearch(q){if(!EXTRA||!EXTRA.length)return [];const P=qParse(q);if(!P.w.length)return [];return EXTRA.map((r,i)=>i).filter(i=>P.w.every(t=>hasW(EXTRA[i].k,t))).slice(0,20)}
+function extraItem(r){const id='w'+(r.codigo||nrm(r.nome+r.dose).replace(/[^A-Z0-9]/g,'').toLowerCase());if(DB[id])return id;
+  const sub=(r.substancia||'').toLowerCase(),H=nrm(sub||r.nome),base=[...new Set(BASEMAP.filter(([re])=>re.test(H)).map(x=>x[1]))],B=base.length===1?DB[base[0]]:null;
+  const db={nome:r.nome,dose:r.dose||'',cat:r.cat,qtd:B?B.qtd:'Conforme a receita',para:B?B.para:'Confira na bula ou com quem receitou.',como:B?B.como:'Siga a receita e a bula oficial.',evitar:B?B.evitar:'Veja a bula oficial no Bulário da Anvisa.',horas:B?[...B.horas]:['08:00'],por:'',src:'wepill',sub,ap:'',ean:r.codigo||'',base:base.length?base:null};
+  const d={db,box:30,unit:'',comp:(sub||r.nome).toLowerCase()};CUST[id]=d;regCustom(id,d);return id}
+function extraByCode(code){return loadExtra().then(x=>x.find(r=>r.codigo===code)||null)}
+/* o pedido leva só o código, o nome e uma foto pequena da caixa: nenhum dado da pessoa */
+async function pedirRemedio(o){try{const sb=await sbLoad();await R(sb.rpc('pedir_remedio',{p_codigo:o.codigo||null,p_nome:o.nome||null,p_foto:o.foto||null}))}catch(e){}}
+const thumbOf=url=>url?imgCanvas(url,520).then(c=>c.toDataURL('image/jpeg',.6)).catch(()=>null):Promise.resolve(null);
+function pendHook(id){const D=DB[id];if(!D)return;const fresh=PEND&&Date.now()-PEND.t<30*60e3;const nm=[D.nome,D.dose].filter(Boolean).join(' ')+(D.sub&&!nrm(D.nome).startsWith(nrm(D.sub))?' ('+D.sub+')':'')+(D.src==='cmed'?' · CMED '+(D.ean||D.ap||''):'');
+  if(fresh){const p=PEND;PEND=null;thumbOf(p.front).then(f=>pedirRemedio({codigo:p.code,nome:nm,foto:f}))}
+  else if(D.src==='manual')pedirRemedio({nome:nm})}
 let VOCAB=null;
 function lev(a,b,max){if(Math.abs(a.length-b.length)>max)return max+1;let prev=Array.from({length:b.length+1},(_,j)=>j);for(let i=1;i<=a.length;i++){const cur=[i];let lo=i;for(let j=1;j<=b.length;j++){cur[j]=Math.min(prev[j]+1,cur[j-1]+1,prev[j-1]+(a[i-1]===b[j-1]?0:1));if(cur[j]<lo)lo=cur[j]}if(lo>max)return max+1;prev=cur}return prev[b.length]}
 function didYouMean(q){const P=qParse(q);if(!CMED||!P.w.length)return [];
@@ -1680,11 +1720,12 @@ function manualItem(nome,cat){nome=clean(nome);const id='m'+Date.now().toString(
   const gt=cat==='fito'||/GOTA/.test(nrm(nome));const d={db,box:gt?600:30,unit:gt?'gotas':'',comp:nome.trim().toLowerCase()};CUST[id]=d;regCustom(id,d);return id}
 function cmedHtml(q){if(nrm(q.trim()).length<2)return '';
   if(!CMED)return CMEDERR?'<p class="sub cmload">Sem conexão com a lista da Anvisa agora. Tente de novo em instantes.</p>':`<p class="sub cmload"><i class="spin"></i>Buscando na lista da Anvisa…</p>`;
-  let r=cmedSearch(q);const su=suplSearch(q);if((r.numMiss||r.partial)&&su.length)r=[];let h='';
+  let r=cmedSearch(q);const su=suplSearch(q),xr=extraSearch(q);if((r.numMiss||r.partial)&&(su.length||xr.length))r=[];let h='';
+  if(xr.length)h+=`<h2 class="cmh">Cadastrados pela equipe WePill</h2>`+xr.map(i=>{const x=EXTRA[i];return `<button class="result cm tap" data-xadd="${i}"><div class="pillic c-${x.cat}">${IC[CAT[x.cat].icon]}</div><div class="info"><b>${esc(x.nome)} <span style="font-weight:500;color:var(--ink-2)">${esc(x.dose)}</span></b><br><span>${esc(x.substancia?x.substancia.toLowerCase():CAT[x.cat].label.toLowerCase())}${x.codigo?' · código '+esc(x.codigo):''}</span></div><span class="chev">${IC.plus}</span></button>`}).join('');
   if(su.length)h+=`<h2 class="cmh">Suplementos e outros produtos</h2>`+su.map(i=>{const x=SUPL[i];return `<button class="result cm tap" data-supl="${i}"><div class="pillic c-${x.cat}">${IC[CAT[x.cat].icon]}</div><div class="info"><b>${esc(x.nome)}</b><br><span>${esc(x.sub)} · ${CAT[x.cat].label.toLowerCase()}</span></div><span class="chev">${IC.plus}</span></button>`}).join('');
   if(r.length)h+=(r.partial?`<p class="sub" style="font-size:13px;margin:10px 2px 0">Não achei tudo o que você digitou junto. Veja os mais parecidos:</p>`:'')+`<h2 class="cmh">Lista Anvisa (CMED) · ${r.length===40?'mais de 40':r.length} resultado${r.length===1?'':'s'}</h2>`+r.map(i=>{const p=CMED.p[i],n=p[2].length;
     return `<button class="result cm tap" data-cmp="${i}"><div class="pillic c-${catOf(p.s)}">${IC[CAT[catOf(p.s)].icon]}</div><div class="info"><b>${esc(tc(p[0]))}</b><br><span>${esc(p[1]==='NC/NI'?'substância não informada':p[1].toLowerCase())} · ${n} apresentaç${n===1?'ão':'ões'}</span></div><span class="chev">${sv('<path d="M9 6l6 6-6 6"/>',2)}</span></button>`}).join('');
-  if(!r.length&&!su.length){const dm=didYouMean(q);h+=dm.length?`<div class="dym"><span>Você quis dizer:</span>${dm.map(x=>`<button class="qchip tap" data-qset="${esc(tc(x))}">${esc(tc(x))}</button>`).join('')}</div>`:'<div class="chk warn">'+IC.shield+'<span>Não encontrei esse nome na lista oficial da Anvisa. Pode ser um remédio que saiu do mercado, um nome comercial novo, um suplemento ou um produto importado. Confira a grafia na caixa ou adicione do seu jeito logo abaixo.</span></div>'}
+  if(!r.length&&!su.length&&!xr.length){const dm=didYouMean(q);h+=dm.length?`<div class="dym"><span>Você quis dizer:</span>${dm.map(x=>`<button class="qchip tap" data-qset="${esc(tc(x))}">${esc(tc(x))}</button>`).join('')}</div>`:'<div class="chk warn">'+IC.shield+'<span>Não encontrei esse nome na lista oficial da Anvisa. Pode ser um remédio que saiu do mercado, um nome comercial novo, um suplemento ou um produto importado. Confira a grafia na caixa ou adicione do seu jeito logo abaixo.</span></div>'}
   h+=manualHtml(q);
   return h}
 function manualHtml(q,ti){const t=(q||'').trim();if(t.length<3)return '';return `<div class="manual"><b>${ti||'Não achou? Adicione do seu jeito'}</b><span class="sub">“${esc(t)}” entra na sua lista como</span><div class="mcats">${Object.keys(CAT).map(c=>`<button class="qchip tap" data-manual="${c}">${CAT[c].label}</button>`).join('')}</div></div>`}
@@ -1694,7 +1735,7 @@ function cmedPres(i){const p=CMED.p[i],re=LASTN.map(numRe),ok=a=>re.length&&re.e
   ord.map(j=>{const a=p[2][j];return `<button class="result tap${ok(a)?' hit':''}" data-cma="${i}:${j}"><div class="info"><b>${esc(a[0].toLowerCase())}</b><br><span>${a[1]?'Código '+a[1]:'Sem código de barras'}</span></div><span class="chev">${IC.plus}</span></button>`}).join('')+manualHtml(($('#q')||{}).value,'Não é nenhuma destas? Gotas, suplemento ou outra versão: adicione do seu jeito')}
 function renderAddResults(){const q=$('#q'),R=$('#results');if(!q||!R)return;const v=q.value,long=nrm(v.trim()).length>=2,cur=filterDB(v);
   let h=cur.length?(long?'<h2 class="cmh">Base revisada (combinações checadas)</h2>':'')+resultsHtml(cur):'';h+=cmedHtml(v);if(!h)h=resultsHtml([]);R.innerHTML=h;
-  if(long&&!CMED&&!CMEDERR)loadCmed().then(renderAddResults,renderAddResults)}
+  if(long&&!CMED&&!CMEDERR)loadCmed().then(renderAddResults,renderAddResults);if(long&&!EXTRA&&!EXTRAP)loadExtra().then(x=>{if(x.length)renderAddResults()})}
 function resultsHtml(res){return res.map(id=>{const has=S.list.includes(id);
   const would=has?[]:interWith(id);
   return `<button class="result tap" data-add="${id}" ${has?'disabled':''}>${pillic(id)}<div class="info"><b>${DB[id].nome} ${DB[id].dose}</b><br><span>${CAT[DB[id].cat].label}${allergyFor(id)?` · <span style="color:var(--rose-ink);font-weight:700">você informou ${alW(allergyFor(id))} a ${esc(allergyFor(id))}</span>`:''}${would.length?` · <span style="color:var(--peach-ink);font-weight:600">${would.length===1?'1 alerta com sua lista':would.length+' alertas com sua lista'}</span>`:''}</span></div>${has?'<span class="src">Na lista</span>':''}</button>`}).join('')||'<p class="sub">Não encontrei. Tente outro nome, escaneie a caixa ou anexe uma foto.</p>'}
@@ -1723,7 +1764,7 @@ function sheetItem(id){const D=DB[id],al=alerts().filter(i=>i.a===id||i.b===id);
     <div class="fact"><small>Como costuma ser usado (bula)</small>${D.qtd}. ${D.como}</div>
     <div class="fact"><small>Pontos de atenção (bula)</small>${D.evitar}</div>
   </div>
-  ${al.length?`<h2>Com outros itens da sua lista</h2>${al.map(a=>alertCard(a)).join('')}`:unkOf(id)?`<div class="todo warnnote">${IC.shield}<span>Este item ainda não está na nossa base de combinações, então não conseguimos checar se ele combina com os outros. Mostre sua lista ao farmacêutico.</span></div>`:`<div class="todo">${IC.ok}<span>Sem conflitos com os outros itens da sua lista.</span></div>`}
+  ${al.length?`<h2>Com outros itens da sua lista</h2>${al.map(a=>alertCard(a)).join('')}`:unkOf(id)?unkNote(id):`<div class="todo">${IC.ok}<span>Sem conflitos com os outros itens da sua lista.</span></div>`}
   <p class="holdhint">Para tirar da lista, segure o item na tela Minha lista.</p>`}
 const BULANOME={omega3:'',calcio:'',ferro:'',magnesio:'',k2:'',b12:'',vitd:'',ginkgo:'ginkgo',saojoao:'hypericum',aas:'acido acetilsalicilico',potassio:'cloreto de potassio'};
 function bulaUrl(id){const D=DB[id];let n=D.src==='cmed'?D.nome:(id in BULANOME?BULANOME[id]:D.nome);if(!n)return '';n=n.normalize('NFD').replace(/[̀-ͯ]/g,'');return 'https://consultas.anvisa.gov.br/#/bulario/q/?nomeProduto='+encodeURIComponent(n.toUpperCase())}
@@ -1893,8 +1934,8 @@ function sheetSched(id){const D=DB[id],n=D.horas.length;SCH={id,n:FREQ.some(f=>f
   <button class="btn primary block tap" data-sok="1" style="margin-top:18px">${IC.check} Adicionar e programar</button>
   <button class="btn ghost block tap" data-sback="1" style="margin-top:8px">Voltar à busca</button>`}
 function addItem(id){if(S.list.includes(id))return finishAdd(id);if(!canAdd())return openSheet(sheetLimit());openSheet(sheetSched(id))}
-function finishAdd(id){if(!S.list.includes(id)&&!canAdd())return openSheet(sheetLimit());if(CUST[id]&&!S.custom[id])S.custom[id]=CUST[id];const before=alerts().length;if(!S.list.includes(id))S.list.push(id);S.fresh=id;save();closeSheet();const n=alerts().length-before;
-  if(allergyFor(id)){go('hoje');toast(`Atenção: você informou ${alW(allergyFor(id))} a ${esc(allergyFor(id))}. Veja o destaque no painel.`)}else if(n>0){toast(`${DB[id].nome} adicionado. Encontrei ${n===1?'1 combinação':n+' combinações'} que merece${n===1?'':'m'} cuidado.`);go('alertas')}else{toast(`${DB[id].nome} adicionado. Nenhuma combinação de risco encontrada na nossa base, o que não garante que a combinação seja segura.`);go('lista')}
+function finishAdd(id){if(!S.list.includes(id)&&!canAdd())return openSheet(sheetLimit());if(CUST[id]&&!S.custom[id])S.custom[id]=CUST[id];const before=alerts().length;if(!S.list.includes(id)){S.list.push(id);pendHook(id)}S.fresh=id;save();closeSheet();const n=alerts().length-before;
+  if(allergyFor(id)){go('hoje');toast(`Atenção: você informou ${alW(allergyFor(id))} a ${esc(allergyFor(id))}. Veja o destaque no painel.`)}else if(n>0){toast(`${DB[id].nome} adicionado. Encontrei ${n===1?'1 combinação':n+' combinações'} que merece${n===1?'':'m'} cuidado.`);go('alertas')}else if(unkOf(id)){toast(`${DB[id].nome} adicionado. As combinações dele ainda não foram checadas: veja como conferir em Alertas.`);go('lista')}else{toast(`${DB[id].nome} adicionado. Nenhuma combinação de risco encontrada na nossa base, o que não garante que a combinação seja segura.`);go('lista')}
   setTimeout(()=>{S.fresh=null},1200)}
 
 
@@ -1936,18 +1977,23 @@ function gotCode(code){camDone=true;const photo=camFreeze();stopCam();$('#cam').
   $('#camhint').innerHTML='';const P=$('#campanel');P.innerHTML=camSteps(L,1);
   setTimeout(()=>{P.innerHTML=camSteps(L,2)},450);
   setTimeout(()=>{if(id){P.innerHTML=camSteps(L,3);return setTimeout(()=>camResult(id,`Base de demonstração · código ${code}`,photo),300)}
-    loadCmed().then(d=>{const h=d.ean[code];if(!h)return camNotFound(code);const cid=cmedItem(h[0],h[1]);P.innerHTML=camSteps(L,3);setTimeout(()=>camResult(cid,`Lista Anvisa (CMED) · código ${code}`,photo),300)},()=>camNotFound(code,true))},950)}
-function camNotFound(code,off){const br=/^789|^790/.test(code);
-  $('#campanel').innerHTML=`<div class="who"><div class="pillic" style="--c:var(--lav);--ci:var(--lav-ink)">${IC.barcode}</div><div><b>Código lido</b><span class="src">${esc(code)}${br?' · produto brasileiro':''}</span></div></div>
-  <div class="chk warn">${IC.shield}<span>${off?'Sem conexão com a lista da Anvisa agora. Tente de novo em instantes.':'Este código não está na lista da Anvisa (CMED). Pode ser um suplemento, um produto importado ou de uso hospitalar. Busque pelo nome.'}</span></div>
-  <div class="row"><button class="btn ghost tap" data-camagain="1">Ler outro</button><button class="btn primary tap" data-camtype="1">Buscar pelo nome</button></div>`}
+    loadCmed().then(d=>{const h=d.ean[code];if(!h)return extraByCode(code).then(r=>{if(!r)return camNotFound(code,false,photo);P.innerHTML=camSteps(L,3);setTimeout(()=>camResult(extraItem(r),`Base WePill · código ${code}`,photo),300)});const cid=cmedItem(h[0],h[1]);P.innerHTML=camSteps(L,3);setTimeout(()=>camResult(cid,`Lista Anvisa (CMED) · código ${code}`,photo),300)},()=>camNotFound(code,true))},950)}
+function camNotFound(code,off,photo){const br=/^789|^790/.test(code);
+  if(off){$('#campanel').innerHTML=`<div class="who"><div class="pillic" style="--c:var(--lav);--ci:var(--lav-ink)">${IC.barcode}</div><div><b>Código lido</b><span class="src">${esc(code)}${br?' · produto brasileiro':''}</span></div></div>
+  <div class="chk warn">${IC.shield}<span>Sem conexão com a lista da Anvisa agora. Tente de novo em instantes.</span></div>
+  <div class="row"><button class="btn ghost tap" data-camagain="1">Ler outro</button><button class="btn primary tap" data-camtype="1">Buscar pelo nome</button></div>`;return}
+  PEND={code,t:Date.now()};pedirRemedio({codigo:code});
+  $('#campanel').innerHTML=`<div class="who"><div class="pillic" style="--c:var(--lav);--ci:var(--lav-ink)">${IC.barcode}</div><div><b>Ainda não temos este código</b><span class="src">${esc(code)}${br?' · produto brasileiro':''}</span></div></div>
+  <div class="unk incam"><div class="unk-h">${IC_INFO}<span><b>Já avisamos a equipe WePill</b><br>Vamos cadastrar este produto para todos. Enquanto isso, adicione agora: fotografe a frente da caixa (o app lê o nome, e a foto ajuda a equipe) ou digite o nome.</span></div></div>
+  <button class="btn primary block tap" data-pendphoto="1">${IC.cam} Fotografar a frente da caixa</button>
+  <div class="row"><button class="btn ghost tap" data-camagain="1">Ler outro</button><button class="btn ghost tap" data-camtype="1">Digitar o nome</button></div>`}
 function camResult(id,src,photo){const D=DB[id],has=S.list.includes(id),al=allergyFor(id);
   const hits=interWith(id);
   if(photo&&!photos[id])photos[id]=photo;
   const chk=[];
   chk.push(al?`<div class="chk bad">${IC.alert||IC.shield}<span><b>${isAl(al)?'Alergia':'Intolerância'}:</b> você informou ${alW(al)} a ${esc(al)}.</span></div>`:`<div class="chk ok">${IC.check}<span>Não encontramos suas alergias na composição cadastrada. Confira também a bula.</span></div>`);
   if(hits.length)hits.slice(0,2).forEach(i=>{const o=i.a===id?i.b:i.a;chk.push(`<div class="chk ${i.sev==='grave'?'bad':'warn'}">${IC.shield}<span><b>${SEVLBL[i.sev]} com ${DB[o].nome}:</b> ${esc(i.t)}.</span></div>`)});
-  else if(unkOf(id))chk.push(`<div class="chk warn">${IC.shield}<span>Este item ainda não está na nossa base de combinações revisada. Mostre sua lista ao farmacêutico.</span></div>`);
+  else if(unkOf(id))chk.push(unkNote(id,'incam'));
   else chk.push(`<div class="chk ok">${IC.check}<span>Nenhuma combinação de risco encontrada na nossa base com os ${S.list.length} itens da sua lista. Isso não garante que a combinação seja segura.</span></div>`);
   $('#campanel').innerHTML=`<div class="who">${pillic(id)}<div><b>${D.nome} ${D.dose}</b><span class="src">${CAT[D.cat].label} · ${esc(src)}</span></div></div>${chk.join('')}
   <div class="row"><button class="btn ghost tap" data-camagain="1">Ler outro</button>${has?`<button class="btn ghost tap" disabled>Já está na lista</button>`:`<button class="btn primary tap" data-camadd="${id}">${IC.check} Adicionar</button>`}</div>`;
@@ -2003,7 +2049,9 @@ async function readPhotoNew(url){const sc=$('#scan');if(!sc)return;const alive=(
   let c;try{c=await imgCanvas(url,1600)}catch(e){end();return set('Não consegui abrir a foto','Tente outra imagem ou digite o nome abaixo')}
   loadCmed().catch(()=>{});
   const code=await photoBarcode(c);
+  if(PEND&&!PEND.front&&Date.now()-PEND.t<30*60e3)PEND.front=url;
   if(code){let id=EAN[code];if(!id){try{const d=await loadCmed();const h=d.ean[code];if(h)id=cmedItem(h[0],h[1])}catch(e){}}
+    if(!id){const r=await extraByCode(code).catch(()=>null);if(r)id=extraItem(r);else if(!PEND||PEND.code!==code){PEND={code,t:Date.now(),front:url};pedirRemedio({codigo:code})}}
     if(id&&alive()){photos[id]=url;end();set('Encontrei: '+DB[id].nome+(DB[id].dose?' '+DB[id].dose:''),'Pelo código de barras '+code);
       if(ACTS)ACTS.innerHTML=`<button class="btn primary sm tap" data-confirm="${id}">Adicionar</button>`;return}}
   set('Lendo o texto da foto…','Primeira vez pode levar alguns segundos');
@@ -2096,6 +2144,8 @@ document.addEventListener('click',e=>{if(DRAGGED){e.stopPropagation();e.preventD
   if(ds.sback){openSheet(sheetAdd());return}
   if(ds.sok){const id=SCH.id,T=[...new Set(schTimes())].sort();Object.keys(S.alarms).forEach(k=>{if(k.split('#')[0]===id)delete S.alarms[k]});DB[id].horas=[...T];S.horasOv[id]=[...T];if(CUST[id])CUST[id].db.horas=[...T];T.forEach((x,i)=>alarm(id+'#'+i));SCH=null;return finishAdd(id)}
   if(ds.supl!==undefined)return addItem(suplItem(+ds.supl));
+  if(ds.xadd!==undefined&&EXTRA&&EXTRA[+ds.xadd])return addItem(extraItem(EXTRA[+ds.xadd]));
+  if(ds.pendphoto){closeCam();openSheet(sheetAdd());photoTarget='new';return $('#file').click()}
   if(ds.qset){const q=$('#q');q.value=ds.qset;return renderAddResults()}
   if(ds.manual){const q=$('#q');if(q&&q.value.trim()){const nn=nrm(clean(q.value).replace(/\s*\d.*$/,'').trim()||q.value);const dup=S.list.find(id=>DB[id]&&nrm(DB[id].nome)===nn);if(dup)return toast(`${DB[dup].nome} já está na sua lista.`);return addItem(manualItem(q.value,ds.manual))}return}
   if(ds.cma){const [i,j]=ds.cma.split(':').map(Number);return addItem(cmedItem(i,j))}
