@@ -21,5 +21,12 @@ let ok=0,fail=0;const t=async(n,fn)=>{try{await fn();ok++;console.log('  ✓',n)
   await t('Alendronato + cálcio pede para separar',async()=>{const a=await par(await item('ALENDRONATO'),'calcio');assert(a.some(x=>/alendronato/.test(x)),JSON.stringify(a))});
   await t('Item já guardado no celular ganha a base nova ao abrir',async()=>{await p.evaluate(()=>{const h=CMED.ean['7896672201257'];const id=cmedItem(h[0],h[1]);const d=JSON.parse(JSON.stringify(CUST[id]));d.db.base=null;const s=JSON.parse(localStorage.getItem('medlist-v2')||'{}');s.custom={[id]:d};s.list=[id];localStorage.setItem('medlist-v2',JSON.stringify(s))});
     await p.reload();await p.waitForTimeout(700);const u=await p.evaluate(()=>S.list.map(unkOf));assert(u.length===1&&u[0]===false,JSON.stringify(u))});
+  await p.evaluate(()=>loadCmed());
+  await t('Revisão: soro de reidratação e ácido folínico não viram potássio/cálcio',async()=>{const r=await p.evaluate(()=>[keysOf(nrm('GLICOSE + CLORETO DE SODIO + CLORETO DE POTASSIO + CITRATO DE SODIO')),keysOf(nrm('FOLINATO DE CALCIO')),keysOf(nrm('CARBONATO DE CALCIO')),keysOf(nrm('CLORETO DE POTASSIO'))]);assert(JSON.stringify(r)==='[[],[],["calcio"],["potassio"]]',JSON.stringify(r))});
+  await t('Revisão: tramadol + trazodona avisa serotonina',async()=>{const a=await par(await item('TRAMADOL'),await item('TRAZODONA'));assert(a.some(x=>x.startsWith('grave')&&/serotonina/.test(x)),JSON.stringify(a))});
+  await t('Revisão: atenolol + salbutamol é leve, propranolol é atenção',async()=>{const a=await par(await item('ATENOLOL'),await item('SALBUTAMOL')),b=await par(await item('PROPRANOLOL'),await item('SALBUTAMOL'));assert(a.length===1&&a[0].startsWith('leve')&&b.length===1&&b[0].startsWith('moderada'),JSON.stringify([a,b]))});
+  await t('Revisão: rivaroxabana + carbamazepina é grave',async()=>{const a=await par(await item('RIVAROXABANA'),await item('CARBAMAZEPINA'));assert(a.some(x=>x.startsWith('grave')),JSON.stringify(a))});
+  await t('Revisão: amiodarona + citalopram é grave',async()=>{const a=await par(await item('AMIODARONA'),await item('CITALOPRAM'));assert(a.some(x=>x.startsWith('grave')&&/ritmo/.test(x)),JSON.stringify(a))});
+  await t('Revisão: levofloxacino + prednisona avisa tendão',async()=>{const a=await par(await item('LEVOFLOXACINO'),await item('PREDNISONA'));assert(a.some(x=>/tendão/.test(x)),JSON.stringify(a))});
   await t('Sem erros de JavaScript',async()=>assert(!errs.length,errs.join('; ')));
   console.log(`\n${ok} passaram, ${fail} falharam`);await b.close();srv.close();process.exit(fail?1:0)})();
