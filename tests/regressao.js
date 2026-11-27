@@ -44,7 +44,7 @@ const BR=t=>new Date(t+'-03:00');
     assert(!(await p.evaluate(()=>window.__xss)),'código executou');await ctx.close()});
   await t('WP-19 item digitado repetido é bloqueado',async()=>{const {ctx,p}=await novo();await cadastrar(p);await addManual(p,'Remedio Teste');await addManual(p,'Remedio Teste');const s=await st(p);assert(s.list.length===1,'ficou com '+s.list.length);await ctx.close()});
   await t('WP-28 item digitado avisa que não foi checado',async()=>{const {ctx,p}=await novo();await cadastrar(p);await addManual(p,'Remedio Teste');const id=(await st(p)).list[0];await p.evaluate(id=>openSheet(sheetItem(id),{item:id}),id);await p.waitForTimeout(300);
-    assert((await p.innerText('#sheetBody')).includes('não conseguimos checar'),'sem aviso');await ctx.close()});
+    assert((await p.innerText('#sheetBody')).includes('Combinações ainda não checadas'),'sem aviso');await ctx.close()});
   await t('WP-17 e WP-16 boas-vindas e ficha não aparecem ao reabrir',async()=>{const {ctx,p}=await novo();await cadastrar(p);await p.reload();await p.waitForTimeout(700);assert(!(await p.isVisible('#onb.on')),'boas-vindas de novo');
     assert(await p.evaluate(()=>document.querySelector('#sos').classList.contains('off')||!document.querySelector('#sos').innerHTML),'ficha aberta');await ctx.close()});
   await t('WP-10 assinatura não é simulada: Assinar pede e-mail e não libera nada sozinho',async()=>{const {ctx,p}=await novo();await cadastrar(p);await p.evaluate(()=>go('planos'));await p.waitForTimeout(300);await p.click('[data-buy="premium"]');await p.waitForTimeout(300);
