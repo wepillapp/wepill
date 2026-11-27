@@ -68,7 +68,7 @@ function view(){const A=$('#app');const M=(ST.msg?`<div class="msg">${esc(ST.msg
 async function load(){ST.err='';try{const {data,error}=await sb.rpc(ST.tab==='pend'?'remedios_pendentes':'remedios_aprovados');if(error)throw error;ST.rows=data||[]}catch(e){ST.rows=[];ST.err=/equipe/i.test(e.message||'')?'Este e-mail ainda não está na equipe. Adicione com o comando do arquivo 08-remedios-extra.sql.':'Não consegui carregar: '+(e.message||e)}view()}
 document.addEventListener('click',async e=>{const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a;ST.msg='';ST.err='';
   if(a==='zoom'){$('#big img').src=b.src;$('#big').classList.add('on');return}
-  if(a==='send'){ST.email=($('#em').value||'').trim().toLowerCase();if(!ST.email)return;b.disabled=true;const {error}=await sb.auth.signInWithOtp({email:ST.email,options:{shouldCreateUser:false}});if(error){ST.err='Não consegui mandar o código: '+error.message;return view()}ST.step='code';view();setTimeout(()=>$('#cd')&&$('#cd').focus(),50);return}
+  if(a==='send'){ST.email=($('#em').value||'').trim().toLowerCase();if(!ST.email)return;b.disabled=true;const {error}=await sb.auth.signInWithOtp({email:ST.email,options:{shouldCreateUser:true}});if(error){ST.err='Não consegui mandar o código: '+error.message;return view()}ST.step='code';view();setTimeout(()=>$('#cd')&&$('#cd').focus(),50);return}
   if(a==='verify'){const c=($('#cd').value||'').replace(/\D/g,'');b.disabled=true;const {data,error}=await sb.auth.verifyOtp({email:ST.email,token:c,type:'email'});if(error){ST.err='Código inválido ou vencido.';return view()}ST.user=data.user;return load()}
   if(a==='back'){ST.step='email';return view()}
   if(a==='out'){e.preventDefault();await sb.auth.signOut();ST.user=null;ST.step='email';return view()}
