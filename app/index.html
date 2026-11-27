@@ -1090,17 +1090,18 @@ const SUBS=[
  [/LORATADINA/,'loratadina'],[/FEXOFENADINA/,'fexofenadina'],[/CETIRIZINA/,'cetirizina'],[/DEXCLORFENIRAMINA/,'dexclorfeniramina'],
  [/ALENDRON/,'alendronato'],[/SILDENAFILA/,'sildenafila'],[/TADALAFILA/,'tadalafila'],[/ISOSSORBIDA/,'isossorbida'],[/TANSULOSINA/,'tansulosina'],
  [/AMIODARONA/,'amiodarona'],[/DIGOXINA/,'digoxina'],[/METOTREXATO/,'metotrexato'],[/ALOPURINOL/,'alopurinol'],
- [/COLECALCIFEROL/,'vitd'],[/CALCIO/,'calcio'],[/FERROS|FERRIC|\bFERRO\b/,'ferro'],[/MAGNESIO/,'magnesio'],[/OMEGA|EICOSAPENTAENOICO|DOCOSAEXAENOICO/,'omega3'],[/FITOMENADIONA|MENAQUINONA/,'k2'],[/CLORETO DE POTASSIO/,'potassio'],[/CIANOCOBALAMINA/,'b12'],[/GINKGO/,'ginkgo'],[/HYPERICUM/,'saojoao']];
+ [/COLECALCIFEROL/,'vitd'],[/^(?!.*CLORETO DE SODIO).*(?<!FOLINATO DE |PANTOTENATO DE )CALCIO/,'calcio'],[/FERROS|FERRIC|\bFERRO\b/,'ferro'],[/^(?!.*CLORETO DE SODIO).*MAGNESIO/,'magnesio'],[/OMEGA|EICOSAPENTAENOICO|DOCOSAEXAENOICO/,'omega3'],[/FITOMENADIONA|MENAQUINONA/,'k2'],[/^(?!.*CLORETO DE SODIO).*CLORETO DE POTASSIO/,'potassio'],[/CIANOCOBALAMINA/,'b12'],[/GINKGO/,'ginkgo'],[/HYPERICUM/,'saojoao']];
 const GRP={'@bra':'losartana valsartana olmesartana telmisartana irbesartana candesartana','@ieca':'enalapril captopril lisinopril ramipril perindopril',
  '@tiaz':'hidroclorotiazida clortalidona indapamida','@betabloq':'atenolol propranolol metoprolol carvedilol bisoprolol nebivolol','@estatina':'sinvastatina atorvastatina rosuvastatina pravastatina',
  '@anticoag':'varfarina rivaroxabana apixabana dabigatrana edoxabana','@antiplaq':'aas clopidogrel ticagrelor','@aine':'ibuprofeno diclofenaco nimesulida naproxeno cetoprofeno meloxicam celecoxibe piroxicam cetorolaco',
  '@opioide':'tramadol codeina morfina oxicodona','@cortic':'prednisona prednisolona dexametasona','@sulfonil':'glibenclamida gliclazida glimepirida','@ibp':'omeprazol esomeprazol pantoprazol lansoprazol',
  '@isrs':'sertralina fluoxetina escitalopram citalopram paroxetina venlafaxina duloxetina','@triciclico':'amitriptilina nortriptilina','@benzo':'clonazepam alprazolam diazepam lorazepam bromazepam zolpidem',
  '@gaba':'gabapentina pregabalina','@quinolona':'ciprofloxacino levofloxacino','@macrolideo':'claritromicina eritromicina','@indutor':'carbamazepina fenitoina',
- '@b2':'salbutamol formoterol salmeterol','@sedativo':'dexclorfeniramina ciclobenzaprina mirtazapina trazodona','@minerais':'calcio ferro magnesio','@potassio':'potassio espironolactona'};
+ '@b2':'salbutamol formoterol salmeterol','@sedativo':'dexclorfeniramina ciclobenzaprina mirtazapina trazodona','@minerais':'calcio ferro magnesio','@potassio':'potassio espironolactona',
+ '@qt':'citalopram escitalopram claritromicina eritromicina ciprofloxacino levofloxacino fluconazol'};
 const CLS={};Object.entries(GRP).forEach(([g,l])=>l.split(' ').forEach(k=>(CLS[k]=CLS[k]||[]).push(g)));
 /* serotonina: antidepressivos, tramadol, ciclobenzaprina, trazodona, erva de São João */
-['sertralina','fluoxetina','escitalopram','citalopram','paroxetina','venlafaxina','duloxetina','amitriptilina','nortriptilina','tramadol','ciclobenzaprina','trazodona','saojoao'].forEach(k=>(CLS[k]=CLS[k]||[]).push('@serot'));
+['sertralina','fluoxetina','escitalopram','citalopram','paroxetina','venlafaxina','duloxetina','amitriptilina','nortriptilina','tramadol','ciclobenzaprina','trazodona','mirtazapina','saojoao'].forEach(k=>(CLS[k]=CLS[k]||[]).push('@serot'));
 const keysOf=H=>[...new Set(SUBS.filter(([re])=>re.test(H)).map(x=>x[1]))];
 const KNOWN=new Set(SUBS.map(x=>x[1]));
 const R_=(a,b,sev,t,p,o,gen)=>({a,b,sev,t,p,o,gen:!!gen});
@@ -1131,10 +1132,9 @@ const INTER=[
  R_('@isrs','@anticoag','moderada','Mais chance de sangramento','O antidepressivo também afeta a coagulação e soma com o remédio que afina o sangue.','Manchas roxas ou sangramento são sinais para contar ao médico.'),
  R_('@isrs','@antiplaq','moderada','Mais chance de sangramento','O antidepressivo também afeta a coagulação e soma com o antiagregante.','Manchas roxas ou sangramento são sinais para contar ao médico.'),
  R_('@isrs','@aine','moderada','Mais chance de sangramento no estômago','O antidepressivo soma com o efeito do anti-inflamatório no estômago.','Use o anti-inflamatório só com orientação e pelo menor tempo possível.'),
- R_('varfarina','ginkgo','grave','Risco aumentado de sangramento','Os dois afinam o sangue e somam o efeito.','Converse com quem receitou a varfarina antes de usar o ginkgo.'),
- R_('@anticoag','ginkgo','moderada','Ginkgo pode aumentar o risco de sangramento','O ginkgo também afeta a coagulação.',OK_MED,1),
+ R_('@anticoag','ginkgo','moderada','Ginkgo pode aumentar o risco de sangramento','O ginkgo também afeta a coagulação. Há relatos de sangramento, mas os estudos não são conclusivos.','Converse com quem receitou o remédio que afina o sangue antes de usar o ginkgo.'),
  R_('varfarina','omega3','moderada','Ômega 3 pode aumentar o risco de sangramento','Em doses altas, soma com o efeito da varfarina.','Vale contar ao médico que receitou a varfarina que você usa ômega 3.'),
- R_('varfarina','k2','moderada','Vitamina K reduz o efeito da varfarina','O sangue pode voltar a coagular mais do que deveria.','Vale contar ao médico que receitou a varfarina que você usa vitamina K2.'),
+ R_('varfarina','k2','moderada','Vitamina K reduz o efeito da varfarina','O sangue pode voltar a coagular mais do que deveria.','Vale contar ao médico que receitou a varfarina que você usa vitamina K.'),
  R_('varfarina','paracetamol','leve','Paracetamol todo dia pode aumentar o efeito da varfarina','Em uso diário e prolongado, o exame de coagulação (INR) pode subir.','Uso de vez em quando costuma ser seguro. Se for usar todo dia, avise o médico.'),
  R_('varfarina','@macrolideo','grave','O antibiótico aumenta muito o efeito da varfarina','O sangue pode ficar fino demais.','Avise quem receitou a varfarina. Pode ser preciso fazer o exame de INR.'),
  R_('varfarina','@quinolona','moderada','O antibiótico pode aumentar o efeito da varfarina','O exame de coagulação (INR) pode subir.','Avise quem receitou a varfarina que você vai usar o antibiótico.'),
@@ -1143,11 +1143,12 @@ const INTER=[
  R_('varfarina','fluconazol','grave','Fluconazol aumenta muito o efeito da varfarina','O sangue pode ficar fino demais.','Avise quem receitou a varfarina antes de usar o fluconazol.'),
  R_('varfarina','amiodarona','grave','Amiodarona aumenta muito o efeito da varfarina','O efeito pode durar semanas.','O médico costuma ajustar a dose da varfarina e pedir exames.'),
  R_('varfarina','@indutor','moderada','O remédio reduz o efeito da varfarina','O sangue pode coagular mais do que deveria.','O médico costuma acompanhar com o exame de INR.'),
+ R_('@anticoag','@indutor','grave','O remédio corta o efeito do remédio que afina o sangue','Carbamazepina e fenitoína baixam muito o nível de rivaroxabana, apixabana, dabigatrana e edoxabana. A bula orienta evitar.','Converse com quem receitou: pode ser preciso trocar um dos remédios.',1),
  R_('clopidogrel','omeprazol','moderada','Omeprazol reduz o efeito do clopidogrel','O clopidogrel protege menos o coração.','Pergunte ao médico se outro protetor de estômago, como o pantoprazol, serve para você.'),
  R_('clopidogrel','esomeprazol','moderada','Esomeprazol reduz o efeito do clopidogrel','O clopidogrel protege menos o coração.','Pergunte ao médico se outro protetor de estômago, como o pantoprazol, serve para você.'),
  /* pressão e potássio */
- R_('@bra','@potassio','grave','Potássio alto no sangue','O remédio de pressão já segura potássio no corpo; somar com potássio ou espironolactona pode afetar o coração.','Converse com quem receitou. Costuma ser preciso fazer exame de potássio.'),
- R_('@ieca','@potassio','grave','Potássio alto no sangue','O remédio de pressão já segura potássio no corpo; somar com potássio ou espironolactona pode afetar o coração.','Converse com quem receitou. Costuma ser preciso fazer exame de potássio.'),
+ R_('@bra','@potassio','grave','Potássio alto no sangue','O remédio de pressão já segura potássio no corpo; somar com potássio ou espironolactona pode subir o potássio e afetar o coração.','É uma combinação comum no tratamento do coração, mas pede exame de potássio regular. Confirme com quem receitou.'),
+ R_('@ieca','@potassio','grave','Potássio alto no sangue','O remédio de pressão já segura potássio no corpo; somar com potássio ou espironolactona pode subir o potássio e afetar o coração.','É uma combinação comum no tratamento do coração, mas pede exame de potássio regular. Confirme com quem receitou.'),
  R_('@ieca','@bra','moderada','Dois remédios de pressão do mesmo tipo','Juntos podem baixar demais a pressão, subir o potássio e cansar os rins.','Confirme com o médico: normalmente só um deles é usado.'),
  R_('@bra','@bra','moderada','Dois remédios de pressão do mesmo tipo','Não costumam ser usados juntos.','Confirme com o médico se é troca de um pelo outro.'),
  R_('@ieca','@ieca','moderada','Dois remédios de pressão do mesmo tipo','Não costumam ser usados juntos.','Confirme com o médico se é troca de um pelo outro.'),
@@ -1159,9 +1160,14 @@ const INTER=[
  R_('smx','@ieca','moderada','Sulfametoxazol + trimetoprima pode subir o potássio','O antibiótico segura potássio e soma com o remédio de pressão.','Avise o médico, principalmente se você tem problema nos rins.'),
  R_('smx','@bra','moderada','Sulfametoxazol + trimetoprima pode subir o potássio','O antibiótico segura potássio e soma com o remédio de pressão.','Avise o médico, principalmente se você tem problema nos rins.'),
  R_('smx','espironolactona','grave','Potássio alto no sangue','O antibiótico e a espironolactona seguram potássio no corpo.',OK_MED),
+ R_('espironolactona','potassio','grave','Potássio alto no sangue','A espironolactona já segura potássio no corpo e o suplemento soma.','Só use os dois juntos com orientação médica e exame de potássio.'),
+ R_('drospirenona','@ieca','leve','A pílula com drospirenona pode subir um pouco o potássio','Ela segura potássio no corpo, assim como o remédio de pressão.','A bula da pílula orienta exame de potássio no primeiro mês.'),
+ R_('drospirenona','@bra','leve','A pílula com drospirenona pode subir um pouco o potássio','Ela segura potássio no corpo, assim como o remédio de pressão.','A bula da pílula orienta exame de potássio no primeiro mês.'),
  R_('drospirenona','@potassio','moderada','A pílula com drospirenona pode subir o potássio','Ela segura potássio no corpo, assim como o outro remédio.','Vale perguntar ao médico sobre o exame de potássio.'),
  R_('sinvastatina','anlodipino','moderada','Anlodipino aumenta o efeito da sinvastatina','Com sinvastatina acima de 20 mg, sobe o risco de dor e lesão muscular.','Confira a dose com o médico. Dor muscular forte é sinal para avisar.'),
- R_('@betabloq','@b2','moderada','O betabloqueador pode atrapalhar a bombinha','Principalmente o propranolol, que pode fechar os brônquios em quem tem asma.','Avise o médico que receitou o betabloqueador que você usa bombinha.'),
+ R_('@betabloq','@b2','leve','O betabloqueador pode reduzir um pouco o efeito da bombinha','Este tipo de betabloqueador costuma ser seguro para quem tem asma ou bronquite.','Avise o médico que você usa bombinha. Falta de ar maior é sinal para avisar.',1),
+ R_('propranolol','@b2','moderada','O propranolol pode atrapalhar a bombinha','Ele pode fechar os brônquios em quem tem asma ou bronquite.','Avise o médico que receitou o propranolol que você usa bombinha.'),
+ R_('carvedilol','@b2','moderada','O carvedilol pode atrapalhar a bombinha','Ele pode fechar os brônquios em quem tem asma ou bronquite.','Avise o médico que receitou o carvedilol que você usa bombinha.'),
  R_('@betabloq','@sulfonil','leve','O betabloqueador pode esconder sinais de açúcar baixo','Tremor e coração acelerado podem não aparecer na hipoglicemia.','Fique atento a suor frio, fome e tontura.'),
  R_('@betabloq','insulina','leve','O betabloqueador pode esconder sinais de açúcar baixo','Tremor e coração acelerado podem não aparecer na hipoglicemia.','Fique atento a suor frio, fome e tontura.'),
  R_('@betabloq','amiodarona','moderada','Coração pode ficar lento demais','Os dois reduzem os batimentos.','Tontura ou desmaio são sinais para avisar o médico.'),
@@ -1192,7 +1198,7 @@ const INTER=[
  R_('tramadol','@triciclico','grave','Risco de excesso de serotonina e convulsão','O tramadol com antidepressivo pode causar agitação, tremor, febre e convulsão.',OK_MED),
  R_('saojoao','@isrs','grave','Risco de excesso de serotonina','A combinação pode causar agitação, tremor, febre e taquicardia.','Converse com quem receitou o antidepressivo antes de usar os dois.'),
  R_('saojoao','etinilestradiol','grave','A erva de São João corta o efeito da pílula','Pode haver gravidez mesmo tomando a pílula certinho.','Converse com o médico. Use outro método junto se for usar a erva.'),
- R_('saojoao','@anticoag','moderada','A erva de São João reduz o efeito do remédio que afina o sangue','O sangue pode coagular mais do que deveria.',OK_MED),
+ R_('saojoao','@anticoag','grave','A erva de São João corta o efeito do remédio que afina o sangue','O sangue pode coagular mais do que deveria. A bula dos anticoagulantes orienta evitar.','Não use a erva sem falar com quem receitou o anticoagulante.'),
  R_('@benzo','@opioide','grave','Sono profundo e respiração fraca','Calmante e remédio forte para dor juntos podem diminuir a respiração.','Converse com quem receitou. Nunca aumente a dose por conta própria.'),
  R_('@gaba','@opioide','grave','Sono profundo e respiração fraca','Gabapentina ou pregabalina com remédio forte para dor podem diminuir a respiração.',OK_MED),
  R_('@benzo','@benzo','moderada','Dois calmantes juntos','Somam sonolência, tontura e risco de queda.','Confirme com o médico se os dois devem ser usados.'),
@@ -1201,6 +1207,9 @@ const INTER=[
  R_('@benzo','@triciclico','moderada','Mais sonolência e risco de queda','Os dois dão sono e somam o efeito.','Cuidado ao dirigir e ao levantar à noite.'),
  R_('@opioide','@sedativo','moderada','Mais sonolência','Os dois dão sono e somam o efeito.','Cuidado ao dirigir e ao levantar à noite.'),
  R_('@isrs','@triciclico','moderada','O antidepressivo pode aumentar o nível do outro','Fluoxetina e paroxetina principalmente aumentam a amitriptilina no sangue.','Confirme a dose com quem receitou.'),
+ R_('tramadol','trazodona','grave','Risco de excesso de serotonina e muito sono','Os dois aumentam a serotonina e dão sono. Pode causar agitação, tremor, febre ou convulsão.',OK_MED),
+ R_('tramadol','ciclobenzaprina','grave','Risco de excesso de serotonina e muito sono','Os dois aumentam a serotonina e dão sono. Pode causar agitação, tremor, febre ou convulsão.',OK_MED),
+ R_('tramadol','mirtazapina','grave','Risco de excesso de serotonina e muito sono','Os dois aumentam a serotonina e dão sono. Pode causar agitação, tremor, febre ou convulsão.',OK_MED),
  R_('bupropiona','tramadol','grave','Risco de convulsão','Os dois baixam o limiar de convulsão.',OK_MED),
  R_('citalopram','escitalopram','grave','Dois antidepressivos quase iguais','O escitalopram é parte do citalopram. Juntos, risco de excesso e de alteração no coração.','Confirme com o médico: normalmente só um deles é usado.'),
  /* lítio, convulsão, pílula */
@@ -1214,11 +1223,18 @@ const INTER=[
  R_('metotrexato','@aine','moderada','Anti-inflamatório aumenta o metotrexato no sangue','Mais risco de efeitos no sangue, fígado e rins.',OK_MED),
  R_('metotrexato','smx','grave','Sulfametoxazol + trimetoprima com metotrexato','Os dois somam efeito no sangue e podem baixar muito as defesas.','Avise o médico que receitou o metotrexato antes de usar o antibiótico.'),
  R_('metotrexato','dipirona','moderada','Dipirona com metotrexato','Os dois podem afetar o sangue e somam o efeito.','A bula orienta cautela. Avise o médico que receitou o metotrexato.'),
- R_('salmeterol','@macrolideo','moderada','Claritromicina aumenta o salmeterol no sangue','Pode acelerar o coração.','Avise o médico que receitou o antibiótico que você usa bombinha.'),
+ R_('salmeterol','claritromicina','moderada','Claritromicina aumenta o salmeterol no sangue','Pode acelerar o coração.','Avise o médico que receitou o antibiótico que você usa bombinha.'),
  R_('@ibp','@ibp','leve','Dois protetores de estômago','Não costumam ser usados juntos.','Confirme com o médico se é troca de um pelo outro.'),
- R_('fluticasona','@macrolideo','leve','Claritromicina aumenta o corticoide da bombinha no sangue','Em uso longo, o corticoide pode agir no corpo todo.','Avise o médico se for usar o antibiótico por muitos dias.'),
- R_('budesonida','@macrolideo','leve','Claritromicina aumenta o corticoide da bombinha no sangue','Em uso longo, o corticoide pode agir no corpo todo.','Avise o médico se for usar o antibiótico por muitos dias.'),
+ R_('fluticasona','claritromicina','leve','Claritromicina aumenta o corticoide da bombinha no sangue','Em uso longo, o corticoide pode agir no corpo todo.','Avise o médico se for usar o antibiótico por muitos dias.'),
+ R_('budesonida','claritromicina','leve','Claritromicina aumenta o corticoide da bombinha no sangue','Em uso longo, o corticoide pode agir no corpo todo.','Avise o médico se for usar o antibiótico por muitos dias.'),
  R_('@tiaz','vitd','leve','Vitamina D em dose alta com diurético pode subir o cálcio','O diurético segura cálcio no corpo.','Vale perguntar ao médico sobre o exame de cálcio.'),
+ R_('amiodarona','@qt','grave','Risco no ritmo do coração','Os dois alteram o ritmo do coração (intervalo QT) e somam o efeito.','Converse com quem receitou. Palpitação, desmaio ou tontura forte são sinais de alerta.'),
+ R_('@qt','@qt','moderada','Os dois podem alterar o ritmo do coração','Cada um mexe um pouco no ritmo do coração (intervalo QT) e o efeito soma.','Avise o médico, principalmente se você tem problema no coração.',1),
+ R_('@quinolona','@cortic','moderada','Mais risco de lesão no tendão','O antibiótico com corticoide aumenta o risco de inflamar ou romper tendões, principalmente depois dos 60 anos.','Dor ou inchaço no calcanhar ou em outro tendão é sinal para parar e avisar o médico.'),
+ R_('ticagrelor','claritromicina','grave','A claritromicina aumenta muito o ticagrelor no sangue','Mais risco de sangramento. A bula do ticagrelor contraindica o uso junto.','Avise o médico que receitou o antibiótico que você usa ticagrelor.'),
+ R_('fenitoina','fluconazol','grave','Fluconazol aumenta a fenitoína no sangue','A fenitoína pode chegar a nível tóxico: tontura, fala enrolada, desequilíbrio.','Avise o médico. Pode ser preciso fazer exame do nível de fenitoína.'),
+ R_('digoxina','@macrolideo','moderada','O antibiótico aumenta a digoxina no sangue','A digoxina pode ficar em excesso: enjoo, visão alterada, coração irregular.','Avise o médico que receitou a digoxina antes de usar o antibiótico.'),
+ R_('litio','furosemida','moderada','A furosemida pode aumentar o lítio no sangue','O lítio pode subir, principalmente no começo.','O médico costuma pedir exame de lítio.'),
  R_('alopurinol','@ieca','leve','Mais chance de alergia de pele','A combinação aumenta um pouco o risco de reação alérgica.','Manchas ou coceira na pele são sinal para avisar o médico.'),
 ];
 const NBASE=new Set([...KNOWN,'omega3','calcio','ferro','magnesio','k2']).size;
